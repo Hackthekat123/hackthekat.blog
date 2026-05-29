@@ -1,0 +1,18 @@
+# Wrangler
+.wrangler/
+.dev.vars
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Old Hugo build artifacts (not needed since we have pre-built HTML now)
+resources/
+.hugo_build.lock
