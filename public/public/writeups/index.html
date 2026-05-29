@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=UTF-8>
+<meta http-equiv=X-UA-Compatible content="ie=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=description content="HTB machine writeups">
+<meta name=robots content="noodp">
+<title>HTB Writeups :: Hackthekat</title>
+<link href=https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css rel=stylesheet type=text/css>
+<link rel=stylesheet href=/main.css>
+<link rel=icon type=image/png href=/favicon.ico>
+<style>
+body { background-color: #0d1117 !important; color: #c9d1d9 !important; }
+
+.wg-wrap { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+.wg-title { font-size: 2rem; font-weight: 700; color: #fff; margin: 0 0 0.3rem; }
+.wg-subtitle { color: #6b7785; font-size: 0.9rem; margin: 0 0 1.5rem; }
+
+.wg-filters {
+  display: flex; gap: 0.8rem; margin-bottom: 2rem;
+  flex-wrap: wrap; align-items: center;
+}
+.wg-search {
+  flex: 1; min-width: 200px; max-width: 350px;
+  background: #161b22; border: 1px solid #30363d;
+  color: #c9d1d9; padding: 0.6rem 1rem; border-radius: 6px;
+  font-size: 0.9rem; outline: none;
+}
+.wg-search::placeholder { color: #6b7785; }
+.wg-search:focus { border-color: #9fef00; }
+.wg-select {
+  background: #161b22; border: 1px solid #30363d;
+  color: #c9d1d9; padding: 0.6rem 0.8rem; border-radius: 6px;
+  font-size: 0.9rem; cursor: pointer; outline: none;
+}
+.wg-select:focus { border-color: #9fef00; }
+.wg-count { color: #6b7785; font-size: 0.85rem; font-family: monospace; margin-left: auto; white-space: nowrap; }
+
+.wg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.2rem;
+}
+.wg-card {
+  background: #161b22; border: 1px solid #21262d;
+  border-radius: 10px; padding: 1.4rem;
+  text-decoration: none; display: block;
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+  color: inherit;
+}
+.wg-card:hover {
+  border-color: #9fef00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  text-decoration: none; color: inherit;
+}
+.wg-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.6rem; margin-bottom: 0.7rem; }
+.wg-name { font-size: 1.1rem; font-weight: 600; color: #fff; font-family: monospace; }
+.wg-badges { display: flex; gap: 0.35rem; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+.wg-badge {
+  font-size: 0.7rem; padding: 0.18rem 0.55rem; border-radius: 4px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; font-family: monospace;
+}
+.os-linux  { background: rgba(159,239,0,.12); color: #9fef00; border: 1px solid rgba(159,239,0,.3); }
+.os-win    { background: rgba(0,153,255,.12); color: #4da6ff; border: 1px solid rgba(0,153,255,.3); }
+.d-easy    { background: rgba(159,239,0,.12); color: #9fef00; border: 1px solid rgba(159,239,0,.3); }
+.d-med     { background: rgba(255,175,0,.12); color: #ffaf00; border: 1px solid rgba(255,175,0,.3); }
+.d-hard    { background: rgba(255,56,56,.12); color: #ff3838; border: 1px solid rgba(255,56,56,.3); }
+.d-insane  { background: rgba(179,114,255,.12); color: #b372ff; border: 1px solid rgba(179,114,255,.3); }
+.wg-desc { color: #8b949e; font-size: 0.875rem; line-height: 1.5; margin: 0; }
+.wg-empty { text-align: center; color: #6b7785; padding: 4rem 0; font-family: monospace; }
+
+@media(max-width:640px){ .wg-title{font-size:1.5rem} .wg-grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class=container>
+<header class=header>
+<span class=header__inner>
+<a href=/ style=text-decoration:none>
+<div class=logo><span class=logo__mark>></span> <span class=logo__text>hello</span> <span class=logo__cursor></span></div>
+</a>
+<span class=header__right>
+<nav class=menu><ul class=menu__inner>
+<div class=submenu><li class=dropdown><a href=/posts/>Blog</a></li></div>
+<div class=submenu><li class=dropdown><a href=/hackthebox/>Hack The Box</a>
+<div class=dropdown-content><a title=Machines href=/writeups/>Machines</a></div>
+</li></div>
+</ul></nav>
+<span class=menu-trigger><svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></span>
+</span>
+</span>
+</header>
+
+<div class=content style="align-items:stretch;justify-content:flex-start">
+<div class=wg-wrap>
+
+<div style="display:flex;align-items:baseline;gap:1rem;margin-bottom:0.3rem">
+  <h1 class=wg-title>🔥 HTB Writeups</h1>
+</div>
+<p class=wg-subtitle>Retired machines — van easy tot insane</p>
+
+<div class=wg-filters>
+  <input class=wg-search id=srch type=text placeholder="Search machine...">
+  <select class=wg-select id=fdiff onchange=filter()>
+    <option value="">All Difficulty</option>
+    <option>Easy</option><option>Medium</option><option>Hard</option><option>Insane</option>
+  </select>
+  <select class=wg-select id=fos onchange=filter()>
+    <option value="">All OS</option>
+    <option>Linux</option><option>Windows</option>
+  </select>
+  <span class=wg-count id=cnt></span>
+</div>
+
+<div class=wg-grid id=grid></div>
+<div class=wg-empty id=empty style=display:none>// no machines found</div>
+
+</div>
+</div>
+
+<footer class=footer>
+<div class=footer__inner><div class=footer__content></div></div>
+</footer>
+</div>
+
+<script>
+const machines = [
+  {name:"Administrator",  os:"Windows", diff:"Medium", url:"/writeups/writeup-administrator/",  desc:"ACL abuse, password resets en DCSync attacks op een Windows Active Directory machine."},
+  {name:"Airtouch",       os:"Linux",   diff:"Medium", url:"/writeups/writeup-airtouch/",       desc:"Wireless network simulatie. SNMP enumeration, WPA2 handshake capture en cracking."},
+  {name:"Artificial",     os:"Linux",   diff:"Easy",   url:"/writeups/writeup-artificial/",     desc:"Linux machine met een webapplicatie als startpunt."},
+  {name:"BabyTwo",        os:"Windows", diff:"Medium", url:"/writeups/writeup-babytwo/",        desc:"Windows machine met focus op Active Directory exploitation."},
+  {name:"Backfire",       os:"Linux",   diff:"Hard",   url:"/writeups/writeup-backfire/",       desc:"Hard Linux box met chained exploits voor foothold en escalation."},
+  {name:"Bamboo",         os:"Linux",   diff:"Medium", url:"/writeups/writeup-bamboo/",         desc:"Linux machine met web exploitation als startpunt."},
+  {name:"Barrier",        os:"Linux",   diff:"Easy",   url:"/writeups/writeup-barrier/",        desc:"Eenvoudige Linux machine met een duidelijk aanvalspad."},
+  {name:"Blurry",         os:"Linux",   diff:"Medium", url:"/writeups/writeup-blurry/",         desc:"Linux machine met ML-platform exploitation en pickle deserialization."},
+  {name:"Breach",         os:"Windows", diff:"Medium", url:"/writeups/writeup-breach/",         desc:"Windows Active Directory machine met credential harvesting."},
+  {name:"Browsed",        os:"Linux",   diff:"Medium", url:"/writeups/writeup-browsed/",        desc:"Linux machine met browser-gerelateerde exploitation technieken."},
+  {name:"Bruno",          os:"Windows", diff:"Easy",   url:"/writeups/writeup-bruno/",          desc:"Windows machine met standaard credential misconfigurations."},
+  {name:"Builder",        os:"Linux",   diff:"Medium", url:"/writeups/writeup-builder/",        desc:"Jenkins CI/CD platform exploitation voor foothold en privilege escalation."},
+  {name:"Cap",            os:"Linux",   diff:"Easy",   url:"/writeups/writeup-cap/",            desc:"Linux machine met IDOR voor pcap download met plaintext FTP credentials. Linux capabilities voor priv esc."},
+  {name:"Cat",            os:"Linux",   diff:"Easy",   url:"/writeups/writeup-cat/",            desc:"Linux machine met stored XSS en SQL injection als exploitation vector."},
+  {name:"Certificate",    os:"Windows", diff:"Hard",   url:"/writeups/writeup-certificate/",    desc:"Windows AD machine met geavanceerde certificate abuse technieken."},
+  {name:"Certified",      os:"Windows", diff:"Medium", url:"/writeups/writeup-certified/",      desc:"Assume-breach AD box. BloodHound → GenericWrite → ShadowCredentials → ESC9 voor Administrator."},
+  {name:"Chemistry",      os:"Linux",   diff:"Easy",   url:"/writeups/writeup-chemistry/",      desc:"Linux machine met CIF file parsing vulnerability voor RCE."},
+  {name:"Cicada",         os:"Windows", diff:"Easy",   url:"/writeups/writeup-cicada/",         desc:"Default password in anonymous SMB share, password spray, SeBackupPrivilege → Administrator hash."},
+  {name:"Clicker",        os:"Linux",   diff:"Medium", url:"/writeups/writeup-clicker/",        desc:"Linux machine met web game exploitation en NFS misconfiguration."},
+  {name:"Code",           os:"Linux",   diff:"Hard",   url:"/writeups/writeup-code/",           desc:"Advanced web exploitation en privilege escalation technieken op Linux."},
+  {name:"CodeTwo",        os:"Windows", diff:"Easy",   url:"/writeups/writeup-codetwo/",        desc:"Windows machine met code review en credential exposure."},
+  {name:"Conversor",      os:"Linux",   diff:"Easy",   url:"/writeups/writeup-conversor/",      desc:"Linux machine met een eenvoudige exploitatieketen."},
+  {name:"Cypher",         os:"Linux",   diff:"Medium", url:"/writeups/writeup-cypher/",         desc:"Linux machine met Neo4j Cypher injection voor initiële toegang."},
+  {name:"DarkZero",       os:"Windows", diff:"Hard",   url:"/writeups/writeup-darkzero/",       desc:"Hard Windows machine met complexe aanvalsketen."},
+  {name:"Delegate",       os:"Windows", diff:"Medium", url:"/writeups/writeup-delegate/",       desc:"Windows machine met Kerberos delegation abuse."},
+  {name:"DevArea",        os:"Linux",   diff:"Easy",   url:"/writeups/writeup-devarea/",        desc:"Linux machine met development environment misconfigurations."},
+  {name:"Dog",            os:"Linux",   diff:"Easy",   url:"/writeups/writeup-dog/",            desc:"Linux machine met Backdrop CMS exploitation en sudo bee command abuse."},
+  {name:"Editor",         os:"Linux",   diff:"Easy",   url:"/writeups/writeup-editor/",         desc:"XWiki SSTI via CVE-2025-24893 voor unauth RCE. SSH credentials uit config, sudo op git voor root."},
+  {name:"Eighteen",       os:"Linux",   diff:"Medium", url:"/writeups/writeup-eighteen/",       desc:"Linux machine met web exploitation als aanvalsvector."},
+  {name:"Environment",    os:"Linux",   diff:"Easy",   url:"/writeups/writeup-environment/",    desc:"Linux machine met environment variable misconfiguration."},
+  {name:"Era",            os:"Linux",   diff:"Easy",   url:"/writeups/writeup-era/",            desc:"Linux machine met een rechttoe-rechtaan aanpak."},
+  {name:"EscapeTwo",      os:"Windows", diff:"Easy",   url:"/writeups/writeup-escapetwo/",      desc:"Credentials uit XLSX files, MSSQL pivot, ESC4 op de CA voor full domain takeover."},
+  {name:"Eureka",         os:"Linux",   diff:"Easy",   url:"/writeups/writeup-eureka/",         desc:"Linux machine met eenvoudige service exploitation."},
+  {name:"EvilCUPS",       os:"Linux",   diff:"Easy",   url:"/writeups/writeup-evilcups/",       desc:"CVE-2024-47076 + CVE-2024-47175 CUPS chain. Malicious printer voor RCE, SUID voor root."},
+  {name:"Expressway",     os:"Linux",   diff:"Easy",   url:"/writeups/writeup-expressway/",     desc:"Linux machine met web application exploitation."},
+  {name:"Facts",          os:"Linux",   diff:"Easy",   url:"/writeups/writeup-facts/",          desc:"Linux machine met een directe aanpak naar root."},
+  {name:"Fluffy",         os:"Windows", diff:"Medium", url:"/writeups/writeup-fluffy/",         desc:"Windows machine met GenericWrite en Kerberoasting attack chain."},
+  {name:"Fries",          os:"Linux",   diff:"Easy",   url:"/writeups/writeup-fries/",          desc:"Linux machine met standaard web exploitation."},
+  {name:"Gavel",          os:"Windows", diff:"Medium", url:"/writeups/writeup-gavel/",          desc:"Windows machine met Active Directory misconfiguraties."},
+  {name:"Giveback",       os:"Linux",   diff:"Easy",   url:"/writeups/writeup-giveback/",       desc:"Linux machine met een eenvoudige exploitatiepad."},
+  {name:"Greenhorn",      os:"Linux",   diff:"Easy",   url:"/writeups/writeup-greenhorn/",      desc:"Linux machine met Pluck CMS RCE en Gitea credential recovery. Pixelated password uit PDF."},
+  {name:"Guardian",       os:"Windows", diff:"Easy",   url:"/writeups/writeup-guardian/",       desc:"Windows machine met basic AD exploitation."},
+  {name:"Hacknet",        os:"Linux",   diff:"Medium", url:"/writeups/writeup-hacknet/",        desc:"Linux machine met network service exploitation."},
+  {name:"Haze",           os:"Windows", diff:"Medium", url:"/writeups/writeup-haze/",           desc:"Windows machine met Splunk exploitation en AD privilege escalation."},
+  {name:"IClean",         os:"Linux",   diff:"Medium", url:"/writeups/writeup-iclean/",         desc:"Linux machine met XSS, SSTI en sudo qpdf exploitation."},
+  {name:"Imagery",        os:"Windows", diff:"Medium", url:"/writeups/writeup-imagery/",        desc:"Windows machine met image processing exploitation."},
+  {name:"Instant",        os:"Linux",   diff:"Medium", url:"/writeups/writeup-instant/",        desc:"Linux machine met Android APK reverse engineering en API exploitation."},
+  {name:"Interpreter",    os:"Linux",   diff:"Medium", url:"/writeups/writeup-interpreter/",    desc:"Linux machine met scripting interpreter exploitation."},
+  {name:"Jupiter",        os:"Linux",   diff:"Hard",   url:"/writeups/writeup-jupiter/",        desc:"Linux machine met Grafana exploitation en Shadow Simulation API RCE."},
+  {name:"Lame",           os:"Linux",   diff:"Easy",   url:"/writeups/writeup-lame/",           desc:"Classic HTB box. Samba usermap_script exploit voor directe root access."},
+  {name:"LinkVortex",     os:"Linux",   diff:"Easy",   url:"/writeups/writeup-linkvortex/",     desc:"Ghost CMS CVE-2023-40028, symlink upload voor file read, Docker config leaks SSH credentials."},
+  {name:"Mirage",         os:"Windows", diff:"Medium", url:"/writeups/writeup-mirage/",         desc:"Windows machine met SNMP en credential harvesting technieken."},
+  {name:"Monitored",      os:"Linux",   diff:"Medium", url:"/writeups/writeup-monitored/",      desc:"Linux machine met Nagios exploitation en sudo API abuse."},
+  {name:"MonitorsFour",   os:"Linux",   diff:"Medium", url:"/writeups/writeup-monitorsfour/",   desc:"Linux machine met Cacti RCE en Docker breakout."},
+  {name:"MonitorsTwo",    os:"Linux",   diff:"Easy",   url:"/writeups/writeup-monitorstwo/",    desc:"Linux machine met Cacti RCE via CVE-2022-46169 en Docker SUID escalation."},
+  {name:"NanoCorp",       os:"Windows", diff:"Easy",   url:"/writeups/writeup-nanocorp/",       desc:"Windows machine met basic credential en service exploitation."},
+  {name:"Nocturnal",      os:"Linux",   diff:"Easy",   url:"/writeups/writeup-nocturnal/",      desc:"Linux machine met file upload en privilege escalation."},
+  {name:"OnlyForYou",     os:"Linux",   diff:"Medium", url:"/writeups/writeup-onlyforyou/",     desc:"Linux machine met LFI, Gogs SSRF, Neo4j injection en pip3 sudo abuse."},
+  {name:"Outbound",       os:"Linux",   diff:"Easy",   url:"/writeups/writeup-outbound/",       desc:"Roundcube RCE CVE-2025-49113, credentials uit mail, sudo custom binary voor root."},
+  {name:"Overwatch",      os:"Windows", diff:"Medium", url:"/writeups/writeup-overwatch/",      desc:"Windows machine met monitoring service exploitation."},
+  {name:"Pirate",         os:"Linux",   diff:"Medium", url:"/writeups/writeup-pirate/",         desc:"Linux machine met web application exploitation technieken."},
+  {name:"Planning",       os:"Linux",   diff:"Easy",   url:"/writeups/writeup-planning/",       desc:"Linux machine met Grafana CVE exploitation en Docker escape."},
+  {name:"Previous",       os:"Linux",   diff:"Easy",   url:"/writeups/writeup-previous/",       desc:"Linux machine met een directe exploitatieketen."},
+  {name:"Pterodactyl",    os:"Linux",   diff:"Medium", url:"/writeups/writeup-pterodactyl/",    desc:"CVE-2025-49132 directory traversal + pearcmd voor RCE. Bcrypt crack, libblockdev/udisks voor root."},
+  {name:"Puppy",          os:"Windows", diff:"Medium", url:"/writeups/writeup-puppy/",          desc:"Windows AD machine met HR group abuse, credential in keepass, SeBackupPrivilege voor root."},
+  {name:"Runner",         os:"Linux",   diff:"Hard",   url:"/writeups/writeup-runner/",         desc:"Pivoting, tunneling en advanced Linux exploitation technieken."},
+  {name:"RustyKey",       os:"Linux",   diff:"Easy",   url:"/writeups/writeup-rustykey/",       desc:"Linux machine met straightforward exploitation."},
+  {name:"Scepter",        os:"Windows", diff:"Hard",   url:"/writeups/writeup-scepter/",        desc:"Hard Windows machine met geavanceerde AD aanvalstechnieken."},
+  {name:"Sightless",      os:"Linux",   diff:"Easy",   url:"/writeups/writeup-sightless/",      desc:"Linux machine met SQLPad SSTI, Docker escape en Chrome remote debug voor Froxlor credentials."},
+  {name:"Signed",         os:"Linux",   diff:"Easy",   url:"/writeups/writeup-signed/",         desc:"Linux machine met signing mechanism exploitation."},
+  {name:"Slonik",         os:"Linux",   diff:"Medium", url:"/writeups/writeup-slonik/",         desc:"Linux machine met PostgreSQL exploitation technieken."},
+  {name:"Sorcery",        os:"Windows", diff:"Hard",   url:"/writeups/writeup-sorcery/",        desc:"Hard Windows machine met complexe privilege escalation."},
+  {name:"Soulmate",       os:"Linux",   diff:"Easy",   url:"/writeups/writeup-soulmate/",       desc:"Linux machine met web exploitation als aanvangspunt."},
+  {name:"Strutted",       os:"Linux",   diff:"Medium", url:"/writeups/writeup-strutted/",       desc:"Apache Struts2 CVE-2024-53677 JSP webshell upload. Tcpdump creds uit Wireshark capture, sudo voor root."},
+  {name:"Surveillance",   os:"Linux",   diff:"Medium", url:"/writeups/writeup-surveillance/",   desc:"Linux machine met Craft CMS RCE en ZoneMinder privilege escalation."},
+  {name:"TheFrizz",       os:"Windows", diff:"Medium", url:"/writeups/writeup-thefrizz/",       desc:"Windows machine met LDAP en AD exploitation."},
+  {name:"Titanic",        os:"Linux",   diff:"Insane", url:"/writeups/writeup-titanic/",        desc:"Very challenging box met chained exploitation en deep privilege escalation technieken."},
+  {name:"TombWatcher",    os:"Windows", diff:"Medium", url:"/writeups/writeup-tombwatcher/",    desc:"AS-REP roasting, GenericWrite → AD Recycle Bin recovery, ESC15 + WriteOwner chain voor root."},
+  {name:"Underpass",      os:"Linux",   diff:"Easy",   url:"/writeups/writeup-underpass/",      desc:"SNMP enumeration toont daloRADIUS. Default credentials → SSH. Sudo mosh-server voor root."},
+  {name:"Unrested",       os:"Linux",   diff:"Medium", url:"/writeups/writeup-unrested/",       desc:"Linux machine met API exploitation en privilege escalation."},
+  {name:"Variatype",      os:"Windows", diff:"Medium", url:"/writeups/writeup-variatype/",      desc:"Windows machine met type confusion exploitation."},
+  {name:"Voleur",         os:"Windows", diff:"Medium", url:"/writeups/writeup-voleur/",         desc:"Windows machine met credential theft technieken."},
+  {name:"Zipping",        os:"Linux",   diff:"Medium", url:"/writeups/writeup-zipping/",        desc:"Linux machine met zip symlink exploit en SQL injection voor RCE."},
+];
+
+function osBadge(os){ return os==="Linux"?'<span class="wg-badge os-linux">Linux</span>':'<span class="wg-badge os-win">Windows</span>'; }
+function diffBadge(d){
+  const cls={Easy:"d-easy",Medium:"d-med",Hard:"d-hard",Insane:"d-insane"}[d]||"d-med";
+  return `<span class="wg-badge ${cls}">${d}</span>`;
+}
+function render(list){
+  const grid=document.getElementById("grid");
+  const empty=document.getElementById("empty");
+  document.getElementById("cnt").textContent=`${list.length} machines`;
+  if(!list.length){grid.innerHTML="";empty.style.display="block";return;}
+  empty.style.display="none";
+  grid.innerHTML=list.map(m=>`
+    <a href="${m.url}" class="wg-card">
+      <div class="wg-card-header">
+        <span class="wg-name">${m.name}</span>
+        <span class="wg-badges">${osBadge(m.os)}${diffBadge(m.diff)}</span>
+      </div>
+      <p class="wg-desc">${m.desc}</p>
+    </a>`).join("");
+}
+function filter(){
+  const q=document.getElementById("srch").value.toLowerCase();
+  const d=document.getElementById("fdiff").value;
+  const o=document.getElementById("fos").value;
+  render(machines.filter(m=>
+    (!q||m.name.toLowerCase().includes(q)||m.desc.toLowerCase().includes(q))&&
+    (!d||m.diff===d)&&
+    (!o||m.os===o)
+  ));
+}
+document.getElementById("srch").addEventListener("input",filter);
+render(machines);
+</script>
+<script type=text/javascript src=/bundle.min.js></script>
+</body>
+</html>
