@@ -475,13 +475,14 @@ body.htb-page {
 <header class=header>
 <span class=header__inner>
 <a href=/ style=text-decoration:none>
-<div class=logo><span class=logo__mark>></span> <span class=logo__text>Hackthekat123 Blogs</span> <span class=logo__cursor></span></div>
+<div class=logo><span class=logo__mark>></span> <span class=logo__text>Welcome at Hackthekat Blogs</span> <span class=logo__cursor></span></div>
 </a>
 <span class=header__right>
 <nav class=menu>
 <ul class=menu__inner>
 <div class=submenu><li class=dropdown><a href=/posts/>Blog</a></li></div>
 <div class=submenu><li class=dropdown><a href=/hackthebox/>Hack The Box</a>
+<div class=dropdown-content><a title=Machines href=/writeups/>Machines</a></div>
 </li></div>
 </ul>
 </nav>
@@ -561,7 +562,7 @@ body.htb-page {
       <h3>Machines</h3>
       <p>Walkthroughs of retired boxes - from easy Linux to insane Active Directory chains.</p>
     </a>
-    <a href="/writeups/hackthebox-documentations/" class="htb-section-card">
+    <a href="/posts" class="htb-section-card">
       <span class="icon">📚</span>
       <h3>Documentation</h3>
       <p>Technical notes, cheat sheets, and references I've collected during HTB.</p>
@@ -572,99 +573,45 @@ body.htb-page {
 <!-- ===== RECENT WRITEUPS ===== -->
 <section class="htb-section">
   <div class="htb-section-header">
-    <div class="htb-section-label">// recent</div>
+    <div class="htb-section-label">// latest</div>
     <h2 class="htb-section-title">Latest writeups</h2>
   </div>
 
   <div class="htb-writeups-grid">
 
-    <a href="/writeups/writeup-tombwatcher/" class="htb-writeup">
+    <a href="Writeup BabyTwo.html" class="htb-writeup">
       <div class="htb-writeup-header">
-        <div class="htb-writeup-name">TombWatcher</div>
+        <div class="htb-writeup-name">BabyTwo</div>
         <div class="htb-writeup-badges">
           <span class="htb-badge os-windows">Windows</span>
           <span class="htb-badge diff-medium">Medium</span>
         </div>
       </div>
-      <p class="htb-writeup-summary">AS-REP roasting for foothold, GenericWrite abuse to recover deleted objects from the AD Recycle Bin, and ESC15 + WriteOwner chain for root.</p>
+      <p class="htb-writeup-summary"></p>
     </a>
 
-    <a href="/writeups/writeup-cicada/" class="htb-writeup">
+    <a href="Writeup Hacknet.html" class="htb-writeup">
       <div class="htb-writeup-header">
-        <div class="htb-writeup-name">Cicada</div>
-        <div class="htb-writeup-badges">
-          <span class="htb-badge os-windows">Windows</span>
-          <span class="htb-badge diff-easy">Easy</span>
-        </div>
-      </div>
-      <p class="htb-writeup-summary">Default password from an anonymous SMB share, password spraying across the domain, and SeBackupPrivilege to dump the SAM/SYSTEM database for the Administrator hash.</p>
-    </a>
-
-    <a href="/writeups/writeup-certified/" class="htb-writeup">
-      <div class="htb-writeup-header">
-        <div class="htb-writeup-name">Certified</div>
-        <div class="htb-writeup-badges">
-          <span class="htb-badge os-windows">Windows</span>
-          <span class="htb-badge diff-medium">Medium</span>
-        </div>
-      </div>
-      <p class="htb-writeup-summary">AD server in the event of a breach: GenericWrite path via BloodHound, ShadowCredentials for account takeover, and ESC9 on the CA for administrator privileges.</p>
-    </a>
-
-    <a href="/writeups/writeup-escapetwo/" class="htb-writeup">
-      <div class="htb-writeup-header">
-        <div class="htb-writeup-name">EscapeTwo</div>
-        <div class="htb-writeup-badges">
-          <span class="htb-badge os-windows">Windows</span>
-          <span class="htb-badge diff-easy">Easy</span>
-        </div>
-      </div>
-      <p class="htb-writeup-summary">Credentials from XLSX shares, MSSQL pivot, and an ESC4 exploit targeting the certificate authority to achieve full domain takeover.</p>
-    </a>
-
-    <a href="/writeups/writeup-strutted/" class="htb-writeup">
-      <div class="htb-writeup-header">
-        <div class="htb-writeup-name">Strutted</div>
+        <div class="htb-writeup-name">Hacknet</div>
         <div class="htb-writeup-badges">
           <span class="htb-badge os-linux">Linux</span>
           <span class="htb-badge diff-medium">Medium</span>
         </div>
       </div>
-      <p class="htb-writeup-summary">CVE-2024-53677 in Apache Struts2 for JSP webshell upload, tcpdump credentials from a Wireshark capture, and a sudo misconfiguration for root.</p>
+      <p class="htb-writeup-summary"></p>
     </a>
 
-    <a href="/writeups/writeup-evilcups/" class="htb-writeup">
+    <a href="Writeup RustyKey.html" class="htb-writeup">
       <div class="htb-writeup-header">
-        <div class="htb-writeup-name">EvilCUPS</div>
+        <div class="htb-writeup-name">RustyKey</div>
         <div class="htb-writeup-badges">
-          <span class="htb-badge os-linux">Linux</span>
-          <span class="htb-badge diff-easy">Easy</span>
+          <span class="htb-badge os-windows">Windows</span>
+          <span class="htb-badge diff-hard">Hard</span>
         </div>
       </div>
-      <p class="htb-writeup-summary">CUPS vulnerability chain (CVE-2024-47076 + CVE-2024-47175): Register a malicious printer and trigger RCE via a print job. SUID privilege escalation to root.</p>
+      <p class="htb-writeup-summary"></p>
     </a>
-
-    <a href="/writeups/writeup-editor/" class="htb-writeup">
-      <div class="htb-writeup-header">
-        <div class="htb-writeup-name">Editor</div>
-        <div class="htb-writeup-badges">
-          <span class="htb-badge os-linux">Linux</span>
-          <span class="htb-badge diff-easy">Easy</span>
-        </div>
-      </div>
-      <p class="htb-writeup-summary">XWiki SSTI via CVE-2025-24893 in the SolrSearch endpoint for unauthenticated RCE, SSH credentials from config backup, and sudo on Git for privilege escalation.</p>
-    </a>
-
-    <a href="/writeups/writeup-pterodactyl/" class="htb-writeup">
-      <div class="htb-writeup-header">
-        <div class="htb-writeup-name">Pterodactyl</div>
-        <div class="htb-writeup-badges">
-          <span class="htb-badge os-linux">Linux</span>
-          <span class="htb-badge diff-medium">Medium</span>
-        </div>
-      </div>
-      <p class="htb-writeup-summary">CVE-2025-49132: directory traversal chained with pearcmd for RCE, bcrypt cracking for user privilege escalation, and a libblockdev/udisks chain for root access.</p>
-    </a>
+  </div>
 
   </div>
 
