@@ -475,7 +475,7 @@ body.htb-page {
 <header class=header>
 <span class=header__inner>
 <a href=/ style=text-decoration:none>
-<div class=logo><span class=logo__mark>></span> <span class=logo__text>hello</span> <span class=logo__cursor></span></div>
+<div class=logo><span class=logo__mark>></span> <span class=logo__text>Hackthekat123 Blogs</span> <span class=logo__cursor></span></div>
 </a>
 <span class=header__right>
 <nav class=menu>
@@ -499,7 +499,7 @@ body.htb-page {
   <div class="htb-hero-content">
     <div class="htb-prompt">cat /etc/motd<span class="htb-cursor"></span></div>
     <h1>Hack <span class="accent">The</span> Box</h1>
-    <p class="tagline">Writeups, exploits, en notes van alle retired machines die ik geroot heb. Geen sanitized walkthroughs — gewoon wat werkte.</p>
+    <p class="tagline">Write-ups, exploits, and notes for all the retired machines I’ve rooted.</p>
   </div>
 </section>
 
@@ -543,9 +543,9 @@ body.htb-page {
 <!-- ===== INTRO ===== -->
 <section class="htb-section" style="padding-top:1rem">
   <div class="htb-intro">
-    <p>Hier verzamel ik mijn writeups van Hack The Box. Elke post loopt door wat ik gedaan heb om user en root te krijgen, inclusief de tools, commands en CVE's die ik onderweg gebruikt heb.</p>
-    <p>De focus ligt op Active Directory chains, Linux privilege escalation en moderne web exploitation — de skills die in real-world pentests echt tellen.</p>
-    <p class="disclaimer">All writeups zijn voor retired machines, conform de HackTheBox terms of service.</p>
+    <p>This is where I collect my Hack The Box write-ups. Each post details what I did to gain user and root access, including the tools, commands, and CVEs I used along the way.</p>
+    <p>The focus is on Active Directory chaining, Linux privilege escalation, and modern web exploitation,... - the skills that really matter in real-world penetration tests.</p>
+    <p class="disclaimer">All write-ups are for retired machines, in accordance with the HackTheBox Terms of Service.</p>
   </div>
 </section>
 
@@ -560,12 +560,12 @@ body.htb-page {
     <a href="/writeups/" class="htb-section-card">
       <span class="icon">🖥️</span>
       <h3>Machines</h3>
-      <p>Walkthroughs van retired boxes — van easy Linux tot insane Active Directory chains.</p>
+      <p>Walkthroughs of retired boxes - from easy Linux to insane Active Directory chains.</p>
     </a>
     <a href="/writeups/hackthebox-documentations/" class="htb-section-card">
       <span class="icon">📚</span>
       <h3>Documentation</h3>
-      <p>Technical notes, cheat sheets en references die ik tijdens HTB heb verzameld.</p>
+      <p>Technical notes, cheat sheets, and references I've collected during HTB.</p>
     </a>
   </div>
 </section>
@@ -587,7 +587,7 @@ body.htb-page {
           <span class="htb-badge diff-medium">Medium</span>
         </div>
       </div>
-      <p class="htb-writeup-summary">AS-REP roasting voor foothold, GenericWrite abuse om deleted objects uit de AD Recycle Bin te recoveren, en ESC15 + WriteOwner chain voor root.</p>
+      <p class="htb-writeup-summary">AS-REP roasting for foothold, GenericWrite abuse to recover deleted objects from the AD Recycle Bin, and ESC15 + WriteOwner chain for root.</p>
     </a>
 
     <a href="/writeups/writeup-cicada/" class="htb-writeup">
@@ -598,7 +598,7 @@ body.htb-page {
           <span class="htb-badge diff-easy">Easy</span>
         </div>
       </div>
-      <p class="htb-writeup-summary">Default password uit anonymous SMB share, password spraying door de domain, en SeBackupPrivilege om SAM/SYSTEM te dumpen voor Administrator hash.</p>
+      <p class="htb-writeup-summary">Default password from an anonymous SMB share, password spraying across the domain, and SeBackupPrivilege to dump the SAM/SYSTEM database for the Administrator hash.</p>
     </a>
 
     <a href="/writeups/writeup-certified/" class="htb-writeup">
@@ -609,7 +609,7 @@ body.htb-page {
           <span class="htb-badge diff-medium">Medium</span>
         </div>
       </div>
-      <p class="htb-writeup-summary">Assume-breach AD box: GenericWrite path via BloodHound, ShadowCredentials voor account takeover, en ESC9 op de CA voor Administrator access.</p>
+      <p class="htb-writeup-summary">AD server in the event of a breach: GenericWrite path via BloodHound, ShadowCredentials for account takeover, and ESC9 on the CA for administrator privileges.</p>
     </a>
 
     <a href="/writeups/writeup-escapetwo/" class="htb-writeup">
@@ -620,7 +620,7 @@ body.htb-page {
           <span class="htb-badge diff-easy">Easy</span>
         </div>
       </div>
-      <p class="htb-writeup-summary">Credentials uit XLSX shares, MSSQL pivot, en ESC4 abuse op de certificate authority voor full domain takeover.</p>
+      <p class="htb-writeup-summary">Credentials from XLSX shares, MSSQL pivot, and an ESC4 exploit targeting the certificate authority to achieve full domain takeover.</p>
     </a>
 
     <a href="/writeups/writeup-strutted/" class="htb-writeup">
@@ -631,7 +631,7 @@ body.htb-page {
           <span class="htb-badge diff-medium">Medium</span>
         </div>
       </div>
-      <p class="htb-writeup-summary">CVE-2024-53677 in Apache Struts2 voor JSP webshell upload, tcpdump credentials uit een Wireshark capture, en sudo misconfig voor root.</p>
+      <p class="htb-writeup-summary">CVE-2024-53677 in Apache Struts2 for JSP webshell upload, tcpdump credentials from a Wireshark capture, and a sudo misconfiguration for root.</p>
     </a>
 
     <a href="/writeups/writeup-evilcups/" class="htb-writeup">
@@ -642,7 +642,7 @@ body.htb-page {
           <span class="htb-badge diff-easy">Easy</span>
         </div>
       </div>
-      <p class="htb-writeup-summary">CUPS vulnerability chain (CVE-2024-47076 + CVE-2024-47175): malicious printer registreren en RCE triggeren via een print job. SUID priv esc voor root.</p>
+      <p class="htb-writeup-summary">CUPS vulnerability chain (CVE-2024-47076 + CVE-2024-47175): Register a malicious printer and trigger RCE via a print job. SUID privilege escalation to root.</p>
     </a>
 
     <a href="/writeups/writeup-editor/" class="htb-writeup">
@@ -653,7 +653,7 @@ body.htb-page {
           <span class="htb-badge diff-easy">Easy</span>
         </div>
       </div>
-      <p class="htb-writeup-summary">XWiki SSTI via CVE-2025-24893 in de SolrSearch endpoint voor unauth RCE, SSH credentials uit config backup, en sudo op git voor priv esc.</p>
+      <p class="htb-writeup-summary">XWiki SSTI via CVE-2025-24893 in the SolrSearch endpoint for unauthenticated RCE, SSH credentials from config backup, and sudo on Git for privilege escalation.</p>
     </a>
 
     <a href="/writeups/writeup-pterodactyl/" class="htb-writeup">
@@ -664,7 +664,7 @@ body.htb-page {
           <span class="htb-badge diff-medium">Medium</span>
         </div>
       </div>
-      <p class="htb-writeup-summary">CVE-2025-49132 directory traversal gechaind met pearcmd voor RCE, bcrypt cracking voor user pivot, en libblockdev/udisks chain voor root.</p>
+      <p class="htb-writeup-summary">CVE-2025-49132: directory traversal chained with pearcmd for RCE, bcrypt cracking for user privilege escalation, and a libblockdev/udisks chain for root access.</p>
     </a>
 
   </div>
