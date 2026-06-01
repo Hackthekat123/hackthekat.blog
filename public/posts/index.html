@@ -1,5 +1,525 @@
-<!doctype html><html lang=en><head><meta charset=UTF-8><meta http-equiv=X-UA-Compatible content="ie=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=description content="Blog posts"><meta name=robots content="noodp"><title>Blog :: Hackthekat home</title><link href=https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css rel=stylesheet type=text/css><link rel=stylesheet href=/main.css><link rel=icon type=image/png href=/favicon.ico><meta itemprop=name content="Blog :: Hackthekat home"><meta name=twitter:card content="summary"><meta name=twitter:title content="Blog :: Hackthekat home"></head><body><div class=container><header class=header><span class=header__inner><a href=/ style=text-decoration:none><div class=logo><span class=logo__mark>></span> <span class=logo__text>hello</span> <span class=logo__cursor></span></div></a><span class=header__right><nav class=menu><ul class=menu__inner><div class=submenu><li class=dropdown><a href=/posts/>Blog</a></li></div><div class=submenu><li class=dropdown><a href=/hackthebox/>Hack The Box</a><div class=dropdown-content><a title=Machines href=/writeups/>Machines</a></div></li></div></ul></nav><span class=menu-trigger><svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></span></span></span></header><div class=content><main class=posts><h1>Blog</h1>
-<div class=post-content>
-<p>Nog geen blog posts. Kom binnenkort terug.</p>
-<p>Bekijk ondertussen de <a href=/writeups/>writeups</a>.</p>
-</div></main></div><footer class=footer><div class=footer__inner><div class=footer__content></div></footer></div><script type=text/javascript src=/bundle.min.js></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name="description" content="Blog posts">
+<meta name="robots" content="noodp">
+<title>Blog :: Hackthekat</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="/main.css">
+<link rel="icon" type="image/png" href="/favicon.ico">
+<style>
+/* ===== HTB PAGE OVERRIDES ===== */
+body.htb-page {
+  background: #0a0e14 !important;
+}
+
+.htb-page .content,
+.htb-page main.posts {
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* HTB color tokens */
+.htb-page {
+  --htb-green: #9fef00;
+  --htb-green-soft: rgba(159, 239, 0, 0.1);
+  --htb-bg: #0a0e14;
+  --htb-card: #11161d;
+  --htb-card-hover: #161c24;
+  --htb-border: #1f2832;
+  --htb-text: #c9d1d9;
+  --htb-muted: #6b7785;
+  --htb-easy: #9fef00;
+  --htb-medium: #ffaf00;
+  --htb-hard: #ff3838;
+  --htb-insane: #b372ff;
+}
+
+/* ===== HERO ===== */
+.htb-hero {
+  position: relative;
+  background:
+    radial-gradient(ellipse at top, rgba(159, 239, 0, 0.08), transparent 50%),
+    linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
+  padding: 7rem 2rem 6rem 2rem;
+  text-align: center;
+  overflow: hidden;
+  border-bottom: 1px solid var(--htb-border);
+}
+
+/* Subtle grid pattern in hero */
+.htb-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(159, 239, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(159, 239, 0, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+.htb-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.htb-prompt {
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  color: var(--htb-green);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.85;
+}
+
+.htb-prompt::before {
+  content: '> ';
+}
+
+.htb-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1rem;
+  background: var(--htb-green);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.htb-hero h1 {
+  font-size: 4.5rem;
+  font-weight: 700;
+  margin: 0 0 1.2rem 0;
+  color: #fff;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.htb-hero h1 .accent {
+  color: var(--htb-green);
+}
+
+.htb-hero p.tagline {
+  font-size: 1.2rem;
+  color: var(--htb-text);
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+/* ===== SECTION WRAPPER ===== */
+.htb-section {
+  padding: 4rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.htb-section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.htb-section-label {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.85rem;
+  color: var(--htb-green);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+
+.htb-section-title {
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+/* ===== STATS GRID ===== */
+.htb-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 3rem;
+}
+
+.htb-stat-card {
+  background: var(--htb-card);
+  border: 1px solid var(--htb-border);
+  border-radius: 10px;
+  padding: 1.8rem 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.htb-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--htb-green);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  transform-origin: left;
+}
+
+.htb-stat-card:hover {
+  background: var(--htb-card-hover);
+  border-color: rgba(159, 239, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.htb-stat-card:hover::before {
+  transform: scaleX(1);
+}
+
+.htb-stat-value {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--htb-green);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.htb-stat-label {
+  font-size: 0.85rem;
+  color: var(--htb-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.htb-badge-row {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0 1rem 0;
+}
+
+.htb-badge-row img {
+  max-height: 90px;
+  border-radius: 6px;
+  border: 1px solid var(--htb-border);
+}
+
+.htb-profile-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.htb-profile-link a {
+  color: var(--htb-green);
+  text-decoration: none;
+  font-family: 'Monaco', monospace;
+  font-size: 0.9rem;
+  border-bottom: 1px dashed transparent;
+  transition: border-color 0.2s;
+}
+
+.htb-profile-link a:hover {
+  border-color: var(--htb-green);
+}
+
+/* ===== INTRO TEXT ===== */
+.htb-intro {
+  max-width: 720px;
+  margin: 0 auto 4rem auto;
+  padding: 0 1rem;
+}
+
+.htb-intro p {
+  color: var(--htb-text);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin: 0.8rem 0;
+  text-align: center;
+}
+
+.htb-intro .disclaimer {
+  font-size: 0.85rem;
+  color: var(--htb-muted);
+  font-style: italic;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--htb-border);
+}
+
+/* ===== SECTIONS CARDS ===== */
+.htb-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.htb-section-card {
+  background: var(--htb-card);
+  border: 1px solid var(--htb-border);
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+  text-decoration: none !important;
+  display: block;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.htb-section-card::after {
+  content: '→';
+  position: absolute;
+  top: 50%;
+  right: 1.5rem;
+  transform: translateY(-50%);
+  color: var(--htb-green);
+  font-size: 1.5rem;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.htb-section-card:hover {
+  background: var(--htb-card-hover);
+  border-color: var(--htb-green);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(159, 239, 0, 0.1);
+}
+
+.htb-section-card:hover::after {
+  opacity: 1;
+  right: 1rem;
+}
+
+.htb-section-card .icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.htb-section-card h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 0.6rem 0;
+  color: #fff;
+}
+
+.htb-section-card p {
+  color: var(--htb-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ===== WRITEUPS GRID ===== */
+.htb-writeups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 3rem;
+}
+
+.htb-writeup {
+  background: var(--htb-card);
+  border: 1px solid var(--htb-border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-decoration: none !important;
+  display: block;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.htb-writeup:hover {
+  background: var(--htb-card-hover);
+  border-color: var(--htb-green);
+  transform: translateY(-2px);
+}
+
+.htb-writeup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.8rem;
+  gap: 0.8rem;
+}
+
+.htb-writeup-name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #fff;
+  font-family: 'Monaco', monospace;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.htb-writeup-badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.htb-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Monaco', monospace;
+}
+
+.htb-badge.os-linux {
+  background: rgba(159, 239, 0, 0.12);
+  color: var(--htb-green);
+  border: 1px solid rgba(159, 239, 0, 0.3);
+}
+
+.htb-badge.os-windows {
+  background: rgba(0, 153, 255, 0.12);
+  color: #0099ff;
+  border: 1px solid rgba(0, 153, 255, 0.3);
+}
+
+.htb-badge.diff-easy {
+  background: rgba(159, 239, 0, 0.12);
+  color: var(--htb-easy);
+  border: 1px solid rgba(159, 239, 0, 0.3);
+}
+
+.htb-badge.diff-medium {
+  background: rgba(255, 175, 0, 0.12);
+  color: var(--htb-medium);
+  border: 1px solid rgba(255, 175, 0, 0.3);
+}
+
+.htb-badge.diff-hard {
+  background: rgba(255, 56, 56, 0.12);
+  color: var(--htb-hard);
+  border: 1px solid rgba(255, 56, 56, 0.3);
+}
+
+.htb-writeup-summary {
+  color: var(--htb-text);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* ===== CTA BUTTON ===== */
+.htb-cta-wrap {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.htb-cta {
+  display: inline-block;
+  background: transparent;
+  color: var(--htb-green);
+  border: 1px solid var(--htb-green);
+  padding: 0.9rem 2.2rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-family: 'Monaco', monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+.htb-cta:hover {
+  background: var(--htb-green);
+  color: var(--htb-bg);
+  text-decoration: none !important;
+  box-shadow: 0 0 30px rgba(159, 239, 0, 0.3);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .htb-hero { padding: 4.5rem 1.5rem 4rem 1.5rem; }
+  .htb-hero h1 { font-size: 2.8rem; }
+  .htb-hero p.tagline { font-size: 1rem; }
+  .htb-section { padding: 3rem 1.5rem; }
+  .htb-section-title { font-size: 1.6rem; }
+  .htb-stat-value { font-size: 2rem; }
+}
+</style>
+</head>
+
+<body class="htb-page">
+<div class="container">
+
+<header class="header">
+<span class="header__inner">
+<a href="/" style="text-decoration:none">
+<div class="logo"><span class="logo__mark">></span> <span class="logo__text">hello</span> <span class="logo__cursor"></span></div>
+</a>
+<span class="header__right">
+<nav class="menu">
+<ul class="menu__inner">
+<div class="submenu"><li class="dropdown"><a href="/posts/">Blog</a></li></div>
+<div class="submenu"><li class="dropdown"><a href="/hackthebox/">Hack The Box</a></li></div>
+</ul>
+</nav>
+</span>
+</span>
+</header>
+
+<div class="content">
+<main class="posts">
+
+<section class="htb-hero">
+  <div class="htb-hero-content">
+    <div class="htb-prompt">ls /blog<span class="htb-cursor"></span></div>
+    <h1>My <span class="accent">Blog</span></h1>
+    <p class="tagline">Cybersecurity notes, research and articles.</p>
+  </div>
+</section>
+
+<section class="htb-section">
+  <div class="htb-section-header">
+    <div class="htb-section-label">// status</div>
+    <h2 class="htb-section-title">No blog posts available yet</h2>
+  </div>
+
+  <div class="htb-intro">
+    <p>There are currently no blog posts available.</p>
+    <p>New content will be published here soon.</p>
+    <p class="disclaimer">In the meantime, feel free to check out the Hack The Box writeups section.</p>
+  </div>
+
+  <div class="htb-cta-wrap">
+    <a href="/writeups/" class="htb-cta">View Writeups →</a>
+  </div>
+</section>
+
+</main>
+</div>
+
+<footer class="footer">
+<div class="footer__inner"><div class="footer__content"></div></div>
+</footer>
+
+</div>
+<script type="text/javascript" src="/bundle.min.js"></script>
+</body>
+</html>
