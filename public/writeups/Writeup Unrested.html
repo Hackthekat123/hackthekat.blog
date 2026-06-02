@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Unrested is a Medium difficulty Linux machine running the <strong>Zabbix 7.0.0</strong> monitoring platform. The attack path involves exploiting <strong>CVE-2024-42327</strong>, an SQL injection vulnerability in the Zabbix API, to obtain a reverse shell. Privilege escalation is achieved by abusing a <code>sudo</code> misconfiguration that allows running <code>nmap</code> with a custom <code>--datadir</code>, enabling arbitrary Lua script execution as root.</p>
+      <p>Unrested is a Medium difficulty Linux machine running the <code>Zabbix 7.0.0</code> monitoring platform. The attack path involves exploiting <code>CVE-2024-42327</code>, an SQL injection vulnerability in the Zabbix API, to obtain a reverse shell. Privilege escalation is achieved by abusing a <code>sudo</code> misconfiguration that allows running <code>nmap</code> with a custom <code>--datadir</code>, enabling arbitrary Lua script execution as root.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>I begin with a full TCP port scan to identify all open services on the target.</p>
@@ -173,12 +173,12 @@ Nmap done: 1 IP address (1 host up) scanned in 12.62 seconds
            Raw packets sent: 8 (328B) | Rcvd: 7 (284B)</code></pre></div>
       <h2 class="writeup-section-title">Foothold: Zabbix CVE-2024-42327</h2>
       <h3 class="writeup-sub-title">Zabbix Web Interface</h3>
-      <p>Navigating to the web page presents the login portal of the <strong>Zabbix monitoring tool</strong>. HTB has provided credentials for accessing the platform, so I use these to log in.</p>
+      <p>Navigating to the web page presents the login portal of the <code>Zabbix monitoring tool</code>. HTB has provided credentials for accessing the platform, so I use these to log in.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250306133004.png" alt="Zabbix dashboard after logging in as matthew" loading="lazy" /><span class="img-caption">Zabbix dashboard after logging in as matthew</span></div>
-      <p>Once logged in as the user <code>matthew</code>, I inspect the Zabbix system information page. The frontend reports it is running <strong>Zabbix version 7.0.0</strong> with a newer update available — indicating the installation has not been patched.</p>
+      <p>Once logged in as the user <code>matthew</code>, I inspect the Zabbix system information page. The frontend reports it is running <code>Zabbix version 7.0.0</code> with a newer update available — indicating the installation has not been patched.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250306133344.png" alt="Zabbix frontend version 7.0.0 — not updated" loading="lazy" /><span class="img-caption">Zabbix frontend version 7.0.0 — not updated</span></div>
       <h3 class="writeup-sub-title">Exploiting CVE-2024-42327 (SQL Injection RCE)</h3>
-      <p>Searching for known vulnerabilities affecting Zabbix 7.0.0, I found <strong>CVE-2024-42327</strong> — an SQL injection in the Zabbix API's <code>user.get</code> endpoint that can be chained with <code>script.execute</code> to achieve Remote Code Execution. The public proof-of-concept is available at: <a href="https://github.com/BridgerAlderson/Zabbix-CVE-2024-42327-SQL-Injection-RCE." target="_blank" rel="noopener">https://github.com/BridgerAlderson/Zabbix-CVE-2024-42327-SQL-Injection-RCE.</a></p>
+      <p>Searching for known vulnerabilities affecting Zabbix 7.0.0, I found <code>CVE-2024-42327</code> — an SQL injection in the Zabbix API's <code>user.get</code> endpoint that can be chained with <code>script.execute</code> to achieve Remote Code Execution. The public proof-of-concept is available at: <a href="https://github.com/BridgerAlderson/Zabbix-CVE-2024-42327-SQL-Injection-RCE." target="_blank" rel="noopener">https://github.com/BridgerAlderson/Zabbix-CVE-2024-42327-SQL-Injection-RCE.</a></p>
       <p>I set up a netcat listener on port 4444, then execute the exploit script with the target URL and matthew's credentials. The exploit performs the SQL injection to escalate API privileges, then triggers a reverse shell payload via the <code>script.execute</code> API method.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Unrested/Zabbix-CVE-2024-42327-SQL-Injection-RCE]
 └─$ python exploit.py         
