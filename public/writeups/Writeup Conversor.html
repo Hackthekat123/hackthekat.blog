@@ -117,7 +117,7 @@ Service Info: Host: conversor.htb; OS: Linux; CPE: cpe:/o:linux:linux_kernel</co
       <h3 class="writeup-sub-title">Web Application Reconnaissance</h3>
       <p>After adding the hostname to my <code>/etc/hosts</code> file, I navigate to the web page. It presents a login page that requires an account. I register a new user and log in, revealing a file upload feature.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20251027193639.png" alt="Login page of the Conversor web application" loading="lazy" /><span class="img-caption">Login page of the Conversor web application</span></div>
-      <p>The application allows uploading files, and the About page reveals that the <strong>source code is available for download</strong>. This is a goldmine — I can review the server-side logic to find upload bypass techniques.</p>
+      <p>The application allows uploading files, and the About page reveals that the <code>source code is available for download</code>. This is a goldmine — I can review the server-side logic to find upload bypass techniques.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20251027193932.png" alt="File upload functionality with source code download available" loading="lazy" /><span class="img-caption">File upload functionality with source code download available</span></div>
       <h3 class="writeup-sub-title">Source Code Review</h3>
       <p>I download the source code archive and extract it to examine the application logic.</p>
@@ -219,7 +219,7 @@ fismathack@conversor:~$</code></pre></div>
 086dcf4f01ed827ee1a03b602bd107c8</code></pre></div>
       <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">See terminal output</code></div>
       <h2 class="writeup-section-title">Privilege Escalation: needrestart Abuse</h2>
-      <p>Running <code>sudo -l</code> reveals that the current user can execute <code>/usr/sbin/needrestart</code> as root without a password. <strong>needrestart</strong> is a utility that checks which services need to be restarted after library upgrades. The <code>-c</code> parameter allows specifying a configuration file to read.</p>
+      <p>Running <code>sudo -l</code> reveals that the current user can execute <code>/usr/sbin/needrestart</code> as root without a password. <code>needrestart</code> is a utility that checks which services need to be restarted after library upgrades. The <code>-c</code> parameter allows specifying a configuration file to read.</p>
       <p>By pointing the <code>-c</code> parameter at <code>/root/root.txt</code>, needrestart attempts to parse the root flag as a configuration file. Since it's not valid config syntax, the tool outputs the file contents in its error message — effectively leaking the root flag.</p>
       <div class="code-block"><pre><code>fismathack@conversor:~$ sudo /usr/sbin/needrestart -c /root/root.txt
 Bareword found where operator expected at (eval 14) line 1, near &quot;671d776b9da817cacdd5261e2733f38d&quot;
