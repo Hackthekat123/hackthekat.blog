@@ -333,7 +333,7 @@ body.htb-page {
 /* ===== WRITEUPS GRID ===== */
 .htb-writeups-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.2rem;
   margin-bottom: 3rem;
 }
@@ -498,7 +498,9 @@ body.htb-page {
     <div class="htb-section-label">// latest</div>
     <h2 class="htb-section-title">Latest writeups</h2>
   </div>
-  
+
+  <div class="htb-writeups-grid">
+
     <a href="Writeup BabyTwo.html" class="htb-writeup">
       <div class="htb-writeup-header">
         <div class="htb-writeup-name">BabyTwo</div>
@@ -537,7 +539,8 @@ body.htb-page {
     <div class="htb-section-label">// Writeups</div>
     <h2 class="htb-section-title">All Writeups</h2>
   </div>
-  
+  <div class="htb-writeups-grid">
+
     <a href="Writeup BabyTwo.html" class="htb-writeup">
       <div class="htb-writeup-header">
         <div class="htb-writeup-name">BabyTwo</div>
@@ -570,6 +573,8 @@ body.htb-page {
       </div>
       <p class="htb-writeup-summary">Certificate trust misconfiguration for internal access, credential leakage for user compromise, and sudo abuse in certificate tooling for privilege escalation.</p>
     </a>
+
+    <div class="htb-writeups-grid">
 
     <a href="Writeup Certified.html" class="htb-writeup">
       <div class="htb-writeup-header">
